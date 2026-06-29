@@ -20,5 +20,7 @@ npm run dev
 
 ## Customize
 
-- Update content in `app/page.tsx`.
-- Update visual styling in `app/globals.css`.
+- Update portfolio content in `app/data/portfolio.ts`.
+- Update portfolio components in `app/components/portfolio`.
+- Update theme palettes in `app/theme/portfolioTheme.ts`.
+- Review planned improvements in `notes/features.md`.

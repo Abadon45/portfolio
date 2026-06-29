@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+
+commit_msg_file="$1"
+commit_msg="$(sed -n '1p' "$commit_msg_file")"
+
+pattern='^(feat|fix|docs|style|refactor|perf|test|chore|ci)(\([a-z0-9][a-z0-9-]*\))?: [a-z0-9].{8,98}$'
+blocked='^(update|updates|fix|fixed|changes|change|wip|stuff|final|misc|work|portfolio updates?)$'
+
+if printf '%s' "$commit_msg" | grep -Eiq "$blocked"; then
+  echo "Commit message is too vague: '$commit_msg'"
+  echo "Use: type(scope): short description"
+  echo "Example: feat(theme): add lower-left theme picker"
+  exit 1
+fi
+
+if ! printf '%s' "$commit_msg" | grep -Eq "$pattern"; then
+  echo "Invalid commit message: '$commit_msg'"
+  echo ""
+  echo "Use Conventional Commits:"
+  echo "  type(scope): short description"
+  echo ""
+  echo "Allowed types:"
+  echo "  feat, fix, docs, style, refactor, perf, test, chore, ci"
+  echo ""
+  echo "Examples:"
+  echo "  feat(theme): add portfolio color picker"
+  echo "  fix(contact): open Gmail compose from email buttons"
+  echo "  docs(commits): add commit message rules"
+  exit 1
+fi
