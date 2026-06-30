@@ -73,8 +73,15 @@ export function PortfolioAppBar({ isDark, onScrollToSection, onScrollToTop, onTo
             sx={{
               alignItems: "center",
               maxWidth: "100%",
-              overflowX: "auto",
+              minHeight: 40,
+              overflowX: { xs: "auto", sm: "visible" },
+              overflowY: "hidden",
               pb: { xs: 0.5, sm: 0 },
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
             }}
           >
             {navItems.map((item) => (
@@ -83,7 +90,16 @@ export function PortfolioAppBar({ isDark, onScrollToSection, onScrollToTop, onTo
                 key={item.href}
                 onClick={() => onScrollToSection(item.href.replace("#", ""))}
                 size="small"
-                sx={{ color: "text.secondary", whiteSpace: "nowrap", transition: "transform 150ms ease", "&:hover": { transform: "scale(1.03)" } }}
+                sx={{
+                  color: "text.secondary",
+                  flexShrink: 0,
+                  whiteSpace: "nowrap",
+                  transition: "color 150ms ease, transform 150ms ease",
+                  "&:hover": {
+                    color: "text.primary",
+                    transform: "translateY(-1px)",
+                  },
+                }}
               >
                 {item.label}
               </Button>
