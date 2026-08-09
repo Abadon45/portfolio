@@ -7,6 +7,7 @@ import { ContactSection } from "./ContactSection";
 import { EducationSection } from "./EducationSection";
 import { ExperienceSection } from "./ExperienceSection";
 import { HeroSection } from "./HeroSection";
+import { LandingPagesSection } from "./LandingPagesSection";
 import { PortfolioAppBar } from "./PortfolioAppBar";
 import { ProjectsSection } from "./ProjectsSection";
 import { ScrollTopButton } from "./ScrollTopButton";
@@ -109,6 +110,7 @@ export function PortfolioPage() {
         <HeroSection isDark={isDark} onScrollToSection={scrollToSection} />
         <SummarySection />
         <ProjectsSection />
+        <LandingPagesSection />
         <SkillsSection />
         <ExperienceSection />
         <EducationSection />

@@ -1,7 +1,6 @@
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import { AppBar, Avatar, Box, Button, Container, IconButton, Link as MuiLink, Stack, Toolbar, Tooltip, Typography } from "@mui/material";
+import { AppBar, Avatar, Box, Button, Container, Link as MuiLink, Stack, Toolbar, Typography } from "@mui/material";
 import { navItems } from "../../data/portfolio";
+import ThemeToggle from "../solar/ThemeToggle";
 
 type PortfolioAppBarProps = {
   isDark: boolean;
@@ -104,29 +103,7 @@ export function PortfolioAppBar({ isDark, onScrollToSection, onScrollToTop, onTo
                 {item.label}
               </Button>
             ))}
-            <Tooltip title={`Switch to ${isDark ? "light" : "dark"} mode`}>
-              <IconButton
-                aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-                color="primary"
-                onClick={onToggleMode}
-                size="small"
-                sx={{
-                  aspectRatio: "1 / 1",
-                  bgcolor: "action.hover",
-                  flexShrink: 0,
-                  height: 36,
-                  ml: 0.5,
-                  minHeight: 36,
-                  p: 0,
-                  width: 36,
-                  "&:hover": {
-                    bgcolor: "action.selected",
-                  },
-                }}
-              >
-                {isDark ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
-              </IconButton>
-            </Tooltip>
+            <ThemeToggle compact mode={isDark ? "dark" : "light"} onToggle={onToggleMode} />
           </Stack>
         </Toolbar>
       </Container>

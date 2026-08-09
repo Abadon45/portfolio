@@ -11,6 +11,13 @@ export type Project = {
   eyebrow: string;
   summary: string;
   details: string[];
+  href?: string;
+};
+
+export type LandingPage = {
+  title: string;
+  summary: string;
+  href: string;
 };
 
 export type ContactLink = {
@@ -138,6 +145,14 @@ export const projects: Project[] = [
       "Supported supplier themes, light/dark behavior, and WCAG-minded color decisions.",
       "Improved maintainability and template consistency across storefront experiences.",
     ],
+  },
+];
+
+export const landingPages: LandingPage[] = [
+  {
+    title: "Cotabato Solar",
+    summary: "A responsive solar services landing page with an interactive savings estimator and inquiry flow.",
+    href: "/solar",
   },
 ];
 
