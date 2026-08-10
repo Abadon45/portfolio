@@ -10,17 +10,16 @@ import { HeroSection } from "./HeroSection";
 import { LandingPagesSection } from "./LandingPagesSection";
 import { PortfolioAppBar } from "./PortfolioAppBar";
 import { ProjectsSection } from "./ProjectsSection";
-import { ScrollTopButton } from "./ScrollTopButton";
+import ScrollToTopButton from "../ScrollToTopButton";
 import { SkillsSection } from "./SkillsSection";
 import { SummarySection } from "./SummarySection";
 import { ThemeSettingsButton } from "./ThemeSettingsButton";
 import type { PortfolioThemeName } from "../../theme/portfolioTheme";
 
 export function PortfolioPage() {
-  const [mode, setMode] = useState<PaletteMode>("light");
+  const [mode, setMode] = useState<PaletteMode>("dark");
   const [activeTheme, setActiveTheme] = useState<PortfolioThemeName>("executive");
   const [customPrimary, setCustomPrimary] = useState("#1a237e");
-  const [showScrollTop, setShowScrollTop] = useState(false);
   const theme = useMemo(() => createPortfolioTheme(mode, activeTheme, customPrimary), [activeTheme, customPrimary, mode]);
   const isDark = mode === "dark";
 
@@ -60,17 +59,6 @@ export function PortfolioPage() {
     document.documentElement.dataset.colorTheme = activeTheme;
     document.documentElement.style.colorScheme = mode;
   }, [activeTheme, customPrimary, mode]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 520);
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const scrollToSection = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({
@@ -117,7 +105,7 @@ export function PortfolioPage() {
         <ContactSection isDark={isDark} />
       </Container>
 
-      <ScrollTopButton show={showScrollTop} onScrollToTop={scrollToTop} />
+      <ScrollToTopButton />
       <ThemeSettingsButton
         activeTheme={activeTheme}
         customPrimary={customPrimary}

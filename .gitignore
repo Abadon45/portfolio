@@ -8,3 +8,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Local agent instructions and workspace-only notes
+AGENTS.md
+SKILL.md
+notes/
+.vscode/
+
+# TypeScript incremental build metadata
+*.tsbuildinfo

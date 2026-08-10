@@ -6,7 +6,7 @@ import ContactSection from "./ContactSection";
 import HeroSection from "./HeroSection";
 import ProcessSection from "./ProcessSection";
 import SavingsEstimator from "./SavingsEstimator";
-import ScrollToTopButton from "./ScrollToTopButton";
+import ScrollToTopButton from "../ScrollToTopButton";
 import SiteFooter from "./SiteFooter";
 import SiteNav from "./SiteNav";
 import ServicesSection from "./ServicesSection";

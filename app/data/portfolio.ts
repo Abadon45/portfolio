@@ -154,6 +154,11 @@ export const landingPages: LandingPage[] = [
     summary: "A responsive solar services landing page with an interactive savings estimator and inquiry flow.",
     href: "/solar",
   },
+  {
+    title: "TWC Ecommerce",
+    summary: "An offline-first MUI storefront demo with product browsing, cart drawer, delivery fee simulation, checkout, payment, and order confirmation flows.",
+    href: "/twc-ecommerce",
+  },
 ];
 
 export const experiences: Experience[] = [

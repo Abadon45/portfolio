@@ -20,6 +20,7 @@ import { Alert, AppBar, Avatar, Badge, Box, Button, Card, CardContent, Chip, Con
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FloatingHomeButton } from "../../components/FloatingHomeButton";
+import ScrollToTopButton from "../../components/ScrollToTopButton";
 import { products, useTwcStore, type StoreProduct } from "./TwcStoreProvider";
 import CheckoutJourney from "./CheckoutJourney";
 import TwcShopPage from "./TwcShopPage";
@@ -81,5 +82,5 @@ export default function TwcStorePage({ view }: { view: View }) {
   const theme = useMemo(() => createTwcEcommerceTheme(mode), [mode]);
   const addProduct = (product: StoreProduct) => { addToCart(product); toastSuccess(`${product.name} added to your basket`); };
   const openProduct = (product: StoreProduct) => { toastInfo(`${product.name} · ${money(product.price)}`); };
-  return <ThemeProvider theme={theme}><CssBaseline /><Box sx={{ bgcolor: "background.default", color: "text.primary", minHeight: "100vh" }}><TwcEshopNavbar count={cartCount} mode={mode} onCart={() => setDrawerOpen(true)} onToggleMode={() => setMode((current) => current === "dark" ? "light" : "dark")} /><TwcCartDrawer onClose={() => setDrawerOpen(false)} open={drawerOpen} />{view === "home" && <TwcHomeView onAdd={addProduct} />}{view === "shop" && <TwcShopPage onCartOpen={() => setDrawerOpen(true)} />}{view === "checkout" && <CheckoutJourney />}{view === "thank-you" && <><TwcThankYouView /><TransactionMeta /></>}<FloatingHomeButton /><Snackbar autoHideDuration={3000} onClose={() => setNotice(null)} open={Boolean(notice)}><Alert onClose={() => setNotice(null)} severity="success" sx={{ width: "100%" }}>{notice}</Alert></Snackbar></Box></ThemeProvider>;
+  return <ThemeProvider theme={theme}><CssBaseline /><Box sx={{ bgcolor: "background.default", color: "text.primary", minHeight: "100vh" }}><TwcEshopNavbar count={cartCount} mode={mode} onCart={() => setDrawerOpen(true)} onToggleMode={() => setMode((current) => current === "dark" ? "light" : "dark")} /><TwcCartDrawer onClose={() => setDrawerOpen(false)} open={drawerOpen} />{view === "home" && <TwcHomeView onAdd={addProduct} />}{view === "shop" && <TwcShopPage onCartOpen={() => setDrawerOpen(true)} />}{view === "checkout" && <CheckoutJourney />}{view === "thank-you" && <><TwcThankYouView /><TransactionMeta /></>}<ScrollToTopButton threshold={520} /><FloatingHomeButton /><Snackbar autoHideDuration={3000} onClose={() => setNotice(null)} open={Boolean(notice)}><Alert onClose={() => setNotice(null)} severity="success" sx={{ width: "100%" }}>{notice}</Alert></Snackbar></Box></ThemeProvider>;
 }
