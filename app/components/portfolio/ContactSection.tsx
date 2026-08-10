@@ -19,8 +19,8 @@ const contactIcons = {
   Demo: PublicIcon,
 } satisfies Record<ContactLink["label"], typeof EmailIcon>;
 
-const MotionStack = motion(Stack);
-const MotionMuiLink = motion(MuiLink);
+const MotionStack = motion.create(Stack);
+const MotionMuiLink = motion.create(MuiLink);
 
 type ContactSectionProps = {
   isDark: boolean;

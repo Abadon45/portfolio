@@ -7,8 +7,8 @@ import { SectionHeading } from "./SectionHeading";
 import { SectionMotion } from "./SectionMotion";
 import { cardSx, cardVariant, listItemVariant, staggerContainer } from "./styles";
 
-const MotionCard = motion(Card);
-const MotionStack = motion(Stack);
+const MotionCard = motion.create(Card);
+const MotionStack = motion.create(Stack);
 const MotionUl = motion.ul;
 const MotionLi = motion.li;
 

@@ -6,9 +6,9 @@ import { SectionHeading } from "./SectionHeading";
 import { SectionMotion } from "./SectionMotion";
 import { cardSx, cardVariant, listItemVariant, staggerContainer } from "./styles";
 
-const MotionBox = motion(Box);
-const MotionCard = motion(Card);
-const MotionChip = motion(Chip);
+const MotionBox = motion.create(Box);
+const MotionCard = motion.create(Card);
+const MotionChip = motion.create(Chip);
 
 export function SkillsSection() {
   return (

@@ -14,7 +14,7 @@ type ThemeSettingsButtonProps = {
   onThemeChange: (theme: PortfolioThemeName) => void;
 };
 
-const MotionPaper = motion(Paper);
+const MotionPaper = motion.create(Paper);
 
 export function ThemeSettingsButton({
   activeTheme,
