@@ -1,5 +1,5 @@
 import TwcProductDetailPage from "../../_components/TwcProductDetailPage";
-import { products } from "../../_components/TwcStoreProvider";
+import { products } from "../../_components/twcProductCatalog";
 import type { Metadata } from "next";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

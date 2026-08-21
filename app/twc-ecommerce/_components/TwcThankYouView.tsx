@@ -19,6 +19,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useTwcAlert } from "../../components/portfolio/TwcAlertSystem";
 import { useTwcStore } from "./TwcStoreProvider";
+import { useStorefrontTheme } from "./twcEcommerceTheme";
 
 const money = (value: number) =>
   `₱${value.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
@@ -27,9 +28,13 @@ export default function TwcThankYouView() {
   const router = useRouter();
   const { lastOrder } = useTwcStore();
   const { toastSuccess } = useTwcAlert();
+  const { themeConfig } = useStorefrontTheme();
+  const isEditorial = themeConfig.headerVariant === "editorial";
+  const isMarketplace = themeConfig.headerVariant === "marketplace";
+  const isCorporate = themeConfig.headerVariant === "corporate";
   if (!lastOrder)
     return (
-      <Container maxWidth="md" sx={{ py: 10, textAlign: "center" }}>
+      <Container maxWidth={isMarketplace ? "lg" : "md"} sx={{ py: 10, textAlign: "center" }}>
         <Typography component="h1" sx={{ fontSize: 42, fontWeight: 900 }}>
           No recent order
         </Typography>
@@ -50,11 +55,11 @@ export default function TwcThankYouView() {
     toastSuccess("Order reference copied.");
   };
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 4, md: 8 } }}>
+    <Container maxWidth={isMarketplace ? "lg" : "md"} sx={{ py: { xs: 4, md: 8 } }}>
       <Box sx={{ textAlign: "center" }}>
         <Avatar
           sx={{
-            bgcolor: "success.main",
+            bgcolor: isEditorial || isCorporate ? "primary.main" : "success.main",
             color: "success.contrastText",
             height: 74,
             mx: "auto",
@@ -67,7 +72,8 @@ export default function TwcThankYouView() {
           component="h1"
           sx={{
             fontSize: { xs: 38, md: 58 },
-            fontWeight: 900,
+            fontFamily: isEditorial ? 'Georgia, "Times New Roman", serif' : undefined,
+            fontWeight: isEditorial ? 500 : 950,
             letterSpacing: "-.07em",
             mt: 2,
           }}
@@ -83,7 +89,7 @@ export default function TwcThankYouView() {
         </Typography>
       </Box>
       <Card
-        sx={{ border: 1, borderColor: "divider", mt: 4, p: { xs: 2, md: 3 } }}
+        sx={{ border: 1, borderColor: "divider", borderRadius: isEditorial || isCorporate ? 0 : isMarketplace ? 1 : undefined, borderTop: isCorporate ? 4 : undefined, borderTopColor: isCorporate ? "primary.main" : undefined, mt: 4, p: { xs: 2, md: 3 } }}
       >
         <Stack
           direction={{ xs: "column", sm: "row" }}
@@ -121,6 +127,7 @@ export default function TwcThankYouView() {
       </Card>
       <Box
         sx={{
+          borderRadius: isEditorial ? 0 : isMarketplace ? 1 : undefined,
           display: "grid",
           gap: 2,
           gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },

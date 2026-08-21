@@ -7,8 +7,12 @@ import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Box, Button, Chip, Container, Divider, Paper, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { products, type StoreProduct } from "./TwcStoreProvider";
 import TwcProductCard from "./TwcProductCard";
+import WellnessOrganicHome from "./WellnessOrganicHome";
+import ModernMarketplaceHome from "./ModernMarketplaceHome";
+import CorporateCommerceHome from "./CorporateCommerceHome";
 import { useStorefrontTheme } from "./twcEcommerceTheme";
 import { premiumMedia, selectPremiumProducts } from "./storefrontContent";
 import { StorefrontCarousel } from "./StorefrontPrimitives";
@@ -16,13 +20,20 @@ import { StorefrontCarousel } from "./StorefrontPrimitives";
 export default function TwcHomeView({ onAdd }: { onAdd: (product: StoreProduct) => void }) {
   const { themeName } = useStorefrontTheme();
   const router = useRouter();
+  useEffect(() => {
+    const section = new URLSearchParams(window.location.search).get("section");
+    if (!section || !["collections", "journal", "about", "story", "benefits", "faq"].includes(section)) return;
+    const frame = window.requestAnimationFrame(() => document.getElementById(section)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    window.history.replaceState(null, "", window.location.pathname);
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
   const categories = [...new Set(products.map((product) => product.category))].slice(0, 8);
   const openShop = (category?: string) => router.push(category ? `/twc-ecommerce/shop?category=${encodeURIComponent(category)}` : "/twc-ecommerce/shop");
 
   if (themeName === "premium-beauty") return <PremiumBeautyHome categories={categories} onAdd={onAdd} onShop={openShop} />;
-  if (themeName === "modern-marketplace") return <MarketplaceHome categories={categories} onAdd={onAdd} onShop={openShop} />;
-  if (themeName === "corporate-commerce") return <CorporateHome categories={categories} onAdd={onAdd} onShop={openShop} />;
-  return <WellnessHome categories={categories} onAdd={onAdd} onShop={openShop} />;
+  if (themeName === "modern-marketplace") return <ModernMarketplaceHome categories={categories} onAdd={onAdd} onShop={openShop} />;
+  if (themeName === "corporate-commerce") return <CorporateCommerceHome categories={categories} onAdd={onAdd} onShop={openShop} />;
+  return <WellnessOrganicHome categories={categories} onAdd={onAdd} onShop={openShop} />;
 }
 
 function PremiumBeautyHome({ categories, onAdd, onShop }: HomeProps) {
@@ -66,7 +77,7 @@ function PremiumNewsletter() {
 function WellnessHome({ categories, onAdd, onShop }: HomeProps) {
   return <>
     <LifestyleHero onShop={onShop} />
-    <Container maxWidth="xl"><TrustStrip /><SectionHeader eyebrow="FIND YOUR FIT" title="Shop by wellness goal" /><CategoryTiles categories={categories} onSelect={onShop} /><SectionHeader eyebrow="CUSTOMER FAVORITES" title="Trending right now" action={<Button onClick={() => onShop()}>Shop all</Button>} /><ProductRail products={products.slice(0, 4)} onAdd={onAdd} /><StoryBlock onShop={onShop} /><BenefitBlock /><FaqBlock /><CtaBlock onShop={onShop} /></Container>
+    <Container maxWidth="xl"><TrustStrip /><Box id="collections" sx={{ scrollMarginTop: 90 }}><SectionHeader eyebrow="FIND YOUR FIT" title="Shop by wellness goal" /><CategoryTiles categories={categories} onSelect={onShop} /></Box><Box id="featured" sx={{ scrollMarginTop: 90 }}><SectionHeader eyebrow="CUSTOMER FAVORITES" title="Trending right now" action={<Button onClick={() => onShop()}>Shop all</Button>} /><ProductRail products={products.slice(0, 4)} onAdd={onAdd} /></Box><Box id="story" sx={{ scrollMarginTop: 90 }}><StoryBlock onShop={onShop} /></Box><Box id="benefits" sx={{ scrollMarginTop: 90 }}><BenefitBlock /></Box><Box id="faq" sx={{ scrollMarginTop: 90 }}><FaqBlock /></Box><CtaBlock onShop={onShop} /></Container>
   </>;
 }
 

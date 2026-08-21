@@ -32,6 +32,7 @@ import {
   type CartLine,
   type CheckoutQuote,
 } from "./TwcStoreProvider";
+import { useStorefrontTheme } from "./twcEcommerceTheme";
 
 const money = (value: number) =>
   `₱${value.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
@@ -48,6 +49,10 @@ export default function CheckoutJourney() {
     clearCart,
   } = useTwcStore();
   const { showModal, toastSuccess } = useTwcAlert();
+  const { themeConfig } = useStorefrontTheme();
+  const isEditorial = themeConfig.headerVariant === "editorial";
+  const isMarketplace = themeConfig.headerVariant === "marketplace";
+  const isCorporate = themeConfig.headerVariant === "corporate";
   const checkoutCart = selectedShop
     ? cart.filter((line) => line.product.shop === selectedShop)
     : cart;
@@ -175,7 +180,8 @@ export default function CheckoutJourney() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 7 } }}>
+    <Container maxWidth={isMarketplace ? "xl" : "lg"} sx={{ bgcolor: isCorporate ? "#f7f9fb" : undefined, py: { xs: 4, md: 7 } }}>
+      <Box sx={{ borderTop: isEditorial ? 0 : 1, borderColor: "divider", pt: isEditorial ? 0 : 3 }}>
       <Stack
         direction={{ xs: "column", sm: "row" }}
         sx={{
@@ -190,13 +196,14 @@ export default function CheckoutJourney() {
             color="primary.main"
             sx={{ fontSize: 12, fontWeight: 800, letterSpacing: ".12em" }}
           >
-            TWC CHECKOUT
+            {isEditorial ? "THE TWC EDIT · CHECKOUT" : isMarketplace ? "FAST CHECKOUT" : isCorporate ? "CORPORATE COMMERCE · CHECKOUT" : "TWC CHECKOUT"}
           </Typography>
           <Typography
             component="h1"
             sx={{
               fontSize: { xs: 36, md: 50 },
-              fontWeight: 800,
+              fontFamily: isEditorial ? 'Georgia, "Times New Roman", serif' : undefined,
+              fontWeight: isEditorial ? 500 : 900,
               letterSpacing: "-.07em",
               mt: 1,
             }}
@@ -407,6 +414,7 @@ export default function CheckoutJourney() {
           />
         </Box>
       )}
+      </Box>
     </Container>
   );
 }
