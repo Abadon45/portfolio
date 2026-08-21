@@ -2,6 +2,9 @@
   "name": "noy-pangan-portfolio",
   "version": "0.1.0",
   "private": true,
+  "allowScripts": {
+    "sharp@0.34.5": true
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
