@@ -49,6 +49,22 @@ refactor(portfolio): split page into section components
 - Do not use vague messages like `update`, `changes`, `fix`, `wip`, `stuff`, or `final`.
 - Do not claim work you did not do. Be specific when work is maintenance, copy updates, or styling.
 
+## Organizing Changes
+
+- Never commit directly to `main` or `develop`; create a branch with the matching type prefix first.
+- Keep one feature, fix, refactor, or documentation update per branch whenever practical.
+- Stage files by feature instead of using `git add .`, so unrelated work remains untouched.
+- Review `git diff --cached` and run `git diff --cached --check` before committing.
+- Use one Conventional Commit line with no body. Open a pull request before merging the branch.
+
+Common branch names:
+
+```text
+feat/premium-beauty-storefront
+fix/portfolio-navigation
+docs/commit-workflow
+```
+
 ## Before Committing
 
 ```bash
@@ -59,4 +75,12 @@ Read your diff before committing:
 
 ```bash
 git diff
+```
+
+For a storefront or shared-route change, also run:
+
+```bash
+npx tsc --noEmit
+npm run build
+git diff --cached --check
 ```

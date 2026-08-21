@@ -18,10 +18,13 @@ export type LandingPage = {
   title: string;
   summary: string;
   href: string;
+  eyebrow: string;
+  actionLabel: string;
+  external?: boolean;
 };
 
 export type ContactLink = {
-  label: "Email" | "Phone" | "LinkedIn" | "GitHub" | "Demo";
+  label: "Email" | "Phone" | "LinkedIn" | "GitHub";
   value: string;
   href: string;
 };
@@ -153,11 +156,23 @@ export const landingPages: LandingPage[] = [
     title: "Cotabato Solar",
     summary: "A responsive solar services landing page with an interactive savings estimator and inquiry flow.",
     href: "/solar",
+    eyebrow: "Recent landing page project",
+    actionLabel: "Open landing page",
   },
   {
     title: "TWC Ecommerce",
-    summary: "An offline-first MUI storefront demo with product browsing, cart drawer, delivery fee simulation, checkout, payment, and order confirmation flows.",
+    summary: "A reusable offline storefront reconstruction with theme switching, product discovery, cart, shipping simulation, checkout, and order confirmation flows.",
     href: "/twc-ecommerce",
+    eyebrow: "Portfolio reconstruction",
+    actionLabel: "Open ecommerce demo",
+  },
+  {
+    title: "Techno Wealth Creators",
+    summary: "A reference to past work delivered for TWC IT Solutions. The current company website is linked for historical context; this portfolio does not represent an ongoing association.",
+    href: "https://www.technowealthcreators.com",
+    eyebrow: "Former work reference",
+    actionLabel: "View company website",
+    external: true,
   },
 ];
 
@@ -219,9 +234,4 @@ export const contactLinks: ContactLink[] = [
     href: "https://linkedin.com/in/emmanuel-pangan-071502a7",
   },
   { label: "GitHub", value: "github.com/Abadon45", href: "https://github.com/Abadon45" },
-  {
-    label: "Demo",
-    value: "demo.twcako.com",
-    href: "https://demo.twcako.com",
-  },
 ];

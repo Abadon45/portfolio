@@ -3,7 +3,6 @@ import EmailIcon from "@mui/icons-material/Email";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import PhoneIcon from "@mui/icons-material/Phone";
-import PublicIcon from "@mui/icons-material/Public";
 import { Box, Card, CardContent, Divider, IconButton, Link as MuiLink, Stack, Tooltip, Typography } from "@mui/material";
 import type { ContactLink } from "../../data/portfolio";
 import { contactLinks } from "../../data/portfolio";
@@ -16,7 +15,6 @@ const contactIcons = {
   Phone: PhoneIcon,
   LinkedIn: LinkedInIcon,
   GitHub: GitHubIcon,
-  Demo: PublicIcon,
 } satisfies Record<ContactLink["label"], typeof EmailIcon>;
 
 const MotionStack = motion.create(Stack);
