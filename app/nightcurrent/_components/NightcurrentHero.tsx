@@ -174,6 +174,7 @@ function StarLayer({ stars }: { stars: Star[] }) {
 }
 
 export function NightcurrentHero() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number | null>(null);
@@ -186,9 +187,10 @@ export function NightcurrentHero() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    const wrapper = wrapperRef.current;
     const hero = heroRef.current;
     const scene = sceneRef.current;
-    if (!hero || !scene) return;
+    if (!wrapper || !hero || !scene) return;
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const coarsePointer = window.matchMedia("(pointer: coarse)");
     const layers = Array.from(
@@ -196,10 +198,14 @@ export function NightcurrentHero() {
     );
     const updateMotion = () => setReducedMotion(motionQuery.matches);
     const updateScroll = () => {
-      const rect = hero.getBoundingClientRect();
+      const rect = wrapper.getBoundingClientRect();
+      const scrollableDistance = rect.height - window.innerHeight;
+      const progress =
+        scrollableDistance > 0
+          ? Math.max(0, Math.min(1, -rect.top / scrollableDistance))
+          : 0;
       targetRef.current.scroll =
-        Math.max(0, Math.min(1, -rect.top / Math.max(rect.height, 1))) *
-        (coarsePointer.matches ? -20 : -36);
+        progress * (coarsePointer.matches ? -140 : -260);
     };
     const updatePointer = (event: PointerEvent) => {
       if (coarsePointer.matches) return;
@@ -216,7 +222,10 @@ export function NightcurrentHero() {
       layers.forEach((layer) => {
         const depth = Number(layer.dataset.depth ?? 0);
         const isUiLayer = layer.dataset.parallaxLayer === "ui";
-        const overscan = isUiLayer ? "" : "scale(1.06) ";
+        const overscanAmount = isUiLayer ? 1 : 1.06 + depth * 0.6;
+        const overscan = isUiLayer
+          ? ""
+          : `scale(${overscanAmount.toFixed(3)}) `;
         layer.style.transform = `${overscan}translate3d(${(current.x * depth).toFixed(2)}px, ${(current.y * depth + current.scroll * depth).toFixed(2)}px, 0)`;
       });
       frameRef.current = window.requestAnimationFrame(animate);
@@ -269,7 +278,7 @@ export function NightcurrentHero() {
       if (motionQuery.matches) stop();
       else if (visibleRef.current) start();
     };
-    observer.observe(hero);
+    observer.observe(wrapper);
     motionQuery.addEventListener("change", handleMotionChange);
     return () => {
       stop();
@@ -293,640 +302,659 @@ export function NightcurrentHero() {
 
   return (
     <Box
-      ref={heroRef}
-      component="section"
-      aria-labelledby="nightcurrent-title"
-      data-motion={reducedMotion ? "reduced" : "active"}
-      data-visible={visible ? "true" : "false"}
+      ref={wrapperRef}
       sx={{
         bgcolor: "#173343",
-        minHeight: { xs: 720, md: "100svh" },
-        overflow: "hidden",
+        height: { xs: "auto", md: "220vh" },
         position: "relative",
-        ...(reducedMotion && {
-          "& .nightcurrent-animated": {
-            animation: "none !important",
-          },
-          "& [data-parallax-layer]": {
-            transform: "none !important",
-            willChange: "auto",
-          },
-        }),
-        "&[data-visible='false'] .nightcurrent-animated": {
-          animationPlayState: "paused",
-        },
-        "&[data-visible='false'] .nightcurrent-intro": {
-          animationPlayState: "paused",
-        },
-        "&[data-motion='reduced'] .nightcurrent-animated": {
-          animation: "none !important",
-        },
-        "&[data-motion='reduced'] .nightcurrent-intro": {
-          animation: "none !important",
-          opacity: 1,
-          transform: "none",
-        },
-        "@keyframes nightcurrent-camera": {
-          from: { opacity: 0, transform: "scale(1.06)" },
-          to: { opacity: 1, transform: "scale(1)" },
-        },
-        "@keyframes nightcurrent-wave": {
-          from: { transform: "translateX(-3%)" },
-          to: { transform: "translateX(3%)" },
-        },
-        "@keyframes nightcurrent-twinkle-subtle": {
-          "0%, 100%": { filter: "brightness(1)" },
-          "50%": { filter: "brightness(1.4)" },
-        },
-        "@keyframes nightcurrent-twinkle-pulse": {
-          "0%, 100%": { filter: "brightness(1)" },
-          "50%": { filter: "brightness(1.8)" },
-        },
-        "@keyframes nightcurrent-light-drift": {
-          "0%, 100%": {
-            opacity: 0.15,
-            transform: "translate3d(0, 12px, 0) scale(0.88)",
-          },
-          "45%": {
-            opacity: 0.9,
-            transform: "translate3d(10px, -22px, 0) scale(1)",
-          },
-          "75%": {
-            opacity: 0.38,
-            transform: "translate3d(-5px, -44px, 0) scale(0.94)",
-          },
-        },
-        "@keyframes nightcurrent-station-intro": {
-          from: { opacity: 0 },
-          to: { opacity: 1 },
-        },
-        "@keyframes nightcurrent-ui-intro": {
-          from: { opacity: 0, transform: "translate3d(0, 18px, 0)" },
-          to: { opacity: 1, transform: "translate3d(0, 0, 0)" },
-        },
       }}
     >
       <Box
-        ref={sceneRef}
-        className="nightcurrent-camera nightcurrent-animated"
+        ref={heroRef}
+        component="section"
+        aria-labelledby="nightcurrent-title"
+        data-motion={reducedMotion ? "reduced" : "active"}
+        data-visible={visible ? "true" : "false"}
         sx={{
-          inset: 0,
-          position: "absolute",
-          animation:
-            "nightcurrent-camera 1.4s cubic-bezier(0.22, 1, 0.36, 1) both",
-          "[data-motion='reduced'] &": { animation: "none" },
-          "[data-visible='false'] &": { animationPlayState: "paused" },
+          bgcolor: "#173343",
+          maxHeight: { xs: "none", md: "100svh" },
+          minHeight: { xs: 720, md: "100svh" },
+          overflow: "hidden",
+          position: { xs: "relative", md: "sticky" },
+          top: 0,
+          ...(reducedMotion && {
+            "& .nightcurrent-animated": {
+              animation: "none !important",
+            },
+            "& [data-parallax-layer]": {
+              transform: "none !important",
+              willChange: "auto",
+            },
+          }),
+          "&[data-visible='false'] .nightcurrent-animated": {
+            animationPlayState: "paused",
+          },
+          "&[data-visible='false'] .nightcurrent-intro": {
+            animationPlayState: "paused",
+          },
+          "&[data-motion='reduced'] .nightcurrent-animated": {
+            animation: "none !important",
+          },
+          "&[data-motion='reduced'] .nightcurrent-intro": {
+            animation: "none !important",
+            opacity: 1,
+            transform: "none",
+          },
+          "@keyframes nightcurrent-camera": {
+            from: { opacity: 0, transform: "scale(1.06)" },
+            to: { opacity: 1, transform: "scale(1)" },
+          },
+          "@keyframes nightcurrent-wave": {
+            from: { transform: "translateX(-3%)" },
+            to: { transform: "translateX(3%)" },
+          },
+          "@keyframes nightcurrent-twinkle-subtle": {
+            "0%, 100%": { filter: "brightness(1)" },
+            "50%": { filter: "brightness(1.4)" },
+          },
+          "@keyframes nightcurrent-twinkle-pulse": {
+            "0%, 100%": { filter: "brightness(1)" },
+            "50%": { filter: "brightness(1.8)" },
+          },
+          "@keyframes nightcurrent-light-drift": {
+            "0%, 100%": {
+              opacity: 0.15,
+              transform: "translate3d(0, 12px, 0) scale(0.88)",
+            },
+            "45%": {
+              opacity: 0.9,
+              transform: "translate3d(10px, -22px, 0) scale(1)",
+            },
+            "75%": {
+              opacity: 0.38,
+              transform: "translate3d(-5px, -44px, 0) scale(0.94)",
+            },
+          },
+          "@keyframes nightcurrent-station-intro": {
+            from: { opacity: 0 },
+            to: { opacity: 1 },
+          },
+          "@keyframes nightcurrent-ui-intro": {
+            from: { opacity: 0, transform: "translate3d(0, 18px, 0)" },
+            to: { opacity: 1, transform: "translate3d(0, 0, 0)" },
+          },
         }}
       >
-        <Layer id="sky" sx={{ bgcolor: "#173343" }}>
-          <Box
-            sx={{
-              background:
-                "linear-gradient(180deg, #112536 0%, #315d6c 52%, #89a39d 100%)",
-              inset: 0,
-              position: "absolute",
-            }}
-          />
-          <Box
-            sx={{
-              height: { xs: 220, md: 370 },
-              position: "absolute",
-              right: "calc(17% - 50px)",
-              top: "calc(15% - 50px)",
-              width: { xs: 220, md: 370 },
-              zIndex: 2,
-            }}
-          >
+        <Box
+          ref={sceneRef}
+          className="nightcurrent-camera nightcurrent-animated"
+          sx={{
+            inset: 0,
+            position: "absolute",
+            animation:
+              "nightcurrent-camera 1.4s cubic-bezier(0.22, 1, 0.36, 1) both",
+            "[data-motion='reduced'] &": { animation: "none" },
+            "[data-visible='false'] &": { animationPlayState: "paused" },
+          }}
+        >
+          <Layer id="sky" sx={{ bgcolor: "#173343" }}>
             <Box
-              aria-hidden="true"
               sx={{
                 background:
-                  "radial-gradient(circle, rgba(243,214,162,0.2) 0%, rgba(243,214,162,0.08) 38%, transparent 72%)",
+                  "linear-gradient(180deg, #112536 0%, #315d6c 52%, #89a39d 100%)",
                 inset: 0,
                 position: "absolute",
               }}
             />
             <Box
-              aria-label="Moon"
-              role="img"
               sx={{
-                bgcolor: "#f3d6a2",
-                borderRadius: "50%",
-                height: { xs: 100, md: 170 },
-                left: "50%",
+                height: { xs: 220, md: 370 },
                 position: "absolute",
-                top: "50%",
-                transform: "translate(-50%, -50%)",
-                width: { xs: 100, md: 170 },
+                right: "calc(17% - 50px)",
+                top: "calc(15% - 50px)",
+                width: { xs: 220, md: 370 },
+                zIndex: 2,
+              }}
+            >
+              <Box
+                aria-hidden="true"
+                sx={{
+                  background:
+                    "radial-gradient(circle, rgba(243,214,162,0.2) 0%, rgba(243,214,162,0.08) 38%, transparent 72%)",
+                  inset: 0,
+                  position: "absolute",
+                }}
+              />
+              <Box
+                aria-label="Moon"
+                role="img"
+                sx={{
+                  bgcolor: "#f3d6a2",
+                  borderRadius: "50%",
+                  height: { xs: 100, md: 170 },
+                  left: "50%",
+                  position: "absolute",
+                  top: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: { xs: 100, md: 170 },
+                }}
+              />
+            </Box>
+          </Layer>
+          <Layer id="star-far">
+            <StarLayer stars={starsFar} />
+          </Layer>
+          <Layer id="star-mid">
+            <StarLayer stars={starsMid} />
+          </Layer>
+          <Layer id="star-near">
+            <StarLayer stars={starsNear} />
+          </Layer>
+          <Layer id="ocean">
+            <Box
+              sx={{
+                bgcolor: "#4d8490",
+                bottom: 0,
+                position: "absolute",
+                top: "49%",
               }}
             />
-          </Box>
-        </Layer>
-        <Layer id="star-far">
-          <StarLayer stars={starsFar} />
-        </Layer>
-        <Layer id="star-mid">
-          <StarLayer stars={starsMid} />
-        </Layer>
-        <Layer id="star-near">
-          <StarLayer stars={starsNear} />
-        </Layer>
-        <Layer id="ocean">
-          <Box
-            sx={{
-              bgcolor: "#4d8490",
-              bottom: 0,
-              position: "absolute",
-              top: "49%",
-            }}
-          />
-          {["54%", "58%", "63%", "70%", "78%"].map((top, index) => (
+            {["54%", "58%", "63%", "70%", "78%"].map((top, index) => (
+              <Box
+                key={top}
+                className="nightcurrent-animated"
+                sx={{
+                  animation: `nightcurrent-wave ${12 + index * 2}s ${index}s ease-in-out infinite alternate`,
+                  background:
+                    "linear-gradient(90deg, transparent 0%, rgba(221,239,220,0.16) 35%, rgba(221,239,220,0.08) 65%, transparent 100%)",
+                  height: 2,
+                  left: "-4%",
+                  position: "absolute",
+                  top,
+                  width: "108%",
+                }}
+              />
+            ))}
+          </Layer>
+          <Layer id="island">
             <Box
-              key={top}
-              className="nightcurrent-animated"
               sx={{
-                animation: `nightcurrent-wave ${12 + index * 2}s ${index}s ease-in-out infinite alternate`,
+                bgcolor: "#37636b",
+                clipPath:
+                  "polygon(0 75%, 16% 44%, 29% 63%, 46% 32%, 61% 60%, 78% 42%, 100% 67%, 100% 100%, 0 100%)",
+                bottom: "48%",
+                position: "absolute",
+                top: "34%",
+              }}
+            />
+          </Layer>
+          <Layer
+            id="cliffs"
+            sx={{ "& > *:not(.nightcurrent-artwork)": { display: "none" } }}
+          >
+            <Box
+              className="nightcurrent-artwork"
+              component="img"
+              src="/images/nightcurrent/hero/cliffs-shoreline.png"
+              alt=""
+              aria-hidden="true"
+              sx={{
+                bottom: 0,
+                height: "76%",
+                left: 0,
+                maskImage:
+                  "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.35) 10%, #000 22%)",
+                objectFit: "cover",
+                objectPosition: "bottom center",
+                position: "absolute",
+                WebkitMaskImage:
+                  "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.35) 10%, #000 22%)",
+                width: "100%",
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "#244b50",
+                clipPath:
+                  "polygon(0 47%, 12% 30%, 24% 43%, 38% 18%, 52% 49%, 69% 27%, 84% 45%, 100% 20%, 100% 100%, 0 100%)",
+                bottom: "22%",
+                position: "absolute",
+                top: "45%",
+              }}
+            />
+            <Box
+              sx={{
                 background:
-                  "linear-gradient(90deg, transparent 0%, rgba(221,239,220,0.16) 35%, rgba(221,239,220,0.08) 65%, transparent 100%)",
-                height: 2,
-                left: "-4%",
+                  "linear-gradient(180deg, rgba(108,142,131,0.5), transparent 38%)",
+                bottom: "22%",
                 position: "absolute",
-                top,
-                width: "108%",
+                top: "45%",
               }}
             />
-          ))}
-        </Layer>
-        <Layer id="island">
-          <Box
+          </Layer>
+          <Layer
+            id="station"
+            className="nightcurrent-animated nightcurrent-station-intro"
             sx={{
-              bgcolor: "#37636b",
-              clipPath:
-                "polygon(0 75%, 16% 44%, 29% 63%, 46% 32%, 61% 60%, 78% 42%, 100% 67%, 100% 100%, 0 100%)",
-              bottom: "48%",
-              position: "absolute",
-              top: "34%",
+              "& > *:not(.nightcurrent-artwork)": { display: "none" },
+              animation: "nightcurrent-station-intro 700ms 350ms both",
             }}
-          />
-        </Layer>
-        <Layer
-          id="cliffs"
-          sx={{ "& > *:not(.nightcurrent-artwork)": { display: "none" } }}
-        >
-          <Box
-            className="nightcurrent-artwork"
-            component="img"
-            src="/images/nightcurrent/hero/cliffs-shoreline.png"
-            alt=""
-            aria-hidden="true"
-            sx={{
-              bottom: 0,
-              height: "76%",
-              left: 0,
-              objectFit: "contain",
-              objectPosition: "bottom left",
-              position: "absolute",
-              width: "100%",
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#244b50",
-              clipPath:
-                "polygon(0 47%, 12% 30%, 24% 43%, 38% 18%, 52% 49%, 69% 27%, 84% 45%, 100% 20%, 100% 100%, 0 100%)",
-              bottom: "22%",
-              position: "absolute",
-              top: "45%",
-            }}
-          />
-          <Box
-            sx={{
-              background:
-                "linear-gradient(180deg, rgba(108,142,131,0.5), transparent 38%)",
-              bottom: "22%",
-              position: "absolute",
-              top: "45%",
-            }}
-          />
-        </Layer>
-        <Layer
-          id="station"
-          className="nightcurrent-animated nightcurrent-station-intro"
-          sx={{
-            "& > *:not(.nightcurrent-artwork)": { display: "none" },
-            animation: "nightcurrent-station-intro 700ms 350ms both",
-          }}
-        >
-          <Box
-            className="nightcurrent-artwork"
-            component="img"
-            src="/images/nightcurrent/hero/station.png"
-            alt=""
-            aria-hidden="true"
-            sx={{
-              height: "68%",
-              left: "44%",
-              objectFit: "contain",
-              objectPosition: "bottom center",
-              position: "absolute",
-              top: "18%",
-              width: "52%",
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#172d32",
-              bottom: "24%",
-              height: 105,
-              left: "61%",
-              position: "absolute",
-              transform: "skewY(-7deg)",
-              width: 155,
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#b9c7b0",
-              bottom: "42%",
-              height: 12,
-              left: "59%",
-              position: "absolute",
-              width: 170,
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#e8aa71",
-              borderRadius: "50%",
-              bottom: "47%",
-              boxShadow: "0 0 30px 10px rgba(232,170,113,0.42)",
-              height: 10,
-              left: "65%",
-              position: "absolute",
-              width: 10,
-            }}
-          />
-          <Box
-            sx={{
-              border: "2px solid #162a32",
-              borderBottom: 0,
-              borderRadius: "50% 50% 0 0",
-              bottom: "58%",
-              height: 48,
-              left: "67%",
-              position: "absolute",
-              width: 78,
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#162a32",
-              bottom: 0,
-              height: "43%",
-              left: "65%",
-              position: "absolute",
-              transform: "rotate(8deg)",
-              width: 10,
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#162a32",
-              bottom: 0,
-              height: "43%",
-              left: "76%",
-              position: "absolute",
-              transform: "rotate(-8deg)",
-              width: 10,
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#162a32",
-              bottom: "66%",
-              height: 90,
-              left: "76%",
-              position: "absolute",
-              transform: "rotate(18deg)",
-              width: 4,
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#202f32",
-              border: "1px solid rgba(232,170,113,0.35)",
-              bottom: "43%",
-              height: 30,
-              left: "63%",
-              position: "absolute",
-              width: 78,
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#89a99c",
-              bottom: "45%",
-              height: 5,
-              left: "66%",
-              opacity: 0.7,
-              position: "absolute",
-              width: 12,
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#172d32",
-              bottom: "25%",
-              height: 3,
-              left: "57%",
-              position: "absolute",
-              transform: "rotate(-7deg)",
-              width: 70,
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#172d32",
-              bottom: "25%",
-              height: 3,
-              left: "76%",
-              position: "absolute",
-              transform: "rotate(7deg)",
-              width: 52,
-            }}
-          />
-        </Layer>
-        <Layer id="shoreline">
-          <Box
-            sx={{
-              bgcolor: "#9b997d",
-              clipPath:
-                "polygon(0 25%, 18% 18%, 34% 29%, 50% 14%, 70% 28%, 88% 19%, 100% 25%, 100% 100%, 0 100%)",
-              bottom: 0,
-              position: "absolute",
-              top: "67%",
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "rgba(82,143,145,0.66)",
-              borderRadius: "50%",
-              bottom: "12%",
-              height: 24,
-              left: "25%",
-              position: "absolute",
-              width: 76,
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "rgba(82,143,145,0.52)",
-              borderRadius: "50%",
-              bottom: "18%",
-              height: 15,
-              left: "43%",
-              position: "absolute",
-              width: 48,
-            }}
-          />
-        </Layer>
-        <Layer id="midground">
-          <Box
-            sx={{
-              bgcolor: "#16383b",
-              clipPath:
-                "polygon(0 40%, 18% 25%, 34% 48%, 52% 22%, 71% 44%, 87% 27%, 100% 43%, 100% 100%, 0 100%)",
-              bottom: 0,
-              position: "absolute",
-              top: "64%",
-            }}
-          />
-          {["19%", "27%", "82%", "88%"].map((left) => (
+          >
             <Box
-              key={left}
+              className="nightcurrent-artwork"
+              component="img"
+              src="/images/nightcurrent/hero/station.png"
+              alt=""
+              aria-hidden="true"
               sx={{
-                bgcolor: "#96b58f",
+                height: { xs: "42%", sm: "55%", md: "68%" },
+                left: { xs: "58%", sm: "50%", md: "44%" },
+                objectFit: "contain",
+                objectPosition: "bottom center",
+                position: "absolute",
+                top: { xs: "38%", sm: "26%", md: "18%" },
+                width: { xs: "70%", sm: "60%", md: "52%" },
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "#172d32",
                 bottom: "24%",
-                height: 100,
-                left,
+                height: 105,
+                left: "61%",
+                position: "absolute",
+                transform: "skewY(-7deg)",
+                width: 155,
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "#b9c7b0",
+                bottom: "42%",
+                height: 12,
+                left: "59%",
+                position: "absolute",
+                width: 170,
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "#e8aa71",
+                borderRadius: "50%",
+                bottom: "47%",
+                boxShadow: "0 0 30px 10px rgba(232,170,113,0.42)",
+                height: 10,
+                left: "65%",
+                position: "absolute",
+                width: 10,
+              }}
+            />
+            <Box
+              sx={{
+                border: "2px solid #162a32",
+                borderBottom: 0,
+                borderRadius: "50% 50% 0 0",
+                bottom: "58%",
+                height: 48,
+                left: "67%",
+                position: "absolute",
+                width: 78,
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "#162a32",
+                bottom: 0,
+                height: "43%",
+                left: "65%",
+                position: "absolute",
+                transform: "rotate(8deg)",
+                width: 10,
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "#162a32",
+                bottom: 0,
+                height: "43%",
+                left: "76%",
+                position: "absolute",
+                transform: "rotate(-8deg)",
+                width: 10,
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "#162a32",
+                bottom: "66%",
+                height: 90,
+                left: "76%",
                 position: "absolute",
                 transform: "rotate(18deg)",
-                width: 3,
+                width: 4,
               }}
             />
-          ))}
-        </Layer>
-        <Layer
-          id="foreground"
-          sx={{ "& > *:not(.nightcurrent-artwork)": { display: "none" } }}
-        >
-          <Box
-            className="nightcurrent-artwork"
-            component="img"
-            src="/images/nightcurrent/hero/foreground-vegetation.png"
-            alt=""
-            aria-hidden="true"
-            sx={{
-              bottom: "-8%",
-              height: "76%",
-              left: 0,
-              maskImage:
-                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.2) 13%, #000 30%)",
-              objectFit: "cover",
-              objectPosition: "center bottom",
-              position: "absolute",
-              WebkitMaskImage:
-                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.2) 13%, #000 30%)",
-              width: "100%",
-            }}
-          />
-          <Box
-            sx={{
-              bgcolor: "#081b24",
-              clipPath:
-                "polygon(0 37%, 14% 11%, 26% 31%, 43% 8%, 58% 35%, 77% 14%, 100% 33%, 100% 100%, 0 100%)",
-              bottom: 0,
-              position: "absolute",
-              top: "74%",
-            }}
-          />
-          {["8%", "13%", "31%", "47%", "84%", "92%"].map((left, index) => (
             <Box
-              key={left}
               sx={{
-                bgcolor: "#0b252c",
-                bottom: 0,
-                clipPath: "polygon(50% 0, 100% 100%, 0 100%)",
-                height: 120 + index * 12,
-                left,
+                bgcolor: "#202f32",
+                border: "1px solid rgba(232,170,113,0.35)",
+                bottom: "43%",
+                height: 30,
+                left: "63%",
                 position: "absolute",
-                transform: `rotate(${index % 2 ? -8 : 8}deg)`,
+                width: 78,
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "#89a99c",
+                bottom: "45%",
+                height: 5,
+                left: "66%",
+                opacity: 0.7,
+                position: "absolute",
+                width: 12,
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "#172d32",
+                bottom: "25%",
+                height: 3,
+                left: "57%",
+                position: "absolute",
+                transform: "rotate(-7deg)",
                 width: 70,
               }}
             />
-          ))}
-        </Layer>
-        <Layer id="lights">
-          {FLOATING_LIGHTS.map(([left, top, size, delay, duration]) => (
             <Box
-              key={`${left}-${top}`}
-              className="nightcurrent-animated"
               sx={{
-                animation: `nightcurrent-light-drift ${duration}s ${delay}s ease-in-out infinite`,
-                bgcolor: "#f8fff4",
-                borderRadius: "50%",
-                boxShadow: "0 0 12px 2px rgba(235,255,239,0.36)",
-                height: size,
-                left: `${left}%`,
-                opacity: 0.15,
+                bgcolor: "#172d32",
+                bottom: "25%",
+                height: 3,
+                left: "76%",
                 position: "absolute",
-                top: `${top}%`,
-                width: size,
+                transform: "rotate(7deg)",
+                width: 52,
               }}
             />
-          ))}
-        </Layer>
-        <Layer id="ui" sx={{ pointerEvents: "auto" }}>
-          <Container
-            maxWidth="lg"
-            sx={{ height: "100%", pointerEvents: "none", position: "relative" }}
-          >
+          </Layer>
+          <Layer id="shoreline">
             <Box
               sx={{
-                maxWidth: 680,
-                pointerEvents: "auto",
-                pt: { xs: 12, md: 16 },
+                bgcolor: "#9b997d",
+                clipPath:
+                  "polygon(0 25%, 18% 18%, 34% 29%, 50% 14%, 70% 28%, 88% 19%, 100% 25%, 100% 100%, 0 100%)",
+                bottom: 0,
+                position: "absolute",
+                top: "67%",
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "rgba(82,143,145,0.66)",
+                borderRadius: "50%",
+                bottom: "12%",
+                height: 24,
+                left: "25%",
+                position: "absolute",
+                width: 76,
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "rgba(82,143,145,0.52)",
+                borderRadius: "50%",
+                bottom: "18%",
+                height: 15,
+                left: "43%",
+                position: "absolute",
+                width: 48,
+              }}
+            />
+          </Layer>
+          <Layer id="midground">
+            <Box
+              sx={{
+                bgcolor: "#16383b",
+                clipPath:
+                  "polygon(0 40%, 18% 25%, 34% 48%, 52% 22%, 71% 44%, 87% 27%, 100% 43%, 100% 100%, 0 100%)",
+                bottom: 0,
+                position: "absolute",
+                top: "64%",
+              }}
+            />
+            {["19%", "27%", "82%", "88%"].map((left) => (
+              <Box
+                key={left}
+                sx={{
+                  bgcolor: "#96b58f",
+                  bottom: "24%",
+                  height: 100,
+                  left,
+                  position: "absolute",
+                  transform: "rotate(18deg)",
+                  width: 3,
+                }}
+              />
+            ))}
+          </Layer>
+          <Layer
+            id="foreground"
+            sx={{ "& > *:not(.nightcurrent-artwork)": { display: "none" } }}
+          >
+            <Box
+              className="nightcurrent-artwork"
+              component="img"
+              src="/images/nightcurrent/hero/foreground-vegetation.png"
+              alt=""
+              aria-hidden="true"
+              sx={{
+                bottom: "-8%",
+                height: "76%",
+                left: 0,
+                maskImage:
+                  "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.2) 13%, #000 30%)",
+                objectFit: "cover",
+                objectPosition: "center bottom",
+                position: "absolute",
+                WebkitMaskImage:
+                  "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.2) 13%, #000 30%)",
+                width: "100%",
+              }}
+            />
+            <Box
+              sx={{
+                bgcolor: "#081b24",
+                clipPath:
+                  "polygon(0 37%, 14% 11%, 26% 31%, 43% 8%, 58% 35%, 77% 14%, 100% 33%, 100% 100%, 0 100%)",
+                bottom: 0,
+                position: "absolute",
+                top: "74%",
+              }}
+            />
+            {["8%", "13%", "31%", "47%", "84%", "92%"].map((left, index) => (
+              <Box
+                key={left}
+                sx={{
+                  bgcolor: "#0b252c",
+                  bottom: 0,
+                  clipPath: "polygon(50% 0, 100% 100%, 0 100%)",
+                  height: 120 + index * 12,
+                  left,
+                  position: "absolute",
+                  transform: `rotate(${index % 2 ? -8 : 8}deg)`,
+                  width: 70,
+                }}
+              />
+            ))}
+          </Layer>
+          <Layer id="lights">
+            {FLOATING_LIGHTS.map(([left, top, size, delay, duration]) => (
+              <Box
+                key={`${left}-${top}`}
+                className="nightcurrent-animated"
+                sx={{
+                  animation: `nightcurrent-light-drift ${duration}s ${delay}s ease-in-out infinite`,
+                  bgcolor: "#f8fff4",
+                  borderRadius: "50%",
+                  boxShadow: "0 0 12px 2px rgba(235,255,239,0.36)",
+                  height: size,
+                  left: `${left}%`,
+                  opacity: 0.15,
+                  position: "absolute",
+                  top: `${top}%`,
+                  width: size,
+                }}
+              />
+            ))}
+          </Layer>
+          <Layer id="ui" sx={{ pointerEvents: "auto" }}>
+            <Container
+              maxWidth="lg"
+              sx={{
+                height: "100%",
+                pointerEvents: "none",
                 position: "relative",
               }}
             >
-              <Chip
-                label="AN ORIGINAL ARCHIVE STUDY"
-                sx={{
-                  bgcolor: "rgba(232,170,113,0.14)",
-                  color: "#f4c38d",
-                  fontSize: "0.65rem",
-                  fontWeight: 800,
-                  letterSpacing: "0.12em",
-                  mb: 3,
-                }}
-              />
-              <Typography
-                id="nightcurrent-title"
-                className="nightcurrent-intro"
-                component="h1"
-                sx={{
-                  animation: "nightcurrent-ui-intro 700ms 700ms both",
-                  color: "#fff4df",
-                  fontFamily: "Georgia, serif",
-                  fontSize: { xs: "4.4rem", sm: "6.5rem", md: "8.3rem" },
-                  fontWeight: 400,
-                  letterSpacing: "-0.07em",
-                  lineHeight: 0.8,
-                }}
-              >
-                night
-                <br />
-                <Box component="span" sx={{ color: "#e8aa71" }}>
-                  current
-                </Box>
-              </Typography>
-              <Typography
-                className="nightcurrent-intro"
-                sx={{
-                  animation: "nightcurrent-ui-intro 700ms 900ms both",
-                  color: "#c1d0d1",
-                  fontSize: { xs: "1.05rem", md: "1.3rem" },
-                  lineHeight: 1.6,
-                  maxWidth: 480,
-                  mt: 4,
-                }}
-              >
-                The island remembers what the sea takes. Follow the signal
-                beyond the last weather line.
-              </Typography>
               <Box
-                className="nightcurrent-intro"
                 sx={{
-                  animation: "nightcurrent-ui-intro 700ms 1100ms both",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 2,
-                  mt: 4,
+                  maxWidth: { xs: "100%", sm: 480, md: 680 },
+                  pointerEvents: "auto",
+                  pt: { xs: 8, sm: 10, md: 16 },
+                  position: "relative",
                 }}
               >
-                <Button
-                  href="#world"
-                  variant="contained"
-                  endIcon={<ArrowDownwardRoundedIcon />}
+                <Chip
+                  label="AN ORIGINAL ARCHIVE STUDY"
                   sx={{
-                    bgcolor: "#e8aa71",
-                    color: "#17232b",
-                    px: 2.5,
-                    "&:hover": { bgcolor: "#f3bf89" },
+                    bgcolor: "rgba(232,170,113,0.14)",
+                    color: "#f4c38d",
+                    fontSize: "0.65rem",
+                    fontWeight: 800,
+                    letterSpacing: "0.12em",
+                    mb: 3,
+                  }}
+                />
+                <Typography
+                  id="nightcurrent-title"
+                  className="nightcurrent-intro"
+                  component="h1"
+                  sx={{
+                    animation: "nightcurrent-ui-intro 700ms 700ms both",
+                    color: "#fff4df",
+                    fontFamily: "Georgia, serif",
+                    fontSize: { xs: "4.4rem", sm: "6.5rem", md: "8.3rem" },
+                    fontWeight: 400,
+                    letterSpacing: "-0.07em",
+                    lineHeight: 0.8,
                   }}
                 >
-                  Enter Tideglass
-                </Button>
-                <Button
-                  href="#recovery"
-                  variant="text"
-                  endIcon={<ArrowOutwardRoundedIcon />}
-                  sx={{ color: "#f4efe5" }}
+                  night
+                  <br />
+                  <Box component="span" sx={{ color: "#e8aa71" }}>
+                    current
+                  </Box>
+                </Typography>
+                <Typography
+                  className="nightcurrent-intro"
+                  sx={{
+                    animation: "nightcurrent-ui-intro 700ms 900ms both",
+                    color: "#c1d0d1",
+                    fontSize: { xs: "1.05rem", md: "1.3rem" },
+                    lineHeight: 1.6,
+                    maxWidth: 480,
+                    mt: 4,
+                  }}
                 >
-                  Read the study
-                </Button>
+                  The island remembers what the sea takes. Follow the signal
+                  beyond the last weather line.
+                </Typography>
+                <Box
+                  className="nightcurrent-intro"
+                  sx={{
+                    animation: "nightcurrent-ui-intro 700ms 1100ms both",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 2,
+                    mt: 4,
+                  }}
+                >
+                  <Button
+                    href="#world"
+                    variant="contained"
+                    endIcon={<ArrowDownwardRoundedIcon />}
+                    sx={{
+                      bgcolor: "#e8aa71",
+                      color: "#17232b",
+                      px: 2.5,
+                      "&:hover": { bgcolor: "#f3bf89" },
+                    }}
+                  >
+                    Enter Tideglass
+                  </Button>
+                  <Button
+                    href="#recovery"
+                    variant="text"
+                    endIcon={<ArrowOutwardRoundedIcon />}
+                    sx={{ color: "#f4efe5" }}
+                  >
+                    Read the study
+                  </Button>
+                </Box>
               </Box>
-            </Box>
-          </Container>
-        </Layer>
-      </Box>
-      <Typography
-        sx={{
-          bottom: 28,
-          color: "#91a9ac",
-          fontSize: "0.65rem",
-          left: { xs: 24, md: 48 },
-          letterSpacing: "0.16em",
-          position: "absolute",
-          textTransform: "uppercase",
-          zIndex: 4,
-        }}
-      >
-        Tideglass Island · 47° 18′ N
-      </Typography>
-      {debug && (
-        <Box
+            </Container>
+          </Layer>
+        </Box>
+        <Typography
           sx={{
-            bgcolor: "rgba(5,12,17,0.9)",
-            border: "1px solid rgba(232,170,113,0.4)",
-            color: "#f4efe5",
-            fontFamily: "monospace",
-            fontSize: 11,
-            left: 16,
-            p: 1.5,
+            bottom: 28,
+            color: "#91a9ac",
+            fontSize: "0.65rem",
+            left: { xs: 24, md: 48 },
+            letterSpacing: "0.16em",
             position: "absolute",
-            top: 80,
-            zIndex: 6,
+            textTransform: "uppercase",
+            zIndex: 4,
           }}
         >
-          <Typography
+          Tideglass Island · 47° 18′ N
+        </Typography>
+        {debug && (
+          <Box
             sx={{
-              color: "#e8aa71",
-              fontFamily: "inherit",
-              fontSize: "inherit",
-              fontWeight: 800,
-              mb: 0.5,
+              bgcolor: "rgba(5,12,17,0.9)",
+              border: "1px solid rgba(232,170,113,0.4)",
+              color: "#f4efe5",
+              fontFamily: "monospace",
+              fontSize: 11,
+              left: 16,
+              p: 1.5,
+              position: "absolute",
+              top: 80,
+              zIndex: 6,
             }}
           >
-            PARALLAX DEBUG
-          </Typography>
-          {PARALLAX_LAYERS.map(([id, label, depth]) => (
-            <Box key={id}>
-              {label.padEnd(17, " ")} depth {depth.toFixed(2)}
-            </Box>
-          ))}
-        </Box>
-      )}
+            <Typography
+              sx={{
+                color: "#e8aa71",
+                fontFamily: "inherit",
+                fontSize: "inherit",
+                fontWeight: 800,
+                mb: 0.5,
+              }}
+            >
+              PARALLAX DEBUG
+            </Typography>
+            {PARALLAX_LAYERS.map(([id, label, depth]) => (
+              <Box key={id}>
+                {label.padEnd(17, " ")} depth {depth.toFixed(2)}
+              </Box>
+            ))}
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }

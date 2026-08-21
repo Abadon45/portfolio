@@ -64,7 +64,6 @@ export function NightcurrentPage() {
         bgcolor: "#101d27",
         color: "#f4efe5",
         minHeight: "100vh",
-        overflow: "hidden",
       }}
     >
       <Box
