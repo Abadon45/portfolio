@@ -45,7 +45,10 @@ export const profileSnapshot = [
   ["Location", "Davao City, Philippines"],
   ["Core stack", "Next.js, React, TypeScript, Django"],
   ["Production scope", "60,000+ registered users"],
-  ["Current focus", "SaaS architecture, commerce workflows, storefront tooling"],
+  [
+    "Current focus",
+    "SaaS architecture, commerce workflows, storefront tooling",
+  ],
 ] as const;
 
 export const proofMetrics: ProofMetric[] = [
@@ -107,7 +110,8 @@ export const projects: Project[] = [
   },
   {
     eyebrow: "Legacy TWC E-Commerce",
-    title: "Django e-commerce platform with checkout, referrals, and fulfillment tooling",
+    title:
+      "Django e-commerce platform with checkout, referrals, and fulfillment tooling",
     summary:
       "Built and maintained the original TWC online store before the platform moved toward the current API-driven architecture, preserving a valuable production foundation even after the public site was retired.",
     details: [
@@ -149,26 +153,49 @@ export const projects: Project[] = [
       "Improved maintainability and template consistency across storefront experiences.",
     ],
   },
+  {
+    eyebrow: "Archive Recovery + Rebrand",
+    title: "Nightcurrent — an original narrative-game web experience",
+    summary:
+      "A Firewatch-inspired archive study rebuilt as an original fictional game site, with a layered Tideglass Island scene, depth-based parallax, responsive storytelling, and an evidence-led recovery report.",
+    href: "/nightcurrent",
+    details: [
+      "Reconstructed the narrative launch-page pattern as the original Nightcurrent identity.",
+      "Built a performant CSS layer system for mouse, scroll, mobile, and reduced-motion states.",
+      "Documented recovered, approximated, unavailable, and newly created parts of the study.",
+    ],
+  },
 ];
 
 export const landingPages: LandingPage[] = [
   {
+    title: "Nightcurrent",
+    summary:
+      "An original narrative-game web experience rebuilt from an archive recovery study, with layered Tideglass Island artwork, parallax depth, and a documented modernization report.",
+    href: "/nightcurrent",
+    eyebrow: "Archive recovery + original rebrand",
+    actionLabel: "Open Nightcurrent study",
+  },
+  {
     title: "Cotabato Solar",
-    summary: "A responsive solar services landing page with an interactive savings estimator and inquiry flow.",
+    summary:
+      "A responsive solar services landing page with an interactive savings estimator and inquiry flow.",
     href: "/solar",
     eyebrow: "Recent landing page project",
     actionLabel: "Open landing page",
   },
   {
     title: "TWC Ecommerce",
-    summary: "A reusable offline storefront reconstruction with theme switching, product discovery, cart, shipping simulation, checkout, and order confirmation flows.",
+    summary:
+      "A reusable offline storefront reconstruction with theme switching, product discovery, cart, shipping simulation, checkout, and order confirmation flows.",
     href: "/twc-ecommerce",
     eyebrow: "Portfolio reconstruction",
     actionLabel: "Open ecommerce demo",
   },
   {
     title: "Techno Wealth Creators",
-    summary: "A reference to past work delivered for TWC IT Solutions. The current company website is linked for historical context; this portfolio does not represent an ongoing association.",
+    summary:
+      "A reference to past work delivered for TWC IT Solutions. The current company website is linked for historical context; this portfolio does not represent an ongoing association.",
     href: "https://www.technowealthcreators.com",
     eyebrow: "Former work reference",
     actionLabel: "View company website",
@@ -226,12 +253,20 @@ export const experiences: Experience[] = [
 ];
 
 export const contactLinks: ContactLink[] = [
-  { label: "Email", value: "noypangan5@gmail.com", href: "https://mail.google.com/mail/?view=cm&fs=1&to=noypangan5@gmail.com" },
+  {
+    label: "Email",
+    value: "noypangan5@gmail.com",
+    href: "https://mail.google.com/mail/?view=cm&fs=1&to=noypangan5@gmail.com",
+  },
   { label: "Phone", value: "0917-770-0256", href: "tel:+639177700256" },
   {
     label: "LinkedIn",
     value: "linkedin.com/in/emmanuel-pangan-071502a7",
     href: "https://linkedin.com/in/emmanuel-pangan-071502a7",
   },
-  { label: "GitHub", value: "github.com/Abadon45", href: "https://github.com/Abadon45" },
+  {
+    label: "GitHub",
+    value: "github.com/Abadon45",
+    href: "https://github.com/Abadon45",
+  },
 ];
