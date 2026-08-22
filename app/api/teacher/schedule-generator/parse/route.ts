@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { getTeacherPortfolioUser } from "../../../../../lib/portfolioAuth";
-import { titleCaseSubject } from "../../../../../lib/k12Subjects";
+import { schoolLevelForYear, schoolLevels, titleCaseSubject } from "../../../../../lib/k12Subjects";
 
 export const runtime = "nodejs";
 const maxFileSize = 5 * 1024 * 1024;
@@ -50,50 +50,72 @@ export async function POST(request: Request) {
     const teacherKey = headerMap.get("teachername") ?? headerMap.get("teacher");
     const yearLevelKey =
       headerMap.get("yearlevel") ?? headerMap.get("gradelevel") ?? headerMap.get("grade");
+    const schoolLevelKey = headerMap.get("schoollevel") ?? headerMap.get("level");
+    const sectionKey = headerMap.get("section") ?? headerMap.get("classname");
     const subjectKey = headerMap.get("subject");
     const hoursKey = headerMap.get("hoursperweek") ?? headerMap.get("hours");
-    if (!teacherKey || !yearLevelKey || !subjectKey || !hoursKey)
+    const daysKey = headerMap.get("daysperweek") ?? headerMap.get("days");
+    if (!teacherKey || !schoolLevelKey || !yearLevelKey || !sectionKey || !subjectKey || !hoursKey || !daysKey)
       return NextResponse.json(
         {
           message:
-            "Your file must include Teacher Name, Year Level, Subject, and Hours Per Week columns.",
+            "Your file must include Teacher Name, School Level, Year Level, Section, Subject, Hours Per Week, and Days Per Week columns.",
         },
         { status: 400 },
       );
     const errors: string[] = [];
+    const allowedSchoolLevels = new Set<string>(schoolLevels);
     const loads = rows
       .map((row, index) => {
         const teacherName = String(row[teacherKey] ?? "").trim();
+        const schoolLevel = String(row[schoolLevelKey] ?? "").trim();
         const yearLevel = String(row[yearLevelKey] ?? "").trim();
+        const section = String(row[sectionKey] ?? "").trim();
         const subject = titleCaseSubject(String(row[subjectKey] ?? ""));
         const hoursPerWeek = Number(row[hoursKey]);
+        const daysPerWeek = Number(row[daysKey]);
         if (
           !teacherName ||
+          !schoolLevel ||
+          !allowedSchoolLevels.has(schoolLevel) ||
+          schoolLevelForYear(yearLevel) !== schoolLevel ||
           !yearLevel ||
+          !section ||
           !subject ||
           !Number.isInteger(hoursPerWeek) ||
           hoursPerWeek <= 0 ||
-          hoursPerWeek > 60
+          hoursPerWeek > 60 ||
+          !Number.isInteger(daysPerWeek) ||
+          daysPerWeek < 1 ||
+          daysPerWeek > 5
         )
           errors.push(
-            `Row ${index + 2}: teacher, year level, subject, and whole hours between 1 and 60 are required.`,
+            `Row ${index + 2}: teacher, school level, year level, section, subject, whole hours between 1 and 60, and days between 1 and 5 are required.`,
           );
-        return { teacherName, yearLevel, subject, hoursPerWeek };
+        return { teacherName, schoolLevel, yearLevel, section, subject, hoursPerWeek, daysPerWeek };
       })
       .filter(
         (load) =>
           load.teacherName &&
+          load.schoolLevel &&
           load.yearLevel &&
+          load.section &&
           load.subject &&
           Number.isInteger(load.hoursPerWeek) &&
           load.hoursPerWeek > 0 &&
-          load.hoursPerWeek <= 60,
+          load.hoursPerWeek <= 60 &&
+          Number.isInteger(load.daysPerWeek) &&
+          load.daysPerWeek >= 1 &&
+          load.daysPerWeek <= 5,
       );
     const combined = new Map<string, (typeof loads)[number]>();
     for (const load of loads) {
-      const key = `${load.teacherName.toLowerCase()}\u0000${load.yearLevel.toLowerCase()}\u0000${load.subject.toLowerCase()}`;
+      const key = `${load.teacherName.toLowerCase()}\u0000${load.schoolLevel.toLowerCase()}\u0000${load.yearLevel.toLowerCase()}\u0000${load.section.toLowerCase()}\u0000${load.subject.toLowerCase()}`;
       const existing = combined.get(key);
-      if (existing) existing.hoursPerWeek += load.hoursPerWeek;
+      if (existing) {
+        existing.hoursPerWeek += load.hoursPerWeek;
+        existing.daysPerWeek = Math.max(existing.daysPerWeek, load.daysPerWeek);
+      }
       else combined.set(key, { ...load });
     }
     return NextResponse.json({

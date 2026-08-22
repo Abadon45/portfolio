@@ -24,7 +24,15 @@ import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import { useTwcAlert } from "../../../components/portfolio/TwcAlertSystem";
-import { subjectsForYearLevel, titleCaseSubject, yearLevels } from "../../../../lib/k12Subjects";
+import {
+  schoolLevelForYear,
+  schoolLevels,
+  firstYearLevelForSchoolLevel,
+  subjectsForYearLevel,
+  titleCaseSubject,
+  yearLevels,
+  type SchoolLevel,
+} from "../../../../lib/k12Subjects";
 import {
   generateTeacherSchedule,
   type ScheduleGeneration,
@@ -42,9 +50,12 @@ export default function ScheduleGeneratorClient() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [loads, setLoads] = useState<LoadDraft[]>([]);
   const [teacherName, setTeacherName] = useState("");
+  const [schoolLevel, setSchoolLevel] = useState<SchoolLevel>("JHS");
   const [yearLevel, setYearLevel] = useState("Grade 7");
+  const [section, setSection] = useState("");
   const [subject, setSubject] = useState("");
   const [hours, setHours] = useState("1");
+  const [daysPerWeek, setDaysPerWeek] = useState("5");
   const [days, setDays] = useState(defaultDays);
   const [periodMinutes, setPeriodMinutes] = useState("60");
   const [startTime, setStartTime] = useState("07:30");
@@ -61,27 +72,40 @@ export default function ScheduleGeneratorClient() {
 
   function addLoad() {
     const parsedHours = Number(hours);
+    const parsedDays = Number(daysPerWeek);
     if (
       !teacherName.trim() ||
+      !schoolLevel ||
+      !yearLevel.trim() ||
+      !section.trim() ||
       !titleCaseSubject(subject) ||
       !Number.isInteger(parsedHours) ||
       parsedHours < 1 ||
-      parsedHours > 60
+      parsedHours > 60 ||
+      !Number.isInteger(parsedDays) ||
+      parsedDays < 1 ||
+      parsedDays > days.length
     ) {
-      toastError("Enter a teacher, year level, subject, and whole hours between 1 and 60.");
+      toastError("Enter the teacher, school level, year level, section, subject, hours, and a valid number of days.");
       return;
     }
     const existing = loads.find(
       (load) =>
         load.teacherName.toLowerCase() === teacherName.trim().toLowerCase() &&
+        load.schoolLevel.toLowerCase() === schoolLevel.toLowerCase() &&
         load.yearLevel.toLowerCase() === yearLevel.toLowerCase() &&
+        load.section.toLowerCase() === section.trim().toLowerCase() &&
         load.subject.toLowerCase() === subject.trim().toLowerCase(),
     );
     if (existing) {
       setLoads((current) =>
         current.map((load) =>
           load.id === existing.id
-            ? { ...load, hoursPerWeek: load.hoursPerWeek + parsedHours }
+            ? {
+                ...load,
+                hoursPerWeek: load.hoursPerWeek + parsedHours,
+                daysPerWeek: Math.max(load.daysPerWeek, parsedDays),
+              }
             : load,
         ),
       );
@@ -91,13 +115,17 @@ export default function ScheduleGeneratorClient() {
         {
           id: crypto.randomUUID(),
           teacherName: teacherName.trim(),
+          schoolLevel,
           yearLevel,
+          section: section.trim(),
           subject: titleCaseSubject(subject),
           hoursPerWeek: parsedHours,
+          daysPerWeek: parsedDays,
         },
       ]);
     }
     setSubject("");
+    setSection("");
     setHours("1");
   }
 
@@ -160,7 +188,7 @@ export default function ScheduleGeneratorClient() {
           academicPeriod: "Generated draft",
           entries: generation.entries.map((entry) => ({
             ...entry,
-            section: null,
+            section: entry.section || null,
             room: null,
             notes: null,
           })),
@@ -201,112 +229,52 @@ export default function ScheduleGeneratorClient() {
           assignments cannot overlap.
         </Typography>
       </Box>
-      <Box
-        sx={{
-          display: "grid",
-          gap: 2,
-          gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-        }}
-      >
-        <Card variant="outlined">
-          <CardContent>
-            <Stack spacing={2}>
+      <Card variant="outlined">
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <Stack spacing={2.5}>
+            <Box>
               <Typography sx={{ fontWeight: 800 }} variant="h6">
-                Add teaching load
-              </Typography>
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-                <TextField
-                  fullWidth
-                  label="Teacher name"
-                  onChange={(event) => setTeacherName(event.target.value)}
-                  value={teacherName}
-                />
-                <FormControl fullWidth>
-                  <InputLabel id="year-level-label">Year level</InputLabel>
-                  <Select
-                    label="Year level"
-                    labelId="year-level-label"
-                    onChange={(event) => {
-                      setYearLevel(event.target.value);
-                      setSubject("");
-                    }}
-                    value={yearLevel}
-                  >
-                    {yearLevels.map((level) => (
-                      <MenuItem key={level} value={level}>{level}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Autocomplete
-                  freeSolo
-                  fullWidth
-                  options={subjectsForYearLevel(yearLevel)}
-                  value={subject}
-                  onChange={(_, value) => setSubject(titleCaseSubject(value ?? ""))}
-                  onInputChange={(_, value) => setSubject(titleCaseSubject(value))}
-                  renderInput={(params) => <TextField {...params} label="Subject" placeholder="Choose or type a subject" />}
-                />
-                <TextField
-                  label="Hours / week"
-                  onChange={(event) => setHours(event.target.value)}
-                  type="number"
-                  value={hours}
-                />
-              </Stack>
-              <Button
-                onClick={addLoad}
-                startIcon={<AddRoundedIcon />}
-                sx={{ alignSelf: "flex-start" }}
-                variant="outlined"
-              >
-                Add subject
-              </Button>
-            </Stack>
-          </CardContent>
-        </Card>
-        <Card variant="outlined">
-          <CardContent>
-            <Stack spacing={2}>
-              <Typography sx={{ fontWeight: 800 }} variant="h6">
-                Import teaching load
+                Build teaching loads
               </Typography>
               <Typography color="text.secondary" variant="body2">
-                Use columns: Teacher Name, Year Level, Subject, Hours Per Week.
-                Duplicate teacher/year-level/subject rows are combined for review.
+                Add one assignment for each teacher, section, subject, and weekly meeting pattern.
               </Typography>
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-                <Button
-                  component="label"
-                  startIcon={<CloudUploadRoundedIcon />}
-                  variant="outlined"
-                >
-                  Choose CSV / Excel
-                  <input
-                    accept=".csv,.xlsx,.xls"
-                    hidden
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (file) void importFile(file);
-                      event.target.value = "";
-                    }}
-                    ref={fileRef}
-                    type="file"
-                  />
-                </Button>
-                <Button
-                  component="a"
-                  download="teaching-load-template.csv"
-                  href={`data:text/csv;charset=utf-8,Teacher%20Name%2CYear%20Level%2CSubject%2CHours%20Per%20Week%0AMaria%20Santos%2CGrade%207%2CMathematics%2C5%0AMaria%20Santos%2CGrade%207%2CEnglish%2C4`}
-                  startIcon={<DownloadRoundedIcon />}
-                  variant="text"
-                >
-                  Download template
-                </Button>
+            </Box>
+            <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.65fr) minmax(280px, 0.85fr)" } }}>
+              <Stack spacing={1.5}>
+                <Typography color="primary.main" sx={{ fontWeight: 800, letterSpacing: "0.06em" }} variant="overline">MANUAL ENTRY</Typography>
+                <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" } }}>
+                  <TextField label="Teacher name" onChange={(event) => setTeacherName(event.target.value)} value={teacherName} />
+                  <FormControl>
+                    <InputLabel id="school-level-label">School level</InputLabel>
+                    <Select label="School level" labelId="school-level-label" onChange={(event) => { const level = event.target.value as SchoolLevel; setSchoolLevel(level); setYearLevel(firstYearLevelForSchoolLevel(level)); setSubject(""); }} value={schoolLevel}>
+                      {schoolLevels.map((level) => <MenuItem key={level} value={level}>{level}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                  <FormControl>
+                    <InputLabel id="year-level-label">Year level</InputLabel>
+                    <Select label="Year level" labelId="year-level-label" onChange={(event) => { const level = event.target.value; setYearLevel(level); setSchoolLevel(schoolLevelForYear(level)); setSubject(""); }} value={yearLevel}>
+                      {yearLevels.map((level) => <MenuItem key={level} value={level}>{level}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                  <TextField label="Section" onChange={(event) => setSection(event.target.value)} placeholder="e.g. Rizal" value={section} />
+                  <Autocomplete freeSolo options={subjectsForYearLevel(yearLevel)} value={subject} onChange={(_, value) => setSubject(titleCaseSubject(value ?? ""))} onInputChange={(_, value) => setSubject(titleCaseSubject(value))} renderInput={(params) => <TextField {...params} label="Subject" placeholder="Choose or type a subject" />} />
+                  <TextField label="Hours / week" onChange={(event) => setHours(event.target.value)} type="number" value={hours} />
+                  <TextField helperText={`1–${days.length} selected school days`} label="Days / week" onChange={(event) => setDaysPerWeek(event.target.value)} type="number" value={daysPerWeek} />
+                </Box>
+                <Button onClick={addLoad} startIcon={<AddRoundedIcon />} sx={{ alignSelf: "flex-start" }} variant="outlined">Add teaching load</Button>
               </Stack>
-            </Stack>
-          </CardContent>
-        </Card>
-      </Box>
+              <Stack spacing={1.5} sx={{ bgcolor: "action.hover", border: 1, borderColor: "divider", borderRadius: 1.5, p: 2 }}>
+                <Typography color="primary.main" sx={{ fontWeight: 800, letterSpacing: "0.06em" }} variant="overline">IMPORT</Typography>
+                <Typography sx={{ fontWeight: 800 }} variant="subtitle1">Import a prepared load sheet</Typography>
+                <Typography color="text.secondary" variant="body2">Columns: Teacher Name, School Level, Year Level, Section, Subject, Hours Per Week, Days Per Week.</Typography>
+                <Button component="label" startIcon={<CloudUploadRoundedIcon />} variant="contained">Choose CSV / Excel<input accept=".csv,.xlsx,.xls" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) void importFile(file); event.target.value = ""; }} ref={fileRef} type="file" /></Button>
+                <Button component="a" download="teaching-load-template.csv" href={`data:text/csv;charset=utf-8,Teacher%20Name%2CSchool%20Level%2CYear%20Level%2CSection%2CSubject%2CHours%20Per%20Week%2CDays%20Per%20Week%0AMaria%20Santos%2CJHS%2CGrade%207%2CRizal%2CMathematics%2C5%2C5%0AMaria%20Santos%2CJHS%2CGrade%207%2CRizal%2CEnglish%2C4%2C4`} startIcon={<DownloadRoundedIcon />} variant="text">Download template</Button>
+              </Stack>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
       {!!importErrors.length && (
         <Alert severity="warning">
           {importErrors.map((error) => (
@@ -347,10 +315,12 @@ export default function ScheduleGeneratorClient() {
                     <Typography sx={{ flex: 1, fontWeight: 700 }}>
                       {load.teacherName}
                     </Typography>
+                    <Typography sx={{ flex: 1 }}>{load.schoolLevel}</Typography>
                     <Typography sx={{ flex: 1 }}>{load.yearLevel}</Typography>
+                    <Typography sx={{ flex: 1 }}>{load.section}</Typography>
                     <Typography sx={{ flex: 1 }}>{load.subject}</Typography>
                     <Typography color="text.secondary">
-                      {load.hoursPerWeek} hrs/week
+                      {load.daysPerWeek} days · {load.hoursPerWeek} hrs
                     </Typography>
                     <Button
                       color="error"
@@ -583,7 +553,7 @@ function GeneratedResult({
                     {entry.day} · {entry.startTime}–{entry.endTime}
                   </Typography>
                   <Typography color="text.secondary" variant="caption">
-                    {entry.yearLevel}
+                    {entry.schoolLevel} · {entry.yearLevel} · {entry.section}
                   </Typography>
                   <Typography sx={{ fontWeight: 800 }}>
                     {entry.subject}
@@ -672,11 +642,13 @@ function fromMinutes(value: number) {
 }
 function downloadCsv(entries: ScheduleSlot[]) {
   const csv = [
-    "Teacher,Year Level,Day,Start,End,Subject",
+    "Teacher,School Level,Year Level,Section,Day,Start,End,Subject",
     ...entries.map((entry) =>
       [
         entry.teacherName,
+        entry.schoolLevel,
         entry.yearLevel,
+        entry.section,
         entry.day,
         entry.startTime,
         entry.endTime,

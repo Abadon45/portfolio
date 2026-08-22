@@ -3,7 +3,7 @@ import {
   createTeacherSchedule,
   listTeacherSchedules,
 } from "../../../../lib/teacherWorkspace";
-import { titleCaseSubject } from "../../../../lib/k12Subjects";
+import { schoolLevels, titleCaseSubject } from "../../../../lib/k12Subjects";
 
 export const runtime = "nodejs";
 
@@ -15,6 +15,10 @@ function normalizeEntries(value: unknown) {
       return {
         teacherName:
           typeof item.teacherName === "string" ? item.teacherName.trim() : "",
+        schoolLevel:
+          typeof item.schoolLevel === "string"
+            ? item.schoolLevel.trim()
+            : "JHS",
         yearLevel:
           typeof item.yearLevel === "string"
             ? item.yearLevel.trim()
@@ -28,7 +32,9 @@ function normalizeEntries(value: unknown) {
             ? titleCaseSubject(item.subject)
             : "",
         section:
-          typeof item.section === "string" ? item.section.trim() || null : null,
+          typeof item.section === "string"
+            ? item.section.trim() || "Unsectioned"
+            : "Unsectioned",
         room: typeof item.room === "string" ? item.room.trim() || null : null,
         notes:
           typeof item.notes === "string" ? item.notes.trim() || null : null,
@@ -41,7 +47,9 @@ function normalizeEntries(value: unknown) {
         entry.startTime &&
         entry.endTime &&
         entry.subject &&
-        entry.yearLevel,
+        entry.yearLevel &&
+        entry.section &&
+        schoolLevels.includes(entry.schoolLevel as (typeof schoolLevels)[number]),
     );
 }
 
@@ -53,7 +61,7 @@ function hasScheduleConflict(
     const timeKey = `${entry.day.toLowerCase()}\u0000${entry.startTime}`;
     const keys = [
       `teacher\u0000${entry.teacherName.toLowerCase()}\u0000${timeKey}`,
-      `year\u0000${entry.yearLevel.toLowerCase()}\u0000${timeKey}`,
+      `year\u0000${entry.schoolLevel.toLowerCase()}\u0000${entry.yearLevel.toLowerCase()}\u0000${entry.section?.toLowerCase()}\u0000${timeKey}`,
       `subject\u0000${entry.subject.toLowerCase()}\u0000${timeKey}`,
     ];
     if (keys.some((key) => occupied.has(key))) return true;

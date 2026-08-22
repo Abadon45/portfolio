@@ -1,8 +1,11 @@
 export type TeachingLoad = {
   teacherName: string;
+  schoolLevel: "Kinder" | "Elementary" | "JHS" | "SHS";
   yearLevel: string;
+  section: string;
   subject: string;
   hoursPerWeek: number;
+  daysPerWeek: number;
 };
 
 export type SchoolPeriod = {
@@ -14,7 +17,9 @@ export type SchoolPeriod = {
 
 export type ScheduleSlot = {
   teacherName: string;
+  schoolLevel: TeachingLoad["schoolLevel"];
   yearLevel: string;
+  section: string;
   subject: string;
   day: string;
   startTime: string;
@@ -66,6 +71,7 @@ export function generateTeacherSchedule({
     string,
     Array<{ subject: string; requiredHours: number }>
   >();
+  const usedDaysByLoad = new Map<string, Set<string>>();
 
   for (const load of loads) {
     const teacherKey = normalizeTeacher(load.teacherName);
@@ -88,15 +94,19 @@ export function generateTeacherSchedule({
     const teacherKey = normalizeTeacher(load.teacherName);
     const yearLevelKey = normalizeValue(load.yearLevel);
     const subjectKey = normalizeValue(load.subject);
+    const classKey = `${normalizeValue(load.schoolLevel)}\u0000${yearLevelKey}\u0000${normalizeValue(load.section)}`;
     const teacherSlots =
       usedByTeacher.get(teacherKey) ?? new Set<string>();
     usedByTeacher.set(teacherKey, teacherSlots);
     const yearLevelSlots =
-      usedByYearLevel.get(yearLevelKey) ?? new Set<string>();
+      usedByYearLevel.get(classKey) ?? new Set<string>();
     const subjectSlots = usedBySubject.get(subjectKey) ?? new Set<string>();
-    usedByYearLevel.set(yearLevelKey, yearLevelSlots);
+    usedByYearLevel.set(classKey, yearLevelSlots);
     usedBySubject.set(subjectKey, subjectSlots);
-    const loadKey = `${teacherKey}\u0000${yearLevelKey}\u0000${subjectKey}`;
+    const loadKey = `${teacherKey}\u0000${classKey}\u0000${subjectKey}`;
+    const usedDays = usedDaysByLoad.get(loadKey) ?? new Set<string>();
+    const targetDays = Math.min(Math.max(1, load.daysPerWeek), orderedDays.length);
+    usedDaysByLoad.set(loadKey, usedDays);
     let scheduled = 0;
     for (let hour = 0; hour < load.hoursPerWeek; hour += 1) {
       const candidates = slots.filter(
@@ -110,14 +120,21 @@ export function generateTeacherSchedule({
         },
       );
       if (!candidates.length) break;
-      candidates.sort((a, b) =>
-        scoreSlot(a, b, load, teacherSlots, dailyHours, lastSubjectSlot),
-      );
+      candidates.sort((a, b) => {
+        const needsNewDay = usedDays.size < targetDays;
+        if (needsNewDay) {
+          const aNewDay = usedDays.has(a.day) ? 1 : 0;
+          const bNewDay = usedDays.has(b.day) ? 1 : 0;
+          if (aNewDay !== bNewDay) return aNewDay - bNewDay;
+        }
+        return scoreSlot(a, b, load, teacherSlots, dailyHours, lastSubjectSlot);
+      });
       const selected = candidates[0];
       const slotKey = `${selected.day}:${selected.id}`;
       teacherSlots.add(slotKey);
       yearLevelSlots.add(slotKey);
       subjectSlots.add(slotKey);
+      usedDays.add(selected.day);
       dailyHours.set(
         `${teacherKey}:${selected.day}`,
         (dailyHours.get(`${teacherKey}:${selected.day}`) ?? 0) + 1,
@@ -128,7 +145,9 @@ export function generateTeacherSchedule({
       );
       entries.push({
         teacherName: load.teacherName,
+        schoolLevel: load.schoolLevel,
         yearLevel: load.yearLevel,
+        section: load.section,
         subject: load.subject,
         day: selected.day,
         startTime: selected.startTime,
@@ -146,7 +165,7 @@ export function generateTeacherSchedule({
       ...load,
       scheduledHours:
         scheduledByLoad.get(
-          `${normalizeTeacher(load.teacherName)}\u0000${normalizeValue(load.yearLevel)}\u0000${normalizeValue(load.subject)}`,
+          `${normalizeTeacher(load.teacherName)}\u0000${normalizeValue(load.schoolLevel)}\u0000${normalizeValue(load.yearLevel)}\u0000${normalizeValue(load.section)}\u0000${normalizeValue(load.subject)}`,
         ) ?? 0,
     }))
     .filter((load) => load.scheduledHours < load.hoursPerWeek);
@@ -206,7 +225,10 @@ function countScheduleConflicts(entries: ScheduleSlot[]) {
     const timeKey = `${entry.day}\u0000${entry.startTime}`;
     const keys = [
       [occupied.teacher, `${normalizeTeacher(entry.teacherName)}\u0000${timeKey}`],
-      [occupied.yearLevel, `${normalizeValue(entry.yearLevel)}\u0000${timeKey}`],
+      [
+        occupied.yearLevel,
+        `${normalizeValue(entry.schoolLevel)}\u0000${normalizeValue(entry.yearLevel)}\u0000${normalizeValue(entry.section)}\u0000${timeKey}`,
+      ],
       [occupied.subject, `${normalizeValue(entry.subject)}\u0000${timeKey}`],
     ] as const;
     for (const [set, key] of keys) {

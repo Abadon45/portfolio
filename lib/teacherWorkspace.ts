@@ -7,6 +7,7 @@ import { getTeacherPortfolioUser } from "./portfolioAuth";
 export type ScheduleEntry = {
   id: string;
   teacherName: string;
+  schoolLevel: string;
   yearLevel: string;
   day: string;
   startTime: string;
@@ -30,6 +31,7 @@ function entryFromRow(row: Record<string, unknown>): ScheduleEntry {
   return {
     id: String(row.id),
     teacherName: String(row.teacher_name ?? ""),
+    schoolLevel: String(row.school_level ?? "JHS"),
     yearLevel: String(row.year_level ?? "All Year Levels"),
     day: String(row.day),
     startTime: String(row.start_time),
@@ -107,9 +109,9 @@ export async function createTeacherSchedule(input: {
     ...input.entries.map(
       (entry) => sql`
         insert into portfolio_auth.teacher_schedule_entries
-          (id, schedule_id, teacher_name, year_level, day, start_time, end_time, subject, section, room, notes)
+          (id, schedule_id, teacher_name, school_level, year_level, day, start_time, end_time, subject, section, room, notes)
         values
-          (${randomUUID()}, ${id}, ${entry.teacherName}, ${entry.yearLevel}, ${entry.day}, ${entry.startTime}, ${entry.endTime},
+          (${randomUUID()}, ${id}, ${entry.teacherName}, ${entry.schoolLevel}, ${entry.yearLevel}, ${entry.day}, ${entry.startTime}, ${entry.endTime},
            ${entry.subject}, ${entry.section}, ${entry.room}, ${entry.notes})
       `,
     ),

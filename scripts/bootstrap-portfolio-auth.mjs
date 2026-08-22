@@ -101,6 +101,7 @@ await sql`
     id text primary key,
     schedule_id text not null references portfolio_auth.teacher_schedules(id) on delete cascade,
     teacher_name text not null default '',
+    school_level text not null default 'JHS',
     year_level text not null default 'All Year Levels',
     day text not null,
     start_time text not null,
@@ -116,6 +117,7 @@ await sql`
 await sql`
 alter table portfolio_auth.teacher_schedule_entries
 add column if not exists teacher_name text not null default '',
+add column if not exists school_level text not null default 'JHS',
 add column if not exists year_level text not null default 'All Year Levels'
 `;
 
