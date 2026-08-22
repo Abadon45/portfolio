@@ -21,6 +21,7 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import type {
   PortfolioUser,
   PortfolioUserPage,
@@ -79,6 +80,7 @@ export function UserManagement({
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [grantingAdminId, setGrantingAdminId] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = window.setTimeout(async () => {
@@ -167,6 +169,49 @@ export function UserManagement({
     }
 
     toastSuccess(`${user.displayName} was deleted.`);
+  }
+
+  async function grantAdmin(user: PortfolioUser) {
+    const confirmation = await showModal({
+      title: `Grant admin status to ${user.displayName}?`,
+      content:
+        "This gives the user access to administration, user management, and protected workspace tools.",
+      type: "warning",
+      confirmText: "Grant admin status",
+      cancelText: "Cancel",
+    });
+    if (confirmation.action !== "confirm") return;
+
+    setGrantingAdminId(user.id);
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}`, {
+        method: "POST",
+        body: JSON.stringify({ role: "admin" }),
+        headers: { "Content-Type": "application/json" },
+      });
+      const result = (await response.json()) as {
+        message?: string;
+        user?: PortfolioUser;
+      };
+      if (!response.ok || !result.user) {
+        throw new Error(result.message ?? "Unable to grant admin status.");
+      }
+      setData((current) => ({
+        ...current,
+        users: current.users.map((item) =>
+          item.id === user.id ? result.user! : item,
+        ),
+      }));
+      toastSuccess(`${user.displayName} is now an administrator.`);
+    } catch (requestError) {
+      toastError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to grant admin status.",
+      );
+    } finally {
+      setGrantingAdminId(null);
+    }
   }
 
   const pageCount = Math.max(1, Math.ceil(data.total / data.pageSize));
@@ -343,6 +388,19 @@ export function UserManagement({
                             >
                               View
                             </Button>
+                            {user.role.toLowerCase() !== "admin" && (
+                              <Button
+                                aria-label={`Grant admin status to ${user.displayName}`}
+                                disabled={grantingAdminId === user.id}
+                                onClick={() => void grantAdmin(user)}
+                                size="small"
+                                startIcon={<AdminPanelSettingsRoundedIcon />}
+                              >
+                                {grantingAdminId === user.id
+                                  ? "Granting…"
+                                  : "Make admin"}
+                              </Button>
+                            )}
                             {user.role.toLowerCase() === "admin" ? (
                               <Chip
                                 icon={<LockRoundedIcon />}
@@ -402,6 +460,19 @@ export function UserManagement({
                     >
                       View user
                     </Button>
+                    {user.role.toLowerCase() !== "admin" && (
+                      <Button
+                        disabled={grantingAdminId === user.id}
+                        fullWidth
+                        onClick={() => void grantAdmin(user)}
+                        startIcon={<AdminPanelSettingsRoundedIcon />}
+                        variant="outlined"
+                      >
+                        {grantingAdminId === user.id
+                          ? "Granting admin status…"
+                          : "Grant admin status"}
+                      </Button>
+                    )}
                     {user.role.toLowerCase() === "admin" ? (
                       <Chip
                         icon={<LockRoundedIcon />}

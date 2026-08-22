@@ -34,6 +34,9 @@ import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneR
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
+import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import type { PortfolioUser } from "../../../lib/portfolioAuth";
 import { createPortfolioTheme } from "../../theme/portfolioTheme";
@@ -44,6 +47,16 @@ const drawerWidth = 248;
 
 const navigation = [
   { label: "Overview", href: "/dashboard", icon: <DashboardRoundedIcon /> },
+  {
+    label: "Teacher's Lounge",
+    href: "/dashboard/teachers-lounge",
+    icon: <SchoolRoundedIcon />,
+  },
+  {
+    label: "SNED Learning",
+    href: "/dashboard/teachers-lounge/sned",
+    icon: <MenuBookRoundedIcon />,
+  },
   { label: "Users", href: "/dashboard/users", icon: <GroupRoundedIcon /> },
   {
     label: "Products",
@@ -57,6 +70,36 @@ const navigation = [
     soon: true,
   },
 ];
+
+const teacherNavigation = [
+  { label: "Overview", href: "/dashboard", icon: <DashboardRoundedIcon /> },
+  {
+    label: "Teacher's Lounge",
+    href: "/dashboard/teachers-lounge",
+    icon: <SchoolRoundedIcon />,
+  },
+  {
+    label: "Schedule Creator",
+    href: "/dashboard/teachers-lounge/schedule",
+    icon: <CalendarMonthRoundedIcon />,
+  },
+  {
+    label: "SNED Learning",
+    href: "/dashboard/teachers-lounge/sned",
+    icon: <MenuBookRoundedIcon />,
+  },
+];
+
+const regularNavigation = [
+  { label: "Overview", href: "/dashboard", icon: <DashboardRoundedIcon /> },
+];
+
+type DashboardNavigationItem = {
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+  soon?: boolean;
+};
 
 function initials(user: PortfolioUser) {
   return user.displayName
@@ -76,6 +119,13 @@ function SidebarContent({
   onNavigate: (href: string) => void;
 }) {
   const pathname = usePathname();
+  const isAdmin = user.role.toLowerCase() === "admin";
+  const isTeacher = user.userType === "public_school_teacher";
+  const items: DashboardNavigationItem[] = isAdmin
+    ? navigation
+    : isTeacher
+      ? teacherNavigation
+      : regularNavigation;
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <Box sx={{ px: 2.5, py: 2.5 }}>
@@ -99,7 +149,7 @@ function SidebarContent({
           Portfolio
         </Typography>
         <List disablePadding>
-          {navigation.map((item) => (
+          {items.map((item) => (
             <ListItemButton
               aria-current={pathname === item.href ? "page" : undefined}
               key={item.href}
@@ -160,7 +210,11 @@ function SidebarContent({
               {user.displayName}
             </Typography>
             <Typography noWrap color="text.secondary" variant="caption">
-              Administrator
+              {isAdmin
+                ? "Administrator"
+                : isTeacher
+                  ? "Public school teacher"
+                  : "Regular user"}
             </Typography>
           </Box>
         </Stack>
@@ -187,7 +241,15 @@ export default function DashboardShell({
   const [loggingOut, setLoggingOut] = useState(false);
   const [mode, setMode] = useState<PaletteMode>("dark");
   const theme = useMemo(() => createPortfolioTheme(mode, "modern"), [mode]);
-  const pageLabel = pathname.includes("/users") ? "Users" : "Overview";
+  const pageLabel = pathname.includes("/users")
+    ? "Users"
+    : pathname.includes("/teachers-lounge/schedule")
+      ? "Schedule Creator"
+      : pathname.includes("/teachers-lounge/sned")
+        ? "SNED Learning"
+        : pathname.includes("/teachers-lounge")
+          ? "Teacher's Lounge"
+          : "Overview";
 
   useEffect(() => {
     const savedMode = window.localStorage.getItem("portfolio-theme-mode");

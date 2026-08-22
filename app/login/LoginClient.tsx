@@ -20,6 +20,8 @@ import {
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import GoogleIcon from "@mui/icons-material/Google";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { FloatingHomeButton } from "../components/FloatingHomeButton";
@@ -31,6 +33,8 @@ type LoginClientProps = {
   initialMode?: "login" | "register";
 };
 
+type PortfolioUserType = "regular_user" | "public_school_teacher";
+
 export default function LoginClient({
   authError,
   callbackUrl,
@@ -41,6 +45,7 @@ export default function LoginClient({
     initialMode,
   );
   const [displayName, setDisplayName] = useState("");
+  const [userType, setUserType] = useState<PortfolioUserType>("regular_user");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -82,7 +87,7 @@ export default function LoginClient({
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, displayName }),
+        body: JSON.stringify({ email, password, displayName, userType }),
       });
       const data = (await response.json().catch(() => null)) as {
         message?: string;
@@ -301,6 +306,80 @@ export default function LoginClient({
                       placeholder="Your name…"
                       value={displayName}
                     />
+                  )}
+                  {isRegistration && (
+                    <Box>
+                      <Typography sx={{ fontWeight: 700, mb: 1 }}>
+                        How will you use this platform?
+                      </Typography>
+                      <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        spacing={1.5}
+                      >
+                        <Button
+                          fullWidth
+                          onClick={() => setUserType("regular_user")}
+                          startIcon={<PersonRoundedIcon />}
+                          sx={{
+                            alignItems: "flex-start",
+                            borderColor:
+                              userType === "regular_user"
+                                ? "primary.main"
+                                : "divider",
+                            justifyContent: "flex-start",
+                            minHeight: 76,
+                            p: 1.5,
+                            textAlign: "left",
+                            textTransform: "none",
+                          }}
+                          variant={
+                            userType === "regular_user"
+                              ? "contained"
+                              : "outlined"
+                          }
+                        >
+                          <Box>
+                            <Typography sx={{ fontWeight: 800 }}>
+                              Regular user
+                            </Typography>
+                            <Typography sx={{ fontSize: 12, opacity: 0.78 }}>
+                              General platform access.
+                            </Typography>
+                          </Box>
+                        </Button>
+                        <Button
+                          fullWidth
+                          onClick={() => setUserType("public_school_teacher")}
+                          startIcon={<SchoolRoundedIcon />}
+                          sx={{
+                            alignItems: "flex-start",
+                            borderColor:
+                              userType === "public_school_teacher"
+                                ? "primary.main"
+                                : "divider",
+                            justifyContent: "flex-start",
+                            minHeight: 76,
+                            p: 1.5,
+                            textAlign: "left",
+                            textTransform: "none",
+                          }}
+                          variant={
+                            userType === "public_school_teacher"
+                              ? "contained"
+                              : "outlined"
+                          }
+                        >
+                          <Box>
+                            <Typography sx={{ fontWeight: 800 }}>
+                              Public school teacher
+                            </Typography>
+                            <Typography sx={{ fontSize: 12, opacity: 0.78 }}>
+                              Teaching-focused tools and resources.
+                            </Typography>
+                          </Box>
+                        </Button>
+                      </Stack>
+                    </Box>
                   )}
                   <TextField
                     autoComplete="email"

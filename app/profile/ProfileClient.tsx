@@ -30,7 +30,8 @@ import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import SpaceDashboardRoundedIcon from "@mui/icons-material/SpaceDashboardRounded";
 import { FloatingHomeButton } from "../components/FloatingHomeButton";
 import InternationalPhoneField from "../components/forms/InternationalPhoneField";
-import ThemeToggle from "../components/solar/ThemeToggle";
+import { ParticleNetworkBackground } from "../components/portfolio/ParticleNetworkBackground";
+import { PortfolioAppBar } from "../components/portfolio/PortfolioAppBar";
 import type { PortfolioUser } from "../../lib/portfolioAuth";
 import TwcAlertProvider, {
   useTwcAlert,
@@ -57,6 +58,12 @@ function formatDate(value: string | null) {
   return new Intl.DateTimeFormat("en", {
     dateStyle: "long",
   }).format(new Date(value));
+}
+
+function userTypeLabel(userType: PortfolioUser["userType"]) {
+  return userType === "public_school_teacher"
+    ? "Public School Teacher"
+    : "Regular User";
 }
 
 function ProfileContent({ initialUser }: ProfileClientProps) {
@@ -161,7 +168,7 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
           maxWidth: 1120,
           mx: "auto",
           px: { xs: 2, sm: 4 },
-          pt: { xs: 8, sm: 10 },
+          pt: { xs: 4, sm: 6 },
           width: "100%",
         }}
       >
@@ -420,6 +427,10 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
                           : "Email & password"
                       }
                     />
+                    <InfoCard
+                      label="Account type"
+                      value={userTypeLabel(user.userType)}
+                    />
                   </Stack>
                 </Stack>
               )}
@@ -625,6 +636,7 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
 }
 
 export default function ProfileClient({ initialUser }: ProfileClientProps) {
+  const router = useRouter();
   const [mode, setMode] = useState<PaletteMode>("dark");
   const theme = useMemo(() => createPortfolioTheme(mode, "modern"), [mode]);
 
@@ -645,25 +657,31 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <TwcAlertProvider>
-        <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>
-          <Box
-            sx={{
-              alignItems: "center",
-              display: "flex",
-              justifyContent: "flex-end",
-              px: { xs: 1.5, sm: 3 },
-              pt: { xs: 1, sm: 1.5 },
-            }}
-          >
-            <ThemeToggle
-              compact
-              mode={mode}
-              onToggle={() =>
+        <Box
+          sx={{
+            bgcolor: "background.default",
+            minHeight: "100vh",
+            position: "relative",
+          }}
+        >
+          <ParticleNetworkBackground
+            backgroundColor="transparent"
+            density={mode === "dark" ? 42 : 28}
+            linkColor={mode === "dark" ? "#60a5fa" : "#2563eb"}
+            particleColor={mode === "dark" ? "#dbeafe" : "#1d4ed8"}
+            speed={mode === "dark" ? 1.1 : 0.7}
+          />
+          <Box sx={{ position: "relative", zIndex: 1 }}>
+            <PortfolioAppBar
+              isDark={mode === "dark"}
+              onScrollToSection={(sectionId) => router.push(`/#${sectionId}`)}
+              onScrollToTop={() => router.push("/")}
+              onToggleMode={() =>
                 setMode((current) => (current === "dark" ? "light" : "dark"))
               }
             />
+            <ProfileContent initialUser={initialUser} />
           </Box>
-          <ProfileContent initialUser={initialUser} />
         </Box>
       </TwcAlertProvider>
     </ThemeProvider>

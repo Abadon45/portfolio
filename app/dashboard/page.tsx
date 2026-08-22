@@ -1,6 +1,7 @@
 import {
   Avatar,
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -12,7 +13,10 @@ import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
 import ShoppingBagRoundedIcon from "@mui/icons-material/ShoppingBagRounded";
 import PaymentsRoundedIcon from "@mui/icons-material/PaymentsRounded";
+import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import {
+  getDashboardPortfolioUser,
   getAdminPortfolioUser,
   listPortfolioUsers,
 } from "../../lib/portfolioAuth";
@@ -40,6 +44,14 @@ function formatDate(value: string) {
 }
 
 export default async function DashboardOverviewPage() {
+  const dashboardUser = await getDashboardPortfolioUser();
+  if (!dashboardUser) return null;
+  if (dashboardUser.userType === "public_school_teacher") {
+    return <TeacherDashboardOverview user={dashboardUser} />;
+  }
+  if (dashboardUser.role.toLowerCase() !== "admin") {
+    return <RegularDashboardOverview user={dashboardUser} />;
+  }
   const admin = await getAdminPortfolioUser();
   if (!admin) return null;
   const users = await listPortfolioUsers({ page: 1, pageSize: 5 });
@@ -165,6 +177,81 @@ export default async function DashboardOverviewPage() {
             />
           </CardContent>
         </Card>
+      </Box>
+    </Stack>
+  );
+}
+
+function RegularDashboardOverview({
+  user,
+}: {
+  user: Awaited<ReturnType<typeof getDashboardPortfolioUser>>;
+}) {
+  if (!user) return null;
+  return (
+    <Stack spacing={3}>
+      <PageHeader
+        eyebrow="YOUR WORKSPACE"
+        title={`Welcome back, ${user.displayName}.`}
+        description="Your personal SaaS workspace is ready. Manage your profile and explore the platform from one dashboard."
+        action={
+          <Button href="/profile" variant="contained">
+            Open profile
+          </Button>
+        }
+      />
+      <Card variant="outlined">
+        <CardContent>
+          <Typography sx={{ fontWeight: 800 }} variant="h6">
+            Personal workspace
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 1 }}>
+            Account type: Regular User. Teacher tools become available only to
+            accounts that explicitly choose the Public School Teacher type.
+          </Typography>
+        </CardContent>
+      </Card>
+    </Stack>
+  );
+}
+
+function TeacherDashboardOverview({
+  user,
+}: {
+  user: Awaited<ReturnType<typeof getDashboardPortfolioUser>>;
+}) {
+  if (!user) return null;
+  return (
+    <Stack spacing={3}>
+      <PageHeader
+        eyebrow="TEACHER WORKSPACE"
+        title={`Welcome back, ${user.displayName}.`}
+        description="Your teaching workspace is ready. Open Teacher's Lounge to plan schedules and organize learning materials."
+        action={
+          <Button href="/dashboard/teachers-lounge" variant="contained">
+            Open Teacher's Lounge
+          </Button>
+        }
+      />
+      <Box
+        sx={{
+          display: "grid",
+          gap: 2,
+          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
+        }}
+      >
+        <StatCard
+          detail="Create and manage your own schedules"
+          icon={<CalendarMonthRoundedIcon />}
+          label="Schedule Creator"
+          value="Ready"
+        />
+        <StatCard
+          detail="Organize teacher-focused learning materials"
+          icon={<MenuBookRoundedIcon />}
+          label="SNED Learning"
+          value="Ready"
+        />
       </Box>
     </Stack>
   );

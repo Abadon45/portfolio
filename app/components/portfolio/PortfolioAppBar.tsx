@@ -1,4 +1,25 @@
-import { AppBar, Avatar, Box, Button, Container, Link as MuiLink, Stack, Toolbar, Typography } from "@mui/material";
+import {
+  AppBar,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Container,
+  Divider,
+  Link as MuiLink,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Stack,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import SpaceDashboardRoundedIcon from "@mui/icons-material/SpaceDashboardRounded";
+import NextLink from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { navItems } from "../../data/portfolio";
 import ThemeToggle from "../solar/ThemeToggle";
 
@@ -9,7 +30,78 @@ type PortfolioAppBarProps = {
   onToggleMode: () => void;
 };
 
-export function PortfolioAppBar({ isDark, onScrollToSection, onScrollToTop, onToggleMode }: PortfolioAppBarProps) {
+type PortfolioNavUser = {
+  firstName: string | null;
+  lastName: string | null;
+  fullName: string | null;
+  displayName: string;
+  email: string;
+  avatarUrl: string | null;
+  role: string;
+};
+
+function visibleUserName(user: PortfolioNavUser) {
+  const personalName = [user.firstName, user.lastName]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .join(" ")
+    .trim();
+  const fallbackName = (user.fullName || user.displayName)
+    .replace(/\s*[([].*?[)\]]\s*$/, "")
+    .trim();
+
+  return personalName || fallbackName || "Account";
+}
+
+function userInitials(user: PortfolioNavUser) {
+  return visibleUserName(user)
+    .split(" ")
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+export function PortfolioAppBar({
+  isDark,
+  onScrollToSection,
+  onScrollToTop,
+  onToggleMode,
+}: PortfolioAppBarProps) {
+  const router = useRouter();
+  const [user, setUser] = useState<PortfolioNavUser | null>(null);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(
+    null,
+  );
+
+  useEffect(() => {
+    let active = true;
+
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        const data = (await response.json()) as { user?: PortfolioNavUser };
+        return data.user ?? null;
+      })
+      .then((nextUser) => {
+        if (active) setUser(nextUser);
+      })
+      .catch(() => {
+        if (active) setUser(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleLogout() {
+    setUserMenuAnchor(null);
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    setUser(null);
+    router.refresh();
+  }
+
   return (
     <AppBar
       color="transparent"
@@ -17,7 +109,9 @@ export function PortfolioAppBar({ isDark, onScrollToSection, onScrollToTop, onTo
       position="sticky"
       sx={{
         backdropFilter: "blur(16px)",
-        bgcolor: isDark ? "rgba(15, 23, 42, 0.88)" : "rgba(251, 252, 255, 0.88)",
+        bgcolor: isDark
+          ? "rgba(15, 23, 42, 0.88)"
+          : "rgba(251, 252, 255, 0.88)",
         borderBottom: 1,
         borderColor: "divider",
       }}
@@ -51,14 +145,29 @@ export function PortfolioAppBar({ isDark, onScrollToSection, onScrollToTop, onTo
               textAlign: "left",
             }}
           >
-            <Avatar sx={{ bgcolor: "primary.main", borderRadius: 2, color: "primary.contrastText", fontSize: "0.78rem", fontWeight: 850 }}>
+            <Avatar
+              sx={{
+                bgcolor: "primary.main",
+                borderRadius: 2,
+                color: "primary.contrastText",
+                fontSize: "0.78rem",
+                fontWeight: 850,
+              }}
+            >
               EP
             </Avatar>
             <Box>
-              <Typography component="strong" sx={{ display: "block", fontWeight: 850, lineHeight: 1.1 }}>
+              <Typography
+                component="strong"
+                sx={{ display: "block", fontWeight: 850, lineHeight: 1.1 }}
+              >
                 Emmanuel "Noy" Pangan
               </Typography>
-              <Typography color="text.secondary" component="small" sx={{ display: "block", mt: 0.25 }}>
+              <Typography
+                color="text.secondary"
+                component="small"
+                sx={{ display: "block", mt: 0.25 }}
+              >
                 Full Stack Web Developer
               </Typography>
             </Box>
@@ -103,7 +212,218 @@ export function PortfolioAppBar({ isDark, onScrollToSection, onScrollToTop, onTo
                 {item.label}
               </Button>
             ))}
-            <ThemeToggle compact mode={isDark ? "dark" : "light"} onToggle={onToggleMode} />
+            <ThemeToggle
+              compact
+              mode={isDark ? "dark" : "light"}
+              onToggle={onToggleMode}
+            />
+            {user ? (
+              <>
+                <Button
+                  aria-controls={
+                    userMenuAnchor ? "portfolio-user-menu" : undefined
+                  }
+                  aria-expanded={userMenuAnchor ? "true" : undefined}
+                  aria-haspopup="menu"
+                  onClick={(event) => setUserMenuAnchor(event.currentTarget)}
+                  size="small"
+                  sx={{
+                    alignItems: "center",
+                    color: "text.primary",
+                    flexShrink: 0,
+                    gap: 0.75,
+                    justifyContent: "flex-start",
+                    lineHeight: 1.2,
+                    minHeight: 28,
+                    minWidth: 0,
+                    px: { xs: 0.25, sm: 0.75 },
+                    py: 0.25,
+                    textTransform: "none",
+                    whiteSpace: "nowrap",
+                    "&:hover": { bgcolor: "action.hover" },
+                  }}
+                >
+                  <Avatar
+                    src={user.avatarUrl ?? undefined}
+                    sx={{ bgcolor: "primary.main", height: 28, width: 28 }}
+                  >
+                    {userInitials(user)}
+                  </Avatar>
+                  <Box
+                    sx={{
+                      display: { xs: "none", sm: "block" },
+                      maxWidth: { sm: 150, md: 190 },
+                      minWidth: 0,
+                      textAlign: "left",
+                    }}
+                  >
+                    <Typography noWrap sx={{ fontSize: 12, fontWeight: 800 }}>
+                      {visibleUserName(user)}
+                    </Typography>
+                    <Typography
+                      color="text.secondary"
+                      noWrap
+                      sx={{ fontSize: 10, textAlign: "left" }}
+                    >
+                      {user.role}
+                    </Typography>
+                  </Box>
+                </Button>
+                <Menu
+                  anchorEl={userMenuAnchor}
+                  id="portfolio-user-menu"
+                  onClose={() => setUserMenuAnchor(null)}
+                  open={Boolean(userMenuAnchor)}
+                  slotProps={{
+                    list: { sx: { p: 0 } },
+                    paper: {
+                      sx: {
+                        border: 1,
+                        borderColor: "divider",
+                        borderRadius: 2,
+                        maxWidth: "calc(100vw - 24px)",
+                        overflow: "hidden",
+                        width: { xs: 286, sm: 320 },
+                      },
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      bgcolor: "primary.main",
+                      color: "primary.contrastText",
+                      p: 2,
+                    }}
+                  >
+                    <Stack
+                      direction="row"
+                      spacing={1.5}
+                      sx={{ alignItems: "center" }}
+                    >
+                      <Avatar
+                        src={user.avatarUrl ?? undefined}
+                        sx={{
+                          bgcolor: "primary.contrastText",
+                          color: "primary.main",
+                          height: 52,
+                          width: 52,
+                        }}
+                      >
+                        {userInitials(user)}
+                      </Avatar>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography noWrap sx={{ fontWeight: 800 }}>
+                          {visibleUserName(user)}
+                        </Typography>
+                        <Typography noWrap sx={{ fontSize: 12, opacity: 0.82 }}>
+                          {user.email}
+                        </Typography>
+                        <Chip
+                          label={user.role}
+                          size="small"
+                          sx={{
+                            borderColor: "currentColor",
+                            color: "inherit",
+                            fontSize: 10,
+                            height: 22,
+                            mt: 0.75,
+                          }}
+                          variant="outlined"
+                        />
+                      </Box>
+                    </Stack>
+                    <Button
+                      fullWidth
+                      onClick={() => {
+                        setUserMenuAnchor(null);
+                        router.push("/profile");
+                      }}
+                      size="small"
+                      sx={{
+                        bgcolor: "primary.contrastText",
+                        color: "primary.main",
+                        mt: 2,
+                        textTransform: "none",
+                        "&:hover": { bgcolor: "primary.contrastText" },
+                      }}
+                      variant="contained"
+                    >
+                      View profile
+                    </Button>
+                  </Box>
+                  <Box sx={{ p: 1 }}>
+                    <MenuItem
+                      onClick={() => {
+                        setUserMenuAnchor(null);
+                        router.push("/profile");
+                      }}
+                    >
+                      <ListItemIcon>
+                        <PersonRoundedIcon fontSize="small" />
+                      </ListItemIcon>
+                      Profile
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        setUserMenuAnchor(null);
+                        router.push("/saas-platform");
+                      }}
+                    >
+                      <ListItemIcon>
+                        <SpaceDashboardRoundedIcon fontSize="small" />
+                      </ListItemIcon>
+                      SaaS workspace
+                    </MenuItem>
+                    {user.role.toLowerCase() === "admin" && (
+                      <MenuItem
+                        onClick={() => {
+                          setUserMenuAnchor(null);
+                          router.push("/dashboard");
+                        }}
+                      >
+                        <ListItemIcon>
+                          <SpaceDashboardRoundedIcon fontSize="small" />
+                        </ListItemIcon>
+                        Admin dashboard
+                      </MenuItem>
+                    )}
+                  </Box>
+                  <Divider />
+                  <MenuItem
+                    onClick={handleLogout}
+                    sx={{ color: "error.main", m: 1 }}
+                  >
+                    <ListItemIcon>
+                      <LogoutRoundedIcon color="error" fontSize="small" />
+                    </ListItemIcon>
+                    Logout
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Button
+                component={NextLink}
+                href="/login"
+                size="small"
+                sx={{
+                  border: 1,
+                  borderColor: "primary.main",
+                  color: "primary.main",
+                  flexShrink: 0,
+                  lineHeight: 1.2,
+                  ml: { sm: 0.5 },
+                  minHeight: 28,
+                  py: 0.25,
+                  whiteSpace: "nowrap",
+                  "&:hover": {
+                    borderColor: "primary.dark",
+                    color: "primary.dark",
+                  },
+                }}
+              >
+                Login
+              </Button>
+            )}
           </Stack>
         </Toolbar>
       </Container>

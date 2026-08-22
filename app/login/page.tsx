@@ -22,14 +22,19 @@ function safeCallbackUrl(value: string | undefined) {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  let authenticated = false;
+  let user: Awaited<ReturnType<typeof getCurrentPortfolioUser>> = null;
   try {
-    authenticated = Boolean(await getCurrentPortfolioUser());
+    user = await getCurrentPortfolioUser();
   } catch {
-    authenticated = false;
+    user = null;
   }
 
-  if (authenticated) {
+  if (user) {
+    if (!user.setupCompleted) {
+      redirect(
+        `/profile/setup?callbackUrl=${encodeURIComponent(safeCallbackUrl(params?.callbackUrl))}`,
+      );
+    }
     redirect("/profile");
   }
 

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import {
   Avatar,
   Box,
@@ -14,6 +15,7 @@ import {
   findPortfolioUserById,
   getAdminPortfolioUser,
 } from "../../../../lib/portfolioAuth";
+import { UserModelEditor } from "../../_components/UserModelEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +42,7 @@ export default async function DashboardUserDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const admin = await getAdminPortfolioUser();
-  if (!admin) return null;
+  if (!admin) redirect("/dashboard");
   const { id } = await params;
   const user = await findPortfolioUserById(id);
   if (!user) notFound();
@@ -167,6 +169,7 @@ export default async function DashboardUserDetailPage({
           </CardContent>
         </Card>
       </Box>
+      <UserModelEditor currentAdminId={admin.id} user={user} />
     </Stack>
   );
 }

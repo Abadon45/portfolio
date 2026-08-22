@@ -27,6 +27,8 @@ export type PortfolioUser = {
   phone: string | null;
   avatarUrl: string | null;
   role: string;
+  userType: "regular_user" | "public_school_teacher";
+  setupCompleted: boolean;
   authProvider: string;
   emailVerified: boolean;
   isActive: boolean;
@@ -48,6 +50,11 @@ function toUser(row: UserRow): PortfolioUser {
     phone: row.phone ? String(row.phone) : null,
     avatarUrl: row.avatar_url ? String(row.avatar_url) : null,
     role: String(row.role),
+    userType:
+      row.user_type === "public_school_teacher"
+        ? "public_school_teacher"
+        : "regular_user",
+    setupCompleted: row.setup_completed !== false,
     authProvider: String(row.auth_provider ?? "password"),
     emailVerified: Boolean(row.email_verified_at),
     isActive: row.is_active !== false,
@@ -88,7 +95,7 @@ export async function findUserByEmail(email: string) {
   const sql = getNeonSql();
   const rows = await sql`
     select id, email, first_name, last_name, full_name, display_name, username, phone,
-      avatar_url, role, auth_provider, password_hash, email_verified_at, is_active,
+      avatar_url, role, user_type, setup_completed, auth_provider, password_hash, email_verified_at, is_active,
       last_login, created_at
     from portfolio_auth.users
     where email = ${normalizeEmail(email)}
@@ -102,7 +109,7 @@ export async function findUserByGoogleId(providerUserId: string) {
   const sql = getNeonSql();
   const rows = await sql`
     select id, email, first_name, last_name, full_name, display_name, username, phone,
-      avatar_url, role, auth_provider, email_verified_at, is_active, last_login, created_at
+      avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at, is_active, last_login, created_at
     from portfolio_auth.users
     where auth_provider = 'google' and provider_user_id = ${providerUserId}
     limit 1
@@ -123,13 +130,13 @@ export async function createGoogleUser(profile: {
   const rows = await sql`
     insert into portfolio_auth.users
       (id, email, first_name, last_name, full_name, display_name, avatar_url,
-       password_hash, role, auth_provider, provider_user_id, email_verified_at)
+       password_hash, role, user_type, setup_completed, auth_provider, provider_user_id, email_verified_at)
     values
       (${randomUUID()}, ${profile.email}, ${profile.firstName}, ${profile.lastName},
        ${profile.fullName}, ${profile.fullName}, ${profile.avatarUrl},
-       '', 'viewer', 'google', ${profile.providerUserId}, now())
+       '', 'viewer', 'regular_user', false, 'google', ${profile.providerUserId}, now())
     returning id, email, first_name, last_name, full_name, display_name, username, phone,
-      avatar_url, role, auth_provider, email_verified_at, is_active, last_login, created_at
+      avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at, is_active, last_login, created_at
   `;
 
   return rows[0] ?? null;
@@ -163,7 +170,7 @@ export async function linkGoogleIdentityToUser(
       and auth_provider = 'password'
       and provider_user_id is null
     returning id, email, first_name, last_name, full_name, display_name, username, phone,
-      avatar_url, role, auth_provider, email_verified_at, is_active, last_login, created_at
+      avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at, is_active, last_login, created_at
   `;
 
   return rows[0] ?? null;
@@ -190,7 +197,7 @@ export async function synchronizeGoogleUser(
       updated_at = now()
     where id = ${userId} and auth_provider = 'google'
     returning id, email, first_name, last_name, full_name, display_name, username, phone,
-      avatar_url, role, auth_provider, email_verified_at, is_active, last_login, created_at
+      avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at, is_active, last_login, created_at
   `;
 
   return rows[0] ?? null;
@@ -200,10 +207,12 @@ export async function createPendingUser({
   email,
   displayName,
   passwordHash,
+  userType = "regular_user",
 }: {
   email: string;
   displayName: string;
   passwordHash: string;
+  userType?: "regular_user" | "public_school_teacher";
 }) {
   const sql = getNeonSql();
   const userId = randomUUID();
@@ -213,9 +222,9 @@ export async function createPendingUser({
   await sql.transaction([
     sql`
       insert into portfolio_auth.users
-        (id, email, display_name, password_hash, role, email_verified_at)
+        (id, email, display_name, password_hash, role, user_type, setup_completed, email_verified_at)
       values
-        (${userId}, ${email}, ${displayName}, ${passwordHash}, 'viewer', null)
+        (${userId}, ${email}, ${displayName}, ${passwordHash}, 'viewer', ${userType}, true, null)
     `,
     sql`
       insert into portfolio_auth.email_verifications
@@ -232,7 +241,7 @@ export async function verifyEmailCode(email: string, code: string) {
   const sql = getNeonSql();
   const rows = await sql`
     select u.id, u.email, u.first_name, u.last_name, u.full_name, u.display_name,
-      u.username, u.phone, u.avatar_url, u.role, u.auth_provider, u.email_verified_at,
+      u.username, u.phone, u.avatar_url, u.role, u.user_type, u.setup_completed, u.auth_provider, u.email_verified_at,
       u.is_active, u.last_login, u.created_at
     from portfolio_auth.users u
     join portfolio_auth.email_verifications v on v.user_id = u.id
@@ -285,7 +294,7 @@ export async function updateCurrentPortfolioUser({
       updated_at = now()
     where id = ${currentUser.id} and is_active = true
     returning id, email, first_name, last_name, full_name, display_name, username, phone,
-      avatar_url, role, auth_provider, email_verified_at, is_active, last_login, created_at
+      avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at, is_active, last_login, created_at
   `;
 
   return rows[0] ? toUser(rows[0]) : null;
@@ -352,7 +361,7 @@ export async function getCurrentPortfolioUser() {
   const sql = getNeonSql();
   const rows = await sql`
     select u.id, u.email, u.first_name, u.last_name, u.full_name, u.display_name,
-      u.username, u.phone, u.avatar_url, u.role, u.auth_provider,
+      u.username, u.phone, u.avatar_url, u.role, u.user_type, u.setup_completed, u.auth_provider,
       u.email_verified_at, u.is_active, u.last_login, u.created_at
     from portfolio_auth.sessions s
     join portfolio_auth.users u on u.id = s.user_id
@@ -369,6 +378,40 @@ export async function getAdminPortfolioUser() {
   return user && user.isActive && user.role.toLowerCase() === "admin"
     ? user
     : null;
+}
+
+export async function getTeacherPortfolioUser() {
+  const user = await getCurrentPortfolioUser();
+  return user &&
+    user.isActive &&
+    (user.userType === "public_school_teacher" ||
+      user.role.trim().toLowerCase() === "admin")
+    ? user
+    : null;
+}
+
+export async function getDashboardPortfolioUser() {
+  const user = await getCurrentPortfolioUser();
+  return user && user.isActive ? user : null;
+}
+
+export async function completePortfolioSetup(
+  userType: "regular_user" | "public_school_teacher",
+) {
+  const currentUser = await getCurrentPortfolioUser();
+  if (!currentUser) return null;
+
+  const sql = getNeonSql();
+  const rows = await sql`
+    update portfolio_auth.users
+    set user_type = ${userType}, setup_completed = true, updated_at = now()
+    where id = ${currentUser.id} and is_active = true
+    returning id, email, first_name, last_name, full_name, display_name, username,
+      phone, avatar_url, role, user_type, setup_completed, auth_provider,
+      email_verified_at, is_active, last_login, created_at
+  `;
+
+  return rows[0] ? toUser(rows[0]) : null;
 }
 
 export type PortfolioUserPage = {
@@ -397,7 +440,7 @@ export async function listPortfolioUsers({
   const [rows, countRows] = await Promise.all([
     sql`
       select id, email, first_name, last_name, full_name, display_name, username, phone,
-        avatar_url, role, auth_provider, email_verified_at, is_active, last_login, created_at
+        avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at, is_active, last_login, created_at
       from portfolio_auth.users
       where ${
         query === ""
@@ -438,7 +481,7 @@ export async function findPortfolioUserById(id: string) {
   const sql = getNeonSql();
   const rows = await sql`
     select id, email, first_name, last_name, full_name, display_name, username, phone,
-      avatar_url, role, auth_provider, email_verified_at, is_active, last_login, created_at
+      avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at, is_active, last_login, created_at
     from portfolio_auth.users
     where id = ${id}
     limit 1
@@ -456,6 +499,61 @@ export async function deletePortfolioUserById(id: string) {
   `;
 
   return Boolean(rows[0]);
+}
+
+export async function updatePortfolioUserByAdmin({
+  id,
+  firstName,
+  lastName,
+  displayName,
+  username,
+  phone,
+  role,
+  isActive,
+}: {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  displayName: string;
+  username: string | null;
+  phone: string | null;
+  role: "viewer" | "admin";
+  isActive: boolean;
+}) {
+  const sql = getNeonSql();
+  const rows = await sql`
+    update portfolio_auth.users
+    set first_name = ${firstName},
+      last_name = ${lastName},
+      full_name = ${displayName},
+      display_name = ${displayName},
+      username = ${username},
+      phone = ${phone},
+      role = ${role},
+      is_active = ${isActive},
+      updated_at = now()
+    where id = ${id}
+    returning id, email, first_name, last_name, full_name, display_name, username,
+      phone, avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at, is_active,
+      last_login, created_at
+  `;
+
+  return rows[0] ? toUser(rows[0]) : null;
+}
+
+export async function setPortfolioUserRoleByAdmin(
+  id: string,
+  role: "viewer" | "admin",
+) {
+  const sql = getNeonSql();
+  const rows = await sql`
+    update portfolio_auth.users
+    set role = ${role}, updated_at = now()
+    where id = ${id}
+    returning id, email, first_name, last_name, full_name, display_name, username, phone,
+      avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at, is_active, last_login, created_at
+  `;
+  return rows[0] ? toUser(rows[0]) : null;
 }
 
 export async function deleteCurrentSession() {
