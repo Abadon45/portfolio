@@ -145,7 +145,15 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
   }
 
   return (
-    <Box sx={{ bgcolor: "background.default", minHeight: "100vh", pb: 8 }}>
+    <Box
+      sx={{
+        bgcolor: "background.default",
+        minHeight: "100vh",
+        overflowX: "hidden",
+        pb: 8,
+        width: "100%",
+      }}
+    >
       <FloatingHomeButton />
       <Box
         sx={{
@@ -153,6 +161,7 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
           mx: "auto",
           px: { xs: 2, sm: 4 },
           pt: { xs: 8, sm: 10 },
+          width: "100%",
         }}
       >
         <Stack spacing={3}>
@@ -265,15 +274,18 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
             <Card
               component="nav"
               variant="outlined"
-              sx={{ alignSelf: "flex-start", minWidth: { md: 210 } }}
+              sx={{
+                alignSelf: "flex-start",
+                minWidth: { md: 210 },
+                width: { xs: "100%", md: "auto" },
+              }}
             >
               <CardContent sx={{ p: 1 }}>
                 <Stack
-                  direction={{ xs: "row", md: "column" }}
+                  direction="column"
                   spacing={0.5}
                   sx={{
-                    overflowX: { xs: "auto", md: "visible" },
-                    scrollbarWidth: "thin",
+                    width: "100%",
                   }}
                 >
                   {(
@@ -301,10 +313,10 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
                       onClick={() => setSection(value)}
                       startIcon={icon}
                       sx={{
-                        flexShrink: 0,
+                        minWidth: 0,
                         justifyContent: "flex-start",
                         textAlign: "left",
-                        whiteSpace: "nowrap",
+                        width: { xs: "100%", md: "auto" },
                       }}
                       variant={section === value ? "contained" : "text"}
                     >
