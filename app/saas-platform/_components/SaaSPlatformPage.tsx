@@ -104,6 +104,34 @@ import {
 
 type NavItem = { label: string; view: SaaSView; icon: typeof DashboardRounded };
 
+type WorkspaceUser = {
+  displayName: string;
+  email: string;
+  role: string;
+  avatarUrl: string | null;
+};
+
+function isWorkspaceUser(value: unknown): value is WorkspaceUser {
+  if (!value || typeof value !== "object") return false;
+  const user = value as Record<string, unknown>;
+  return (
+    typeof user.displayName === "string" &&
+    typeof user.email === "string" &&
+    typeof user.role === "string" &&
+    (typeof user.avatarUrl === "string" || user.avatarUrl === null)
+  );
+}
+
+function workspaceInitials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
 const BASE_NAV: NavItem[] = [
   { label: "Overview", view: "overview", icon: DashboardRounded },
   { label: "Products", view: "products", icon: Inventory2Rounded },
@@ -1865,6 +1893,7 @@ function CommerceOsWorkspace() {
   const [storeId, setStoreId] = useState("s1");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mode, setMode] = useState<PaletteMode>("dark");
+  const [currentUser, setCurrentUser] = useState<WorkspaceUser | null>(null);
   const theme = useMemo(() => createPortfolioTheme(mode, "classic"), [mode]);
   const capabilities = PERSONA_CAPABILITIES[persona];
   const nav =
@@ -1907,6 +1936,27 @@ function CommerceOsWorkspace() {
     loadSaaSData().catch(() => {
       toastInfo("Neon data is unavailable; showing the local demo fixtures.");
     });
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        const payload = (await response.json()) as { user?: unknown };
+        return isWorkspaceUser(payload.user) ? payload.user : null;
+      })
+      .then((user) => {
+        if (active) setCurrentUser(user);
+      })
+      .catch(() => {
+        if (active) setCurrentUser(null);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -2398,16 +2448,49 @@ function CommerceOsWorkspace() {
                   <NotificationsNoneRounded />
                 </IconButton>
               </Tooltip>
-              <Avatar
+              <Button
+                aria-label={`Open profile for ${currentUser?.displayName ?? "preview visitor"}`}
+                component={Link}
+                href="/profile"
                 sx={{
-                  bgcolor: "primary.dark",
-                  fontSize: 12,
-                  height: 32,
-                  width: 32,
+                  alignItems: "center",
+                  border: 1,
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  color: "text.primary",
+                  gap: 1,
+                  minWidth: 0,
+                  px: { xs: 0.5, sm: 1 },
+                  py: 0.5,
+                  textAlign: "left",
+                  textTransform: "none",
+                  "&:hover": { bgcolor: "action.hover" },
                 }}
               >
-                ES
-              </Avatar>
+                <Avatar
+                  src={currentUser?.avatarUrl ?? undefined}
+                  sx={{
+                    bgcolor: "primary.dark",
+                    fontSize: 12,
+                    height: 32,
+                    width: 32,
+                  }}
+                >
+                  {workspaceInitials(currentUser?.displayName ?? "Preview")}
+                </Avatar>
+                <Box sx={{ display: { xs: "none", sm: "block" }, minWidth: 0 }}>
+                  <Typography noWrap sx={{ fontSize: 12, fontWeight: 800 }}>
+                    {currentUser?.displayName ?? "Preview visitor"}
+                  </Typography>
+                  <Typography
+                    color="text.secondary"
+                    noWrap
+                    sx={{ fontSize: 10 }}
+                  >
+                    {currentUser?.role ?? "Demo workspace"}
+                  </Typography>
+                </Box>
+              </Button>
             </Stack>
           </Box>
           <Box

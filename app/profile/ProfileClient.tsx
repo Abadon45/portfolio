@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import { createPortfolioTheme } from "../theme/portfolioTheme";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import GoogleIcon from "@mui/icons-material/Google";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
@@ -245,16 +246,28 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
                   spacing={1}
                   sx={{ width: { xs: "100%", sm: "auto" } }}
                 >
-                  {user.role.toLowerCase() === "admin" && (
-                    <Button
-                      onClick={() => router.push("/dashboard")}
-                      startIcon={<SpaceDashboardRoundedIcon />}
-                      sx={{ width: { xs: "100%", sm: "auto" } }}
-                      variant="outlined"
-                    >
-                      Admin dashboard
-                    </Button>
-                  )}
+                  <Button
+                    onClick={() =>
+                      router.push(
+                        user.role.toLowerCase() === "admin"
+                          ? "/dashboard"
+                          : "/saas-platform",
+                      )
+                    }
+                    startIcon={
+                      user.role.toLowerCase() === "admin" ? (
+                        <SpaceDashboardRoundedIcon />
+                      ) : (
+                        <DashboardRoundedIcon />
+                      )
+                    }
+                    sx={{ width: { xs: "100%", sm: "auto" } }}
+                    variant="outlined"
+                  >
+                    {user.role.toLowerCase() === "admin"
+                      ? "Admin dashboard"
+                      : "SaaS dashboard"}
+                  </Button>
                   <Button
                     onClick={() => {
                       setSection("personal");
