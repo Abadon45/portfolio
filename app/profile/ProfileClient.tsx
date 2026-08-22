@@ -190,6 +190,7 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
                 sx={{
                   alignItems: { xs: "center", sm: "center" },
                   justifyContent: "space-between",
+                  minWidth: 0,
                 }}
               >
                 <Stack
@@ -265,6 +266,16 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
                   >
                     Edit profile
                   </Button>
+                  <Button
+                    color="error"
+                    disabled={loggingOut}
+                    onClick={logOut}
+                    startIcon={<LogoutRoundedIcon />}
+                    sx={{ width: { xs: "100%", sm: "auto" } }}
+                    variant="outlined"
+                  >
+                    {loggingOut ? "Signing out…" : "Sign out"}
+                  </Button>
                 </Stack>
               </Stack>
             </CardContent>
@@ -276,7 +287,9 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
               variant="outlined"
               sx={{
                 alignSelf: "flex-start",
+                boxSizing: "border-box",
                 minWidth: { md: 210 },
+                overflow: "hidden",
                 width: { xs: "100%", md: "auto" },
               }}
             >
@@ -315,7 +328,9 @@ function ProfileContent({ initialUser }: ProfileClientProps) {
                       sx={{
                         minWidth: 0,
                         justifyContent: "flex-start",
+                        overflowWrap: "anywhere",
                         textAlign: "left",
+                        whiteSpace: "normal",
                         width: { xs: "100%", md: "auto" },
                       }}
                       variant={section === value ? "contained" : "text"}

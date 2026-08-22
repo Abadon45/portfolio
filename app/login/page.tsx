@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getCurrentPortfolioUser } from "../../lib/portfolioAuth";
 import LoginClient from "./LoginClient";
 
 export const metadata: Metadata = {
@@ -20,6 +22,17 @@ function safeCallbackUrl(value: string | undefined) {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
+  let authenticated = false;
+  try {
+    authenticated = Boolean(await getCurrentPortfolioUser());
+  } catch {
+    authenticated = false;
+  }
+
+  if (authenticated) {
+    redirect("/profile");
+  }
+
   return (
     <LoginClient
       authError={params?.authError}
