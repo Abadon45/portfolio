@@ -148,7 +148,7 @@ export default function CheckoutJourney() {
       const shippingAddress =
         addressMode === "saved"
           ? "Noy Pangan · Brgy. Poblacion, Cotabato City"
-          : `${address?.name} ${address?.last_name}, ${address?.address}, ${address?.barangay}, ${address?.city}, ${address?.province}`;
+          : `${address?.name} ${address?.last_name}, ${address?.address}, ${address?.barangay}, ${address?.city}, ${address?.province} · ${address?.mobile}`;
       setLastOrder({
         reference: quote.orderNumber,
         total: quote.amount,
@@ -180,74 +180,162 @@ export default function CheckoutJourney() {
   };
 
   return (
-    <Container maxWidth={isMarketplace ? "xl" : "lg"} sx={{ bgcolor: isCorporate ? "#f7f9fb" : undefined, py: { xs: 4, md: 7 } }}>
-      <Box sx={{ borderTop: isEditorial ? 0 : 1, borderColor: "divider", pt: isEditorial ? 0 : 3 }}>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
+    <Container
+      maxWidth={isMarketplace ? "xl" : "lg"}
+      sx={{
+        bgcolor: isCorporate ? "#f7f9fb" : undefined,
+        py: { xs: 4, md: 7 },
+      }}
+    >
+      <Box
         sx={{
-          alignItems: { sm: "center" },
-          justifyContent: "space-between",
-          gap: 2,
-          mb: 2,
+          borderTop: isEditorial ? 0 : 1,
+          borderColor: "divider",
+          pt: isEditorial ? 0 : 3,
         }}
       >
-        <Box>
-          <Typography
-            color="primary.main"
-            sx={{ fontSize: 12, fontWeight: 800, letterSpacing: ".12em" }}
-          >
-            {isEditorial ? "THE TWC EDIT · CHECKOUT" : isMarketplace ? "FAST CHECKOUT" : isCorporate ? "CORPORATE COMMERCE · CHECKOUT" : "TWC CHECKOUT"}
-          </Typography>
-          <Typography
-            component="h1"
-            sx={{
-              fontSize: { xs: 36, md: 50 },
-              fontFamily: isEditorial ? 'Georgia, "Times New Roman", serif' : undefined,
-              fontWeight: isEditorial ? 500 : 900,
-              letterSpacing: "-.07em",
-              mt: 1,
-            }}
-          >
-            Complete your order.
-          </Typography>
-        </Box>
-        <Chip
-          icon={<LockRoundedIcon />}
-          label="Offline demo transaction"
-          sx={{ color: "primary.main", bgcolor: "action.hover" }}
-        />
-      </Stack>
-      <Stepper activeStep={step} sx={{ mb: 4, overflowX: "auto", py: 1 }}>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      {step === 1 && (
-        <Box>
-          <Stack
-            direction="row"
-            sx={{ alignItems: "center", gap: 2, mb: 2, flexWrap: "wrap" }}
-          >
-            <Typography sx={{ fontWeight: 800 }}>Delivery option</Typography>
-            <RadioGroup
-              row
-              value={addressMode}
-              onChange={(event) =>
-                setAddressMode(event.target.value as "another" | "saved")
-              }
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          sx={{
+            alignItems: { sm: "center" },
+            justifyContent: "space-between",
+            gap: 2,
+            mb: 2,
+          }}
+        >
+          <Box>
+            <Typography
+              color="primary.main"
+              sx={{ fontSize: 12, fontWeight: 800, letterSpacing: ".12em" }}
             >
-              <Stack direction="row" sx={{ alignItems: "center" }}>
-                <Radio value="another" />
-                <Typography sx={{ fontSize: 14 }}>Another address</Typography>
-              </Stack>
-              <Stack direction="row" sx={{ alignItems: "center" }}>
-                <Radio value="saved" />
-                <Typography sx={{ fontSize: 14 }}>Saved address</Typography>
-              </Stack>
-            </RadioGroup>
-          </Stack>
+              {isEditorial
+                ? "THE TWC EDIT · CHECKOUT"
+                : isMarketplace
+                  ? "FAST CHECKOUT"
+                  : isCorporate
+                    ? "CORPORATE COMMERCE · CHECKOUT"
+                    : "TWC CHECKOUT"}
+            </Typography>
+            <Typography
+              component="h1"
+              sx={{
+                fontSize: { xs: 36, md: 50 },
+                fontFamily: isEditorial
+                  ? 'Georgia, "Times New Roman", serif'
+                  : undefined,
+                fontWeight: isEditorial ? 500 : 900,
+                letterSpacing: "-.07em",
+                mt: 1,
+              }}
+            >
+              Complete your order.
+            </Typography>
+          </Box>
+          <Chip
+            icon={<LockRoundedIcon />}
+            label="Offline demo transaction"
+            sx={{ color: "primary.main", bgcolor: "action.hover" }}
+          />
+        </Stack>
+        <Stepper activeStep={step} sx={{ mb: 4, overflowX: "auto", py: 1 }}>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+        {step === 1 && (
+          <Box>
+            <Stack
+              direction="row"
+              sx={{ alignItems: "center", gap: 2, mb: 2, flexWrap: "wrap" }}
+            >
+              <Typography sx={{ fontWeight: 800 }}>Delivery option</Typography>
+              <RadioGroup
+                row
+                value={addressMode}
+                onChange={(event) =>
+                  setAddressMode(event.target.value as "another" | "saved")
+                }
+              >
+                <Stack direction="row" sx={{ alignItems: "center" }}>
+                  <Radio value="another" />
+                  <Typography sx={{ fontSize: 14 }}>Another address</Typography>
+                </Stack>
+                <Stack direction="row" sx={{ alignItems: "center" }}>
+                  <Radio value="saved" />
+                  <Typography sx={{ fontSize: 14 }}>Saved address</Typography>
+                </Stack>
+              </RadioGroup>
+            </Stack>
+            <Box
+              sx={{
+                display: "grid",
+                gap: 3,
+                gridTemplateColumns: { xs: "1fr", md: "1.2fr .8fr" },
+              }}
+            >
+              {addressMode === "another" ? (
+                <TwcAddressForm submitting={loading} onSubmit={saveShipping} />
+              ) : (
+                <Card sx={{ p: { xs: 2, md: 3 }, borderRadius: 3 }}>
+                  <Typography
+                    variant="h3"
+                    sx={{ fontSize: 22, fontWeight: 800 }}
+                  >
+                    Saved address
+                  </Typography>
+                  <Alert severity="info" sx={{ mt: 2 }}>
+                    Noy Pangan · Brgy. Poblacion, Cotabato City · address_id:
+                    101
+                  </Alert>
+                  <Stack
+                    direction="row"
+                    sx={{
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      mt: 2,
+                      gap: 1,
+                    }}
+                  >
+                    <Button
+                      onClick={() => router.push("/twc-ecommerce/shop")}
+                      startIcon={<ArrowBackRoundedIcon />}
+                      sx={{ color: "text.secondary" }}
+                    >
+                      Shop more
+                    </Button>
+                    <Button
+                      disabled={loading}
+                      onClick={saveSavedAddress}
+                      startIcon={
+                        loading ? (
+                          <CircularProgress size={16} />
+                        ) : (
+                          <ArrowForwardRoundedIcon />
+                        )
+                      }
+                      variant="contained"
+                    >
+                      {loading ? "Saving address…" : "Continue to payment"}
+                    </Button>
+                  </Stack>
+                </Card>
+              )}
+              <Summary quote={displayQuote} items={checkoutCart} />
+            </Box>
+            {error && (
+              <Alert
+                severity="warning"
+                sx={{ mt: 2 }}
+                onClose={() => setError("")}
+              >
+                {error}
+              </Alert>
+            )}
+          </Box>
+        )}
+        {step === 2 && (
           <Box
             sx={{
               display: "grid",
@@ -255,165 +343,121 @@ export default function CheckoutJourney() {
               gridTemplateColumns: { xs: "1fr", md: "1.2fr .8fr" },
             }}
           >
-            {addressMode === "another" ? (
-              <TwcAddressForm submitting={loading} onSubmit={saveShipping} />
-            ) : (
-              <Card sx={{ p: { xs: 2, md: 3 }, borderRadius: 3 }}>
-                <Typography variant="h3" sx={{ fontSize: 22, fontWeight: 800 }}>
-                  Saved address
-                </Typography>
-                <Alert severity="info" sx={{ mt: 2 }}>
-                  Noy Pangan · Brgy. Poblacion, Cotabato City · address_id: 101
-                </Alert>
-                <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mt: 2, gap: 1 }}>
-                  <Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />} sx={{ color: "text.secondary" }}>Shop more</Button>
-                  <Button
-                    disabled={loading}
-                    onClick={saveSavedAddress}
-                    startIcon={
-                      loading ? (
-                        <CircularProgress size={16} />
-                      ) : (
-                        <ArrowForwardRoundedIcon />
-                      )
-                    }
-                    variant="contained"
-                  >
-                    {loading ? "Saving address..." : "Continue to payment"}
-                  </Button>
-                </Stack>
-              </Card>
-            )}
-            <Summary quote={displayQuote} items={checkoutCart} />
-          </Box>
-          {error && (
-            <Alert
-              severity="warning"
-              sx={{ mt: 2 }}
-              onClose={() => setError("")}
+            <Card
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                p: { xs: 2, md: 3 },
+                borderRadius: 3,
+              }}
             >
-              {error}
-            </Alert>
-          )}
-        </Box>
-      )}
-      {step === 2 && (
-        <Box
-          sx={{
-            display: "grid",
-            gap: 3,
-            gridTemplateColumns: { xs: "1fr", md: "1.2fr .8fr" },
-          }}
-        >
-          <Card
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              p: { xs: 2, md: 3 },
-              borderRadius: 3,
-            }}
-          >
-            <Typography variant="h3" sx={{ fontSize: 22, fontWeight: 800 }}>
-              Choose payment
-            </Typography>
-            <Typography color="text.secondary" sx={{ mt: 0.75 }}>
-              COD is the default source flow. Xendit is represented as an
-              offline handoff.
-            </Typography>
-            <RadioGroup
-              onChange={(event) => setPayment(event.target.value)}
-              sx={{ mt: 2 }}
-              value={payment}
-            >
-              <Card
-                variant="outlined"
-                sx={{ mb: 1, p: 1.5, boxShadow: "none" }}
-              >
-                <Stack direction="row" sx={{ alignItems: "center" }}>
-                  <Radio value="cod" />
-                  <Box>
-                    <Typography sx={{ fontWeight: 700 }}>
-                      Cash on Delivery
-                    </Typography>
-                    <Typography color="text.secondary" sx={{ fontSize: 12 }}>
-                      Place locally and mark the order for booking.
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Card>
-              <Card variant="outlined" sx={{ p: 1.5, boxShadow: "none" }}>
-                <Stack direction="row" sx={{ alignItems: "center" }}>
-                  <Radio value="xendit" />
-                  <Box>
-                    <Typography sx={{ fontWeight: 700 }}>
-                      Xendit payment
-                    </Typography>
-                    <Typography color="text.secondary" sx={{ fontSize: 12 }}>
-                      Simulate the external payment handoff and return.
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Card>
-            </RadioGroup>
-            <Box sx={{ bgcolor: "action.hover", borderRadius: 2, mt: 3, p: 2 }}>
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <CodeRoundedIcon color="primary" />
-                <Typography sx={{ fontWeight: 700 }}>
-                  Simulated API lifecycle
-                </Typography>
-              </Stack>
-              <Typography
-                color="text.secondary"
-                sx={{
-                  fontFamily: "monospace",
-                  fontSize: 12,
-                  lineHeight: 1.8,
-                  mt: 1,
-                }}
-              >
-                POST /api/checkout/shipping-info →{" "}
-                {quote?.orderNumber ?? "waiting"}
-                <br />
-                response.status: {quote?.status ?? "not_started"}
-                <br />
-                POST /api/order/place-{payment} →{" "}
-                {loading ? "processing" : "pending"}
+              <Typography variant="h3" sx={{ fontSize: 22, fontWeight: 800 }}>
+                Choose payment
               </Typography>
-            </Box>
-            <Stack direction="row" spacing={1} sx={{ mt: 3 }}>
-              <Button
-                onClick={() => setStep(1)}
-                startIcon={<ArrowBackRoundedIcon />}
+              <Typography color="text.secondary" sx={{ mt: 0.75 }}>
+                COD is the default source flow. Xendit is represented as an
+                offline handoff.
+              </Typography>
+              <RadioGroup
+                onChange={(event) => setPayment(event.target.value)}
+                sx={{ mt: 2 }}
+                value={payment}
               >
-                Back
-              </Button>
-              <Button
-                disabled={loading}
-                onClick={() => void reviewPayment()}
-                startIcon={
-                  loading ? (
-                    <CircularProgress size={16} />
-                  ) : (
-                    <CheckRoundedIcon />
-                  )
-                }
-                variant="contained"
+                <Card
+                  variant="outlined"
+                  sx={{ mb: 1, p: 1.5, boxShadow: "none" }}
+                >
+                  <Stack direction="row" sx={{ alignItems: "center" }}>
+                    <Radio value="cod" />
+                    <Box>
+                      <Typography sx={{ fontWeight: 700 }}>
+                        Cash on Delivery
+                      </Typography>
+                      <Typography color="text.secondary" sx={{ fontSize: 12 }}>
+                        Place locally and mark the order for booking.
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Card>
+                <Card variant="outlined" sx={{ p: 1.5, boxShadow: "none" }}>
+                  <Stack direction="row" sx={{ alignItems: "center" }}>
+                    <Radio value="xendit" />
+                    <Box>
+                      <Typography sx={{ fontWeight: 700 }}>
+                        Xendit payment
+                      </Typography>
+                      <Typography color="text.secondary" sx={{ fontSize: 12 }}>
+                        Simulate the external payment handoff and return.
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Card>
+              </RadioGroup>
+              <Box
+                sx={{ bgcolor: "action.hover", borderRadius: 2, mt: 3, p: 2 }}
               >
-                Review and place order
-              </Button>
-            </Stack>
-          </Card>
-          <Summary
-            quote={displayQuote}
-            items={checkoutCart}
-            address={
-              addressMode === "saved"
-                ? "Noy Pangan · Saved default address"
-                : `${address?.name ?? "Guest customer"}, ${address?.address ?? "Address pending"}`
-            }
-          />
-        </Box>
-      )}
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ alignItems: "center" }}
+                >
+                  <CodeRoundedIcon color="primary" />
+                  <Typography sx={{ fontWeight: 700 }}>
+                    Simulated API lifecycle
+                  </Typography>
+                </Stack>
+                <Typography
+                  color="text.secondary"
+                  sx={{
+                    fontFamily: "monospace",
+                    fontSize: 12,
+                    lineHeight: 1.8,
+                    mt: 1,
+                  }}
+                >
+                  POST /api/checkout/shipping-info →{" "}
+                  {quote?.orderNumber ?? "waiting"}
+                  <br />
+                  response.status: {quote?.status ?? "not_started"}
+                  <br />
+                  POST /api/order/place-{payment} →{" "}
+                  {loading ? "processing" : "pending"}
+                </Typography>
+              </Box>
+              <Stack direction="row" spacing={1} sx={{ mt: 3 }}>
+                <Button
+                  onClick={() => setStep(1)}
+                  startIcon={<ArrowBackRoundedIcon />}
+                >
+                  Back
+                </Button>
+                <Button
+                  disabled={loading}
+                  onClick={() => void reviewPayment()}
+                  startIcon={
+                    loading ? (
+                      <CircularProgress size={16} />
+                    ) : (
+                      <CheckRoundedIcon />
+                    )
+                  }
+                  variant="contained"
+                >
+                  Review and place order
+                </Button>
+              </Stack>
+            </Card>
+            <Summary
+              quote={displayQuote}
+              items={checkoutCart}
+              address={
+                addressMode === "saved"
+                  ? "Noy Pangan · Saved default address"
+                  : `${address?.name ?? "Guest customer"}, ${address?.address ?? "Address pending"}`
+              }
+            />
+          </Box>
+        )}
       </Box>
     </Container>
   );

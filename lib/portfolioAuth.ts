@@ -51,7 +51,9 @@ function toUser(row: UserRow): PortfolioUser {
     authProvider: String(row.auth_provider ?? "password"),
     emailVerified: Boolean(row.email_verified_at),
     isActive: row.is_active !== false,
-    lastLogin: row.last_login ? new Date(String(row.last_login)).toISOString() : null,
+    lastLogin: row.last_login
+      ? new Date(String(row.last_login)).toISOString()
+      : null,
     createdAt: new Date(String(row.created_at)).toISOString(),
   };
 }
@@ -181,10 +183,7 @@ export async function synchronizeGoogleUser(
   const rows = await sql`
     update portfolio_auth.users
     set email = ${profile.email},
-      first_name = ${profile.firstName},
-      last_name = ${profile.lastName},
-      full_name = ${profile.fullName},
-      display_name = ${profile.fullName},
+      -- Keep application profile fields user-controlled after account creation.
       avatar_url = ${profile.avatarUrl},
       email_verified_at = coalesce(email_verified_at, now()),
       last_login = now(),
@@ -292,10 +291,7 @@ export async function updateCurrentPortfolioUser({
   return rows[0] ? toUser(rows[0]) : null;
 }
 
-export async function sendEmailVerificationCode(
-  email: string,
-  code: string,
-) {
+export async function sendEmailVerificationCode(email: string, code: string) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.AUTH_FROM_EMAIL;
 
@@ -355,7 +351,9 @@ export async function getCurrentPortfolioUser() {
 
   const sql = getNeonSql();
   const rows = await sql`
-    select u.id, u.email, u.display_name, u.role, u.created_at
+    select u.id, u.email, u.first_name, u.last_name, u.full_name, u.display_name,
+      u.username, u.phone, u.avatar_url, u.role, u.auth_provider,
+      u.email_verified_at, u.is_active, u.last_login, u.created_at
     from portfolio_auth.sessions s
     join portfolio_auth.users u on u.id = s.user_id
     where s.token_hash = ${hashSessionToken(token)}
@@ -364,6 +362,100 @@ export async function getCurrentPortfolioUser() {
   `;
 
   return rows[0] ? toUser(rows[0]) : null;
+}
+
+export async function getAdminPortfolioUser() {
+  const user = await getCurrentPortfolioUser();
+  return user && user.isActive && user.role.toLowerCase() === "admin"
+    ? user
+    : null;
+}
+
+export type PortfolioUserPage = {
+  users: PortfolioUser[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export async function listPortfolioUsers({
+  page = 1,
+  pageSize = 10,
+  search = "",
+}: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+} = {}): Promise<PortfolioUserPage> {
+  const sql = getNeonSql();
+  const safePage = Math.max(1, Math.floor(page));
+  const safePageSize = Math.min(50, Math.max(1, Math.floor(pageSize)));
+  const offset = (safePage - 1) * safePageSize;
+  const query = search.trim();
+  const pattern = `%${query}%`;
+
+  const [rows, countRows] = await Promise.all([
+    sql`
+      select id, email, first_name, last_name, full_name, display_name, username, phone,
+        avatar_url, role, auth_provider, email_verified_at, is_active, last_login, created_at
+      from portfolio_auth.users
+      where ${
+        query === ""
+          ? sql`true`
+          : sql`(
+        email ilike ${pattern}
+        or display_name ilike ${pattern}
+        or coalesce(full_name, '') ilike ${pattern}
+      )`
+      }
+      order by created_at desc
+      limit ${safePageSize} offset ${offset}
+    `,
+    sql`
+      select count(*)::int as total
+      from portfolio_auth.users
+      where ${
+        query === ""
+          ? sql`true`
+          : sql`(
+        email ilike ${pattern}
+        or display_name ilike ${pattern}
+        or coalesce(full_name, '') ilike ${pattern}
+      )`
+      }
+    `,
+  ]);
+
+  return {
+    users: rows.map((row) => toUser(row)),
+    total: Number(countRows[0]?.total ?? 0),
+    page: safePage,
+    pageSize: safePageSize,
+  };
+}
+
+export async function findPortfolioUserById(id: string) {
+  const sql = getNeonSql();
+  const rows = await sql`
+    select id, email, first_name, last_name, full_name, display_name, username, phone,
+      avatar_url, role, auth_provider, email_verified_at, is_active, last_login, created_at
+    from portfolio_auth.users
+    where id = ${id}
+    limit 1
+  `;
+
+  return rows[0] ? toUser(rows[0]) : null;
+}
+
+export async function deletePortfolioUserById(id: string) {
+  const sql = getNeonSql();
+  const rows = await sql`
+    delete from portfolio_auth.users
+    where id = ${id}
+    returning id
+  `;
+
+  return Boolean(rows[0]);
 }
 
 export async function deleteCurrentSession() {

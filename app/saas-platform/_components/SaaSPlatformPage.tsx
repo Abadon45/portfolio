@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   AccountBalanceWalletRounded,
   AddRounded,
@@ -1133,7 +1134,10 @@ function DataView({
           <MetricCard
             label="Available payout"
             value={formatPeso(
-              settlements.reduce((total, settlement) => total + settlement.payable, 0),
+              settlements.reduce(
+                (total, settlement) => total + settlement.payable,
+                0,
+              ),
             )}
             icon={AccountBalanceWalletRounded}
           />
@@ -1152,26 +1156,41 @@ function DataView({
             icon={TrendingUpRounded}
           />
         </Box>
-        <CardShell title="Settlement history" subtitle="SupplierSettlement records">
+        <CardShell
+          title="Settlement history"
+          subtitle="SupplierSettlement records"
+        >
           <Box sx={{ overflowX: "auto" }}>
             <Table size="small" sx={{ minWidth: 720 }}>
               <TableHead>
                 <TableRow>
-                  {["Settlement", "Period", "Orders", "Gross", "Fees", "Payable", "Status"].map(
-                    (heading) => <TableCell key={heading}>{heading}</TableCell>,
-                  )}
+                  {[
+                    "Settlement",
+                    "Period",
+                    "Orders",
+                    "Gross",
+                    "Fees",
+                    "Payable",
+                    "Status",
+                  ].map((heading) => (
+                    <TableCell key={heading}>{heading}</TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {settlements.map((settlement) => (
                   <TableRow key={settlement.id}>
-                    <TableCell sx={{ fontWeight: 800 }}>{settlement.id}</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }}>
+                      {settlement.id}
+                    </TableCell>
                     <TableCell>{settlement.period}</TableCell>
                     <TableCell>{settlement.orders}</TableCell>
                     <TableCell>{formatPeso(settlement.gross)}</TableCell>
                     <TableCell>{formatPeso(settlement.fees)}</TableCell>
                     <TableCell>{formatPeso(settlement.payable)}</TableCell>
-                    <TableCell><StatusChip status={settlement.status} /></TableCell>
+                    <TableCell>
+                      <StatusChip status={settlement.status} />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -1226,7 +1245,9 @@ function DataView({
                     <TableCell>{payout.date}</TableCell>
                     <TableCell>{formatPeso(payout.amount)}</TableCell>
                     <TableCell>{payout.method}</TableCell>
-                    <TableCell><StatusChip status={payout.status} /></TableCell>
+                    <TableCell>
+                      <StatusChip status={payout.status} />
+                    </TableCell>
                     <TableCell>{payout.reference}</TableCell>
                   </TableRow>
                 ))}
@@ -1456,7 +1477,11 @@ function DataView({
           eyebrow="Storefront / Northstar"
           title="Storefront manager"
           description="Keep your commerce presence connected to the operational workspace."
-          action={<Button onClick={onPreviewStore} variant="contained">Preview store</Button>}
+          action={
+            <Button onClick={onPreviewStore} variant="contained">
+              Preview store
+            </Button>
+          }
         />
         <Box
           sx={{
@@ -1476,7 +1501,11 @@ function DataView({
               <Typography sx={{ fontSize: 28, fontWeight: 850, mt: 7 }}>
                 Wellness, made practical.
               </Typography>
-              <Button onClick={onPreviewStore} sx={{ mt: 2 }} variant="contained">
+              <Button
+                onClick={onPreviewStore}
+                sx={{ mt: 2 }}
+                variant="contained"
+              >
                 Preview
               </Button>
             </Box>
@@ -1536,7 +1565,9 @@ function DataView({
                 Renews September 21, 2026 · 84% of monthly usage included
               </Typography>
             </Box>
-            <Button onClick={onManagePlan} variant="contained">Manage plan</Button>
+            <Button onClick={onManagePlan} variant="contained">
+              Manage plan
+            </Button>
           </Stack>
         </CardShell>
       </>
@@ -2134,11 +2165,15 @@ function CommerceOsWorkspace() {
   };
 
   const previewStore = () => {
-    toastInfo("Storefront preview opened in the source project; this demo keeps the preview in place.");
+    toastInfo(
+      "Storefront preview opened in the source project; this demo keeps the preview in place.",
+    );
   };
 
   const managePlan = () => {
-    toastInfo(`Plan management is simulated for the ${SUBSCRIPTION.plan} plan.`);
+    toastInfo(
+      `Plan management is simulated for the ${SUBSCRIPTION.plan} plan.`,
+    );
   };
 
   const navigation = (
@@ -2322,6 +2357,28 @@ function CommerceOsWorkspace() {
               direction="row"
               sx={{ alignItems: "center", gap: { xs: 0.5, sm: 1 } }}
             >
+              <Button
+                aria-label="Return to product overview"
+                component={Link}
+                href="/saas-platform/landing"
+                size="small"
+                startIcon={<ArrowBackRounded />}
+                sx={{
+                  color: "text.secondary",
+                  display: "inline-flex",
+                  fontSize: 12,
+                  minWidth: 0,
+                  px: { xs: 0.5, sm: 1 },
+                  "&:hover": { color: "text.primary" },
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{ display: { xs: "none", sm: "inline" } }}
+                >
+                  Product overview
+                </Box>
+              </Button>
               <Tooltip
                 title={`Switch to ${mode === "dark" ? "light" : "dark"} mode`}
               >

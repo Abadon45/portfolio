@@ -28,11 +28,18 @@ import { ParticleNetworkBackground } from "../components/portfolio/ParticleNetwo
 type LoginClientProps = {
   authError?: string;
   callbackUrl: string;
+  initialMode?: "login" | "register";
 };
 
-export default function LoginClient({ authError, callbackUrl }: LoginClientProps) {
+export default function LoginClient({
+  authError,
+  callbackUrl,
+  initialMode = "login",
+}: LoginClientProps) {
   const router = useRouter();
-  const [mode, setMode] = useState<"login" | "register" | "verify">("login");
+  const [mode, setMode] = useState<"login" | "register" | "verify">(
+    initialMode,
+  );
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -53,14 +60,16 @@ export default function LoginClient({ authError, callbackUrl }: LoginClientProps
     event.preventDefault();
     setError("");
     const nextFieldErrors = {
-      displayName: isRegistration && !displayName.trim() ? "Enter your name." : "",
-      email: !/^\S+@\S+\.\S+$/.test(email) ? "Enter a valid email address." : "",
-      password:
-        !password
-          ? "Enter your password."
-          : isRegistration && password.length < 8
-            ? "Use at least 8 characters."
-            : "",
+      displayName:
+        isRegistration && !displayName.trim() ? "Enter your name." : "",
+      email: !/^\S+@\S+\.\S+$/.test(email)
+        ? "Enter a valid email address."
+        : "",
+      password: !password
+        ? "Enter your password."
+        : isRegistration && password.length < 8
+          ? "Use at least 8 characters."
+          : "",
       verificationCode: "",
     };
     setFieldErrors(nextFieldErrors);
@@ -68,7 +77,8 @@ export default function LoginClient({ authError, callbackUrl }: LoginClientProps
     setPending(true);
 
     try {
-      const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
+      const endpoint =
+        mode === "login" ? "/api/auth/login" : "/api/auth/register";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,7 +114,9 @@ export default function LoginClient({ authError, callbackUrl }: LoginClientProps
     setError("");
     const nextFieldErrors = {
       displayName: "",
-      email: !/^\S+@\S+\.\S+$/.test(email) ? "Enter a valid email address." : "",
+      email: !/^\S+@\S+\.\S+$/.test(email)
+        ? "Enter a valid email address."
+        : "",
       password: "",
       verificationCode: !/^\d{6}$/.test(verificationCode)
         ? "Enter the 6-digit code from your email."
@@ -241,7 +253,9 @@ export default function LoginClient({ authError, callbackUrl }: LoginClientProps
                     helperText={fieldErrors.verificationCode}
                     label="Confirmation code"
                     name="verificationCode"
-                    onChange={(event) => setVerificationCode(event.target.value)}
+                    onChange={(event) =>
+                      setVerificationCode(event.target.value)
+                    }
                     slotProps={{
                       htmlInput: {
                         inputMode: "numeric",
@@ -258,7 +272,13 @@ export default function LoginClient({ authError, callbackUrl }: LoginClientProps
                   )}
                   <Button
                     disabled={pending}
-                    endIcon={pending ? <CircularProgress size={18} /> : <ArrowForwardRoundedIcon />}
+                    endIcon={
+                      pending ? (
+                        <CircularProgress size={18} />
+                      ) : (
+                        <ArrowForwardRoundedIcon />
+                      )
+                    }
                     type="submit"
                     variant="contained"
                   >
@@ -296,7 +316,9 @@ export default function LoginClient({ authError, callbackUrl }: LoginClientProps
                     value={email}
                   />
                   <TextField
-                    autoComplete={isRegistration ? "new-password" : "current-password"}
+                    autoComplete={
+                      isRegistration ? "new-password" : "current-password"
+                    }
                     error={Boolean(fieldErrors.password)}
                     fullWidth
                     helperText={fieldErrors.password}
@@ -305,9 +327,13 @@ export default function LoginClient({ authError, callbackUrl }: LoginClientProps
                         endAdornment: (
                           <InputAdornment position="end">
                             <IconButton
-                              aria-label={showPassword ? "Hide password" : "Show password"}
+                              aria-label={
+                                showPassword ? "Hide password" : "Show password"
+                              }
                               edge="end"
-                              onClick={() => setShowPassword((visible) => !visible)}
+                              onClick={() =>
+                                setShowPassword((visible) => !visible)
+                              }
                               sx={{ color: "grey.300" }}
                             >
                               {showPassword ? (
@@ -328,7 +354,13 @@ export default function LoginClient({ authError, callbackUrl }: LoginClientProps
                   />
                   <Button
                     disabled={pending}
-                    endIcon={pending ? <CircularProgress size={18} /> : <ArrowForwardRoundedIcon />}
+                    endIcon={
+                      pending ? (
+                        <CircularProgress size={18} />
+                      ) : (
+                        <ArrowForwardRoundedIcon />
+                      )
+                    }
                     type="submit"
                     variant="contained"
                   >
@@ -346,7 +378,12 @@ export default function LoginClient({ authError, callbackUrl }: LoginClientProps
 
             {mode === "login" && (
               <>
-                <Divider sx={{ borderColor: "rgba(148, 163, 184, 0.22)", color: "grey.400" }}>
+                <Divider
+                  sx={{
+                    borderColor: "rgba(148, 163, 184, 0.22)",
+                    color: "grey.400",
+                  }}
+                >
                   or
                 </Divider>
                 <Button
@@ -368,7 +405,9 @@ export default function LoginClient({ authError, callbackUrl }: LoginClientProps
                   }}
                   variant="outlined"
                 >
-                  {googlePending ? "Connecting to Google…" : "Continue with Google"}
+                  {googlePending
+                    ? "Connecting to Google…"
+                    : "Continue with Google"}
                 </Button>
               </>
             )}
@@ -381,7 +420,9 @@ export default function LoginClient({ authError, callbackUrl }: LoginClientProps
                 }}
                 variant="text"
               >
-                {isRegistration ? "Already have an account? Sign in" : "Need an account? Register"}
+                {isRegistration
+                  ? "Already have an account? Sign in"
+                  : "Need an account? Register"}
               </Button>
             )}
 

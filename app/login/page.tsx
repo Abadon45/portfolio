@@ -7,7 +7,11 @@ export const metadata: Metadata = {
 };
 
 type LoginPageProps = {
-  searchParams?: Promise<{ authError?: string; callbackUrl?: string }>;
+  searchParams?: Promise<{
+    authError?: string;
+    callbackUrl?: string;
+    mode?: string;
+  }>;
 };
 
 function safeCallbackUrl(value: string | undefined) {
@@ -20,6 +24,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <LoginClient
       authError={params?.authError}
       callbackUrl={safeCallbackUrl(params?.callbackUrl)}
+      initialMode={params?.mode === "register" ? "register" : "login"}
     />
   );
 }

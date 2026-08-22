@@ -159,7 +159,7 @@ export const projects: Project[] = [
     title: "Commerce OS — one platform for many business roles",
     summary:
       "A portfolio-safe reconstruction of a multi-persona SaaS platform connecting commerce, supplier operations, storefronts, analytics, subscriptions, and business growth.",
-    href: "/saas-platform",
+    href: "/saas-platform/landing",
     details: [
       "Designed persona-aware dashboards for Business Basic, Business Pro, Business Advanced, Supplier, Coach, Affiliate, and legacy accounts.",
       "Built modular local workflows for products, inventory, orders, settlements, payouts, price requests, storefronts, subscriptions, learning, and affiliate activity.",
@@ -185,9 +185,9 @@ export const landingPages: LandingPage[] = [
     title: "Commerce OS",
     summary:
       "A persona-aware commerce operating system for storefronts, supplier operations, analytics, subscriptions, affiliate tools, and business growth.",
-    href: "/saas-platform",
+    href: "/saas-platform/landing",
     eyebrow: "SaaS product engineering",
-    actionLabel: "Open SaaS platform",
+    actionLabel: "Explore product landing",
   },
   {
     title: "Nightcurrent",
