@@ -17,3 +17,4 @@ notes/
 
 # TypeScript incremental build metadata
 *.tsbuildinfo
+.vercel
