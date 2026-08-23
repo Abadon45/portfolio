@@ -15,8 +15,13 @@ import { SkillsSection } from "./SkillsSection";
 import { SummarySection } from "./SummarySection";
 import { ThemeSettingsButton } from "./ThemeSettingsButton";
 import type { PortfolioThemeName } from "../../theme/portfolioTheme";
+import type { PortfolioUser } from "../../../lib/portfolioAuth";
 
-export function PortfolioPage() {
+export function PortfolioPage({
+  initialUser,
+}: {
+  initialUser?: PortfolioUser | null;
+}) {
   const [mode, setMode] = useState<PaletteMode>("dark");
   const [activeTheme, setActiveTheme] = useState<PortfolioThemeName>("executive");
   const [customPrimary, setCustomPrimary] = useState("#1a237e");
@@ -92,7 +97,13 @@ export function PortfolioPage() {
         })}
       />
 
-      <PortfolioAppBar isDark={isDark} onScrollToSection={scrollToSection} onScrollToTop={scrollToTop} onToggleMode={toggleMode} />
+      <PortfolioAppBar
+        initialUser={initialUser}
+        isDark={isDark}
+        onScrollToSection={scrollToSection}
+        onScrollToTop={scrollToTop}
+        onToggleMode={toggleMode}
+      />
 
       <Container component="main" maxWidth="lg" sx={{ pb: 6 }}>
         <HeroSection isDark={isDark} onScrollToSection={scrollToSection} />
