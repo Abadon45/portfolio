@@ -90,7 +90,11 @@ await sql`
     id text primary key,
     user_id text not null references portfolio_auth.users(id) on delete cascade,
     name text not null,
+    school_year text not null default 'Unspecified',
+    term text not null default 'Full School Year',
     academic_period text,
+    source_loads jsonb not null default '[]'::jsonb,
+    quality_metrics jsonb not null default '{}'::jsonb,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
   )
@@ -119,6 +123,14 @@ alter table portfolio_auth.teacher_schedule_entries
 add column if not exists teacher_name text not null default '',
 add column if not exists school_level text not null default 'JHS',
 add column if not exists year_level text not null default 'All Year Levels'
+`;
+
+await sql`
+  alter table portfolio_auth.teacher_schedules
+  add column if not exists school_year text not null default 'Unspecified',
+  add column if not exists term text not null default 'Full School Year',
+  add column if not exists source_loads jsonb not null default '[]'::jsonb,
+  add column if not exists quality_metrics jsonb not null default '{}'::jsonb
 `;
 
 await sql`

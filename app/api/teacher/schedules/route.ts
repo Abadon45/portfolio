@@ -4,6 +4,7 @@ import {
   listTeacherSchedules,
 } from "../../../../lib/teacherWorkspace";
 import { schoolLevels, titleCaseSubject } from "../../../../lib/k12Subjects";
+import { isScheduleTerm } from "../../../../lib/scheduleTerms";
 
 export const runtime = "nodejs";
 
@@ -46,6 +47,7 @@ function normalizeEntries(value: unknown) {
         entry.day &&
         entry.startTime &&
         entry.endTime &&
+        isValidTimeRange(entry.startTime, entry.endTime) &&
         entry.subject &&
         entry.yearLevel &&
         entry.section &&
@@ -53,21 +55,55 @@ function normalizeEntries(value: unknown) {
     );
 }
 
+function isValidTimeRange(startTime: string, endTime: string) {
+  const start = timeToMinutes(startTime);
+  const end = timeToMinutes(endTime);
+  return Number.isFinite(start) && Number.isFinite(end) && start < end;
+}
+
 function hasScheduleConflict(
   entries: ReturnType<typeof normalizeEntries>,
 ) {
-  const occupied = new Set<string>();
-  for (const entry of entries) {
-    const timeKey = `${entry.day.toLowerCase()}\u0000${entry.startTime}`;
-    const keys = [
-      `teacher\u0000${entry.teacherName.toLowerCase()}\u0000${timeKey}`,
-      `year\u0000${entry.schoolLevel.toLowerCase()}\u0000${entry.yearLevel.toLowerCase()}\u0000${entry.section?.toLowerCase()}\u0000${timeKey}`,
-      `subject\u0000${entry.subject.toLowerCase()}\u0000${timeKey}`,
-    ];
-    if (keys.some((key) => occupied.has(key))) return true;
-    keys.forEach((key) => occupied.add(key));
-  }
-  return false;
+  return entries.some((entry, index) =>
+    entries.slice(0, index).some((other) =>
+      intervalsOverlap(entry, other) &&
+      (sameTeacher(entry, other) || sameSection(entry, other)),
+    ),
+  );
+}
+
+function sameTeacher(
+  left: ReturnType<typeof normalizeEntries>[number],
+  right: ReturnType<typeof normalizeEntries>[number],
+) {
+  return left.teacherName.toLowerCase() === right.teacherName.toLowerCase();
+}
+
+function sameSection(
+  left: ReturnType<typeof normalizeEntries>[number],
+  right: ReturnType<typeof normalizeEntries>[number],
+) {
+  return (
+    left.schoolLevel.toLowerCase() === right.schoolLevel.toLowerCase() &&
+    left.yearLevel.toLowerCase() === right.yearLevel.toLowerCase() &&
+    left.section.toLowerCase() === right.section.toLowerCase()
+  );
+}
+
+function timeToMinutes(value: string) {
+  const [hours, minutes] = value.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+function intervalsOverlap(
+  left: ReturnType<typeof normalizeEntries>[number],
+  right: ReturnType<typeof normalizeEntries>[number],
+) {
+  return (
+    left.day.toLowerCase() === right.day.toLowerCase() &&
+    timeToMinutes(left.startTime) < timeToMinutes(right.endTime) &&
+    timeToMinutes(left.endTime) > timeToMinutes(right.startTime)
+  );
 }
 
 export async function GET() {
@@ -93,14 +129,40 @@ export async function POST(request: Request) {
     unknown
   > | null;
   const name = typeof body?.name === "string" ? body.name.trim() : "";
+  const schoolYear =
+    typeof body?.schoolYear === "string" && body.schoolYear.trim()
+      ? body.schoolYear.trim()
+      : "Unspecified";
+  const term =
+    typeof body?.term === "string" && body.term.trim()
+      ? body.term.trim()
+      : "Full School Year";
   const academicPeriod =
     typeof body?.academicPeriod === "string"
       ? body.academicPeriod.trim() || null
       : null;
-  const entries = normalizeEntries(body?.entries);
-  if (!name || name.length > 100) {
+  const rawEntries = Array.isArray(body?.entries) ? body.entries : [];
+  const entries = normalizeEntries(rawEntries);
+  const sourceLoads = Array.isArray(body?.sourceLoads) ? body.sourceLoads : [];
+  const qualityMetrics =
+    body?.qualityMetrics && typeof body.qualityMetrics === "object"
+      ? (body.qualityMetrics as Record<string, unknown>)
+      : {};
+  if (!name || name.length > 100 || !isScheduleTerm(term)) {
     return NextResponse.json(
-      { message: "Enter a schedule name." },
+      {
+        message:
+          "Enter a schedule name and choose Full School Year, Term 1, Term 2, or Term 3.",
+      },
+      { status: 400 },
+    );
+  }
+  if (entries.length !== rawEntries.length) {
+    return NextResponse.json(
+      {
+        message:
+          "Every schedule entry must include a valid teacher, school level, year level, section, subject, day, and non-overlapping time interval.",
+      },
       { status: 400 },
     );
   }
@@ -116,7 +178,11 @@ export async function POST(request: Request) {
   try {
     const schedule = await createTeacherSchedule({
       name,
+      schoolYear,
+      term,
       academicPeriod,
+      sourceLoads,
+      qualityMetrics,
       entries,
     });
     if (!schedule)

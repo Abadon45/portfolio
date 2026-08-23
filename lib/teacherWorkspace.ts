@@ -21,7 +21,11 @@ export type ScheduleEntry = {
 export type TeacherSchedule = {
   id: string;
   name: string;
+  schoolYear: string;
+  term: string;
   academicPeriod: string | null;
+  sourceLoads: unknown[];
+  qualityMetrics: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
   entries: ScheduleEntry[];
@@ -50,7 +54,14 @@ function scheduleFromRow(
   return {
     id: String(row.id),
     name: String(row.name),
+    schoolYear: String(row.school_year ?? "Unspecified"),
+    term: String(row.term ?? "Full School Year"),
     academicPeriod: row.academic_period ? String(row.academic_period) : null,
+    sourceLoads: Array.isArray(row.source_loads) ? row.source_loads : [],
+    qualityMetrics:
+      row.quality_metrics && typeof row.quality_metrics === "object"
+        ? (row.quality_metrics as Record<string, unknown>)
+        : {},
     createdAt: new Date(String(row.created_at)).toISOString(),
     updatedAt: new Date(String(row.updated_at)).toISOString(),
     entries,
@@ -62,7 +73,7 @@ export async function listTeacherSchedules() {
   if (!teacher) return null;
   const sql = getNeonSql();
   const rows = await sql`
-    select id, name, academic_period, created_at, updated_at
+    select id, name, school_year, term, academic_period, source_loads, quality_metrics, created_at, updated_at
     from portfolio_auth.teacher_schedules
     where user_id = ${teacher.id}
     order by updated_at desc
@@ -94,7 +105,11 @@ export async function listTeacherSchedules() {
 
 export async function createTeacherSchedule(input: {
   name: string;
+  schoolYear: string;
+  term: string;
   academicPeriod: string | null;
+  sourceLoads: unknown[];
+  qualityMetrics: Record<string, unknown>;
   entries: Omit<ScheduleEntry, "id">[];
 }) {
   const teacher = await getTeacherPortfolioUser();
@@ -103,8 +118,12 @@ export async function createTeacherSchedule(input: {
   const id = randomUUID();
   await sql.transaction([
     sql`
-      insert into portfolio_auth.teacher_schedules (id, user_id, name, academic_period)
-      values (${id}, ${teacher.id}, ${input.name}, ${input.academicPeriod})
+      insert into portfolio_auth.teacher_schedules
+        (id, user_id, name, school_year, term, academic_period, source_loads, quality_metrics)
+      values
+        (${id}, ${teacher.id}, ${input.name}, ${input.schoolYear}, ${input.term},
+         ${input.academicPeriod}, ${JSON.stringify(input.sourceLoads)}::jsonb,
+         ${JSON.stringify(input.qualityMetrics)}::jsonb)
     `,
     ...input.entries.map(
       (entry) => sql`
