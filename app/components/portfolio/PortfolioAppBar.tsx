@@ -24,6 +24,7 @@ import { navItems } from "../../data/portfolio";
 import ThemeToggle from "../solar/ThemeToggle";
 
 type PortfolioAppBarProps = {
+  initialUser?: PortfolioNavUser | null;
   isDark: boolean;
   onScrollToSection: (sectionId: string) => void;
   onScrollToTop: () => void;
@@ -63,13 +64,14 @@ function userInitials(user: PortfolioNavUser) {
 }
 
 export function PortfolioAppBar({
+  initialUser = null,
   isDark,
   onScrollToSection,
   onScrollToTop,
   onToggleMode,
 }: PortfolioAppBarProps) {
   const router = useRouter();
-  const [user, setUser] = useState<PortfolioNavUser | null>(null);
+  const [user, setUser] = useState<PortfolioNavUser | null>(initialUser);
   const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(
     null,
   );
@@ -79,15 +81,16 @@ export function PortfolioAppBar({
 
     fetch("/api/auth/me", { cache: "no-store" })
       .then(async (response) => {
-        if (!response.ok) return null;
+        if (response.status === 401) return null;
+        if (!response.ok) return undefined;
         const data = (await response.json()) as { user?: PortfolioNavUser };
         return data.user ?? null;
       })
       .then((nextUser) => {
-        if (active) setUser(nextUser);
+        if (active && nextUser !== undefined) setUser(nextUser);
       })
       .catch(() => {
-        if (active) setUser(null);
+        // Preserve the server-resolved account during a transient API failure.
       });
 
     return () => {
@@ -403,7 +406,7 @@ export function PortfolioAppBar({
             ) : (
               <Button
                 component={NextLink}
-                href="/login"
+                href="/login?callbackUrl=/"
                 size="small"
                 sx={{
                   border: 1,
