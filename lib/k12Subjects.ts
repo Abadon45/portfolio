@@ -14,6 +14,55 @@ export const yearLevels = [
   "Grade 12",
 ] as const;
 
+export const schoolLevels = ["Kinder", "Elementary", "JHS", "SHS"] as const;
+
+export type SchoolLevel = (typeof schoolLevels)[number];
+
+const schoolLevelAliases: Record<string, SchoolLevel> = {
+  kinder: "Kinder",
+  kindergarten: "Kinder",
+  elementary: "Elementary",
+  elem: "Elementary",
+  jhs: "JHS",
+  "junior high": "JHS",
+  "junior high school": "JHS",
+  shs: "SHS",
+  "senior high": "SHS",
+  "senior high school": "SHS",
+};
+
+export function normalizeSchoolLevel(value: string): SchoolLevel | null {
+  return schoolLevelAliases[value.trim().replace(/\s+/g, " ").toLowerCase()] ?? null;
+}
+
+export function normalizeYearLevel(value: string) {
+  const normalized = value.trim().replace(/\s+/g, " ").toLowerCase();
+  if (["k", "kg", "kindergarten", "kinder"].includes(normalized)) {
+    return "Kindergarten";
+  }
+  const match = normalized.match(/^(?:g|grade)\s*(\d{1,2})$/);
+  return match ? `Grade ${Number(match[1])}` : value.trim().replace(/\s+/g, " ");
+}
+
+export function schoolLevelForYear(yearLevel: string): SchoolLevel {
+  const normalizedYearLevel = normalizeYearLevel(yearLevel);
+  if (normalizedYearLevel === "Kindergarten") return "Kinder";
+  if (["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"].includes(normalizedYearLevel)) {
+    return "Elementary";
+  }
+  if (["Grade 7", "Grade 8", "Grade 9", "Grade 10"].includes(normalizedYearLevel)) {
+    return "JHS";
+  }
+  return "SHS";
+}
+
+export function firstYearLevelForSchoolLevel(level: SchoolLevel) {
+  if (level === "Kinder") return "Kindergarten";
+  if (level === "Elementary") return "Grade 1";
+  if (level === "JHS") return "Grade 7";
+  return "Grade 11";
+}
+
 const elementaryCore = [
   "English",
   "Filipino",
