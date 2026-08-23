@@ -2,11 +2,11 @@ import { getCurrentPortfolioUser } from "../lib/portfolioAuth";
 import { PortfolioPage } from "./components/portfolio/PortfolioPage";
 
 export default async function Home() {
-  let user = null;
+  let user: Awaited<ReturnType<typeof getCurrentPortfolioUser>> | undefined;
   try {
     user = await getCurrentPortfolioUser();
   } catch {
-    user = null;
+    user = undefined;
   }
 
   return <PortfolioPage initialUser={user} />;

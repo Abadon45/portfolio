@@ -10,6 +10,7 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Skeleton,
   Stack,
   Toolbar,
   Typography,
@@ -71,6 +72,9 @@ export function PortfolioAppBar({
   onToggleMode,
 }: PortfolioAppBarProps) {
   const router = useRouter();
+  const [authState, setAuthState] = useState<
+    "loading" | "authenticated" | "unauthenticated"
+  >(initialUser === undefined ? "loading" : initialUser ? "authenticated" : "unauthenticated");
   const [user, setUser] = useState<PortfolioNavUser | null>(initialUser);
   const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(
     null,
@@ -87,10 +91,16 @@ export function PortfolioAppBar({
         return data.user ?? null;
       })
       .then((nextUser) => {
-        if (active && nextUser !== undefined) setUser(nextUser);
+        if (!active) return;
+        if (nextUser === undefined) {
+          if (initialUser === undefined) setAuthState("unauthenticated");
+          return;
+        }
+        setUser(nextUser);
+        setAuthState(nextUser ? "authenticated" : "unauthenticated");
       })
       .catch(() => {
-        // Preserve the server-resolved account during a transient API failure.
+        if (active && initialUser === undefined) setAuthState("unauthenticated");
       });
 
     return () => {
@@ -102,6 +112,7 @@ export function PortfolioAppBar({
     setUserMenuAnchor(null);
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
     setUser(null);
+    setAuthState("unauthenticated");
     router.refresh();
   }
 
@@ -220,7 +231,9 @@ export function PortfolioAppBar({
               mode={isDark ? "dark" : "light"}
               onToggle={onToggleMode}
             />
-            {user ? (
+            {authState === "loading" ? (
+              <AccountActionSkeleton />
+            ) : user ? (
               <>
                 <Button
                   aria-controls={
@@ -431,5 +444,22 @@ export function PortfolioAppBar({
         </Toolbar>
       </Container>
     </AppBar>
+  );
+}
+
+function AccountActionSkeleton() {
+  return (
+    <Stack
+      aria-label="Loading account"
+      direction="row"
+      spacing={0.75}
+      sx={{ alignItems: "center", flexShrink: 0, px: 0.75 }}
+    >
+      <Skeleton animation="wave" variant="circular" sx={{ height: 28, width: 28 }} />
+      <Box sx={{ display: { xs: "none", sm: "block" }, width: { sm: 96, md: 132 } }}>
+        <Skeleton animation="wave" height={14} width="82%" />
+        <Skeleton animation="wave" height={11} width="48%" />
+      </Box>
+    </Stack>
   );
 }
