@@ -43,7 +43,10 @@ export const navItems = [
 
 export const profileSnapshot = [
   ["Location", "Davao City, Philippines"],
-  ["Core stack", "Next.js, React, TypeScript, Django"],
+  [
+    "Core stack",
+    "Next.js, React, TypeScript, Django, Neon, Vercel Blob",
+  ],
   ["Production scope", "60,000+ registered users"],
   [
     "Current focus",
@@ -74,6 +77,7 @@ export const skills = {
     "Python",
     "REST API Design",
     "PostgreSQL",
+    "Neon Serverless Postgres",
     "NextAuth",
   ],
   "Architecture & Systems": [
@@ -87,6 +91,7 @@ export const skills = {
     "Docker",
     "NGINX",
     "Vercel",
+    "Vercel Blob",
     "Railway",
     "Git",
     "GitHub",
