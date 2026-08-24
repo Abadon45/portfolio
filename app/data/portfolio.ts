@@ -97,6 +97,7 @@ export const skills = {
     "GitHub",
     "Puck Page Builder",
     "Xendit",
+    "Stripe",
     "Webhooks",
   ],
 };
@@ -140,6 +141,7 @@ export const projects: Project[] = [
   {
     eyebrow: "Commerce Systems",
     title: "Checkout, cart, Xendit payments, and cross-device continuation",
+    href: "/payments",
     summary:
       "Delivered end-to-end checkout workflows with server-owned order state, address handling, payment confirmation, and webhook-backed processing.",
     details: [
@@ -217,6 +219,14 @@ export const landingPages: LandingPage[] = [
     href: "/twc-ecommerce",
     eyebrow: "Portfolio reconstruction",
     actionLabel: "Open ecommerce demo",
+  },
+  {
+    title: "Payments Lab",
+    summary:
+      "An interactive comparison of Xendit invoice payments and Stripe Checkout, focused on server-side verification and idempotent fulfillment.",
+    href: "/payments",
+    eyebrow: "Payment integration study",
+    actionLabel: "Open payments lab",
   },
   {
     title: "Techno Wealth Creators",
