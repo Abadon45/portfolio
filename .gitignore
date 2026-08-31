@@ -18,3 +18,6 @@ notes/
 # TypeScript incremental build metadata
 *.tsbuildinfo
 .vercel
+
+# Prisma Client is generated during install/build.
+lib/generated/prisma/

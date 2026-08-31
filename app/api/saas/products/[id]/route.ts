@@ -3,6 +3,7 @@ import {
   updateSaaSProduct,
   type ProductMutation,
 } from "../../../../../lib/saasDemoRepository";
+import { getAdminPortfolioUser } from "../../../../../lib/portfolioAuth";
 
 export const runtime = "nodejs";
 
@@ -21,6 +22,14 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  const admin = await getAdminPortfolioUser();
+  if (!admin) {
+    return NextResponse.json(
+      { message: "Administrator access is required." },
+      { status: 403 },
+    );
+  }
+
   const payload: unknown = await request.json().catch(() => null);
 
   if (!isProductMutation(payload)) {

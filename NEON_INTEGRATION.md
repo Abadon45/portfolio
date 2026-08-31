@@ -1,7 +1,8 @@
 # Neon integration
 
-The portfolio now has a server-only Neon boundary. It is intentionally disconnected until a
-database URL and the real schema are verified.
+The portfolio now has a server-only Neon boundary. Prisma owns the application schemas and the
+generated client is used for the storefront repository. The managed `neon_auth` schema remains
+outside Prisma’s schema and must not be migrated by this project.
 
 ## Local setup
 
@@ -31,6 +32,11 @@ existing sanitized ecommerce JSON with:
 ```bash
 node --env-file=.env.local scripts/bootstrap-ecommerce-products.mjs
 ```
+
+The catalog table also stores lifecycle, pricing, merchandising, SEO, shipping-profile, package
+dimension, source-snapshot, and image-provenance fields. Product images remain public URLs in the
+catalog and can point to the source catalog, another public image host, or Vercel Blob; uploading
+an image to Blob is optional.
 
 ## Portfolio authentication model
 
@@ -72,8 +78,12 @@ The SaaS route still uses sanitized fixtures until the schema is verified. Integ
 5. Subscription and plan features
 6. Authenticated mutations
 
-Do not run Prisma or Drizzle migrations against the existing Django database. The backend already
-owns that schema. Add a separate ORM only if the portfolio receives its own Neon schema.
+Do not run Prisma or Drizzle migrations against an existing Django-owned database. The portfolio
+has its own `portfolio_auth` and `saas_demo` schemas, which are described in `prisma/schema.prisma`
+and managed through the versioned Prisma migrations. Neon’s managed `neon_auth` schema remains
+excluded.
+
+See `PRISMA.md` for the Prisma workflow and baseline migration rules.
 
 ## Current endpoints
 
@@ -90,7 +100,8 @@ owns that schema. Add a separate ORM only if the portfolio receives its own Neon
 
 ## Vercel Blob images
 
-The product model stores image URLs in `saas_demo.store_products.images`. The upload route uses
+The product model stores image URLs in `saas_demo.store_products.images` and structured provenance
+in `saas_demo.store_products.image_sources`. The upload route uses
 Vercel Blob's server SDK and accepts a multipart form field named `file`. Create a Blob store in
 the Vercel project, set its access mode to public for storefront images, and add the generated
 the generated Blob store ID to `.env.local` and Vercel project environment variables. Vercel may
@@ -98,11 +109,13 @@ provide `BLOB_UPLOAD_SECRET_STORE_ID` for OIDC-based access; older setups may in
 `BLOB_READ_WRITE_TOKEN`. Also set a separate random `BLOB_UPLOAD_SECRET`; callers must send it as
 `x-blob-upload-secret`.
 
-Example request:
+The upload route requires an authenticated portfolio administrator session.
+
+Example request from a client that has an admin session cookie:
 
 ```bash
 curl -X POST \
-  -H "x-blob-upload-secret: YOUR_UPLOAD_SECRET" \
+  -b "portfolio_session=YOUR_ADMIN_SESSION_TOKEN" \
   -F "file=@./product.jpg" \
   http://localhost:3000/api/ecommerce/products/PRODUCT_SLUG/images
 ```

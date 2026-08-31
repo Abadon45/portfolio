@@ -32,7 +32,7 @@ import { useTwcAlert } from "../../components/portfolio/TwcAlertSystem";
 import TwcCartDrawer from "./TwcCartDrawer";
 import TwcEshopNavbar from "./TwcEshopNavbar";
 import TwcProductCard from "./TwcProductCard";
-import { products, useTwcStore } from "./TwcStoreProvider";
+import { useTwcStore, type StoreProduct } from "./TwcStoreProvider";
 import { createTwcEcommerceTheme, useStorefrontMode, useStorefrontTheme } from "./twcEcommerceTheme";
 import TwcStoreFooter from "./TwcStoreFooter";
 
@@ -45,8 +45,8 @@ export default function TwcProductDetailPage({ slug }: { slug: string }) {
 
 function ThemedProductDetailPage({ slug }: { slug: string }) {
   const router = useRouter();
+  const { cart, addToCart, products } = useTwcStore();
   const product = products.find((item) => item.slug === slug);
-  const { cart, addToCart } = useTwcStore();
   const { toastSuccess } = useTwcAlert();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { themeName } = useStorefrontTheme();
@@ -78,7 +78,7 @@ function ThemedProductDetailPage({ slug }: { slug: string }) {
     toastSuccess(`${product.name} added to your basket`);
     setDrawerOpen(true);
   };
-  const addRelated = (item: (typeof products)[number]) => {
+  const addRelated = (item: StoreProduct) => {
     addToCart(item);
     toastSuccess(`${item.name} added to your basket`);
     setDrawerOpen(true);
@@ -103,6 +103,7 @@ function ThemedProductDetailPage({ slug }: { slug: string }) {
         />
         <TwcCartDrawer onClose={() => setDrawerOpen(false)} open={drawerOpen} />
         <ProductDetail
+          products={products}
           product={product}
           added={added}
           onAdd={add}
@@ -116,29 +117,31 @@ function ThemedProductDetailPage({ slug }: { slug: string }) {
 }
 
 function ProductDetail({
+  products,
   product,
   added,
   onAdd,
   onRelatedAdd,
 }: {
-  product: (typeof products)[number];
+  products: StoreProduct[];
+  product: StoreProduct;
   added: boolean;
   onAdd: (quantity: number) => void;
-  onRelatedAdd: (product: (typeof products)[number]) => void;
+  onRelatedAdd: (product: StoreProduct) => void;
 }) {
   const router = useRouter();
   const { themeConfig } = useStorefrontTheme();
   if (themeConfig.productDetailVariant === "editorial") {
-    return <EditorialProductDetail product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
+    return <EditorialProductDetail products={products} product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
   }
   if (themeConfig.productDetailVariant === "conversion") {
-    return <MarketplaceProductDetail product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
+    return <MarketplaceProductDetail products={products} product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
   }
   if (themeConfig.productDetailVariant === "corporate") {
-    return <CorporateProductDetail product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
+    return <CorporateProductDetail products={products} product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
   }
   if (themeConfig.productDetailVariant === "wellness") {
-    return <WellnessProductDetail product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
+    return <WellnessProductDetail products={products} product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
   }
   const isEditorial = false;
   const isConversion = false;
@@ -512,10 +515,11 @@ function ProductDetail({
 }
 
 type DetailProps = {
-  product: (typeof products)[number];
+  products: StoreProduct[];
+  product: StoreProduct;
   added: boolean;
   onAdd: (quantity: number) => void;
-  onRelatedAdd: (product: (typeof products)[number]) => void;
+  onRelatedAdd: (product: StoreProduct) => void;
 };
 
 function ProductGallery({ product, editorial = false }: { product: DetailProps["product"]; editorial?: boolean }) {
@@ -551,7 +555,7 @@ function ProductFacts({ product }: { product: DetailProps["product"] }) {
   return <Stack divider={<Divider flexItem />} spacing={1.5} sx={{ borderTop: 1, borderColor: "divider", mt: 3, pt: 2 }}>{[["Shop", product.shop], ["Category", product.category], ["Availability", product.unlimitedStock ? "Available for demo" : `${product.stock} units`], ["Delivery", "Calculated at checkout"]].map(([label, value]) => <Stack direction="row" key={label} sx={{ justifyContent: "space-between", gap: 2 }}><Typography color="text.secondary" sx={{ fontSize: 13 }}>{label}</Typography><Typography sx={{ fontSize: 13, fontWeight: 800, textAlign: "right" }}>{value}</Typography></Stack>)}</Stack>;
 }
 
-function RelatedProducts({ product, onAdd }: { product: DetailProps["product"]; onAdd: DetailProps["onRelatedAdd"] }) {
+function RelatedProducts({ products, product, onAdd }: { products: StoreProduct[]; product: DetailProps["product"]; onAdd: DetailProps["onRelatedAdd"] }) {
   const related = products.filter((item) => item.slug !== product.slug && item.category === product.category).slice(0, 4);
   const router = useRouter();
   if (!related.length) return null;
@@ -560,20 +564,20 @@ function RelatedProducts({ product, onAdd }: { product: DetailProps["product"]; 
 
 function EditorialProductDetail(props: DetailProps) {
   const router = useRouter();
-  return <Container maxWidth="lg" sx={{ py: { xs: 3, md: 7 } }}><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />} sx={{ color: "text.secondary", mb: 3 }}>Back to the edit</Button><Box sx={{ display: "grid", gap: { xs: 4, md: 9 }, gridTemplateColumns: { xs: "1fr", md: "1.15fr .85fr" } }}><ProductGallery editorial product={props.product} /><Box sx={{ alignSelf: "center" }}><PurchasePanel {...props} eyebrow="THE EDIT" /><Typography color="text.secondary" sx={{ borderLeft: 2, borderColor: "primary.main", lineHeight: 1.8, mt: 4, pl: 2 }}>A considered addition to a slower, more intentional daily ritual.</Typography></Box></Box><Paper sx={{ bgcolor: "background.paper", borderTop: 1, borderColor: "divider", borderRadius: 0, mt: { xs: 7, md: 12 }, p: { xs: 2.5, sm: 3.5, md: 5 } }}><Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 30, md: 44 }, fontWeight: 500 }}>The story behind the choice.</Typography><Divider sx={{ borderColor: "divider", my: { xs: 2, md: 3 } }} /><Typography color="text.secondary" sx={{ lineHeight: 1.9, maxWidth: 720, whiteSpace: "pre-line" }}>{props.product.details || props.product.description}</Typography></Paper><RelatedProducts product={props.product} onAdd={props.onRelatedAdd} /></Container>;
+  return <Container maxWidth="lg" sx={{ py: { xs: 3, md: 7 } }}><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />} sx={{ color: "text.secondary", mb: 3 }}>Back to the edit</Button><Box sx={{ display: "grid", gap: { xs: 4, md: 9 }, gridTemplateColumns: { xs: "1fr", md: "1.15fr .85fr" } }}><ProductGallery editorial product={props.product} /><Box sx={{ alignSelf: "center" }}><PurchasePanel {...props} eyebrow="THE EDIT" /><Typography color="text.secondary" sx={{ borderLeft: 2, borderColor: "primary.main", lineHeight: 1.8, mt: 4, pl: 2 }}>A considered addition to a slower, more intentional daily ritual.</Typography></Box></Box><Paper sx={{ bgcolor: "background.paper", borderTop: 1, borderColor: "divider", borderRadius: 0, mt: { xs: 7, md: 12 }, p: { xs: 2.5, sm: 3.5, md: 5 } }}><Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 30, md: 44 }, fontWeight: 500 }}>The story behind the choice.</Typography><Divider sx={{ borderColor: "divider", my: { xs: 2, md: 3 } }} /><Typography color="text.secondary" sx={{ lineHeight: 1.9, maxWidth: 720, whiteSpace: "pre-line" }}>{props.product.details || props.product.description}</Typography></Paper><RelatedProducts products={props.products} product={props.product} onAdd={props.onRelatedAdd} /></Container>;
 }
 
 function MarketplaceProductDetail(props: DetailProps) {
   const router = useRouter();
-  return <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 } }}><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />} sx={{ color: "text.secondary", mb: 2 }}>Back to results</Button><Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: ".9fr 1.1fr" } }}><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: { xs: 1, md: 2 } }}><ProductGallery product={props.product} /></Paper><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: { xs: 2, md: 4 } }}><PurchasePanel {...props} eyebrow="FAST CHECKOUT" /><ProductFacts product={props.product} /></Paper></Box><RelatedProducts product={props.product} onAdd={props.onRelatedAdd} /></Container>;
+  return <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 } }}><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />} sx={{ color: "text.secondary", mb: 2 }}>Back to results</Button><Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: ".9fr 1.1fr" } }}><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: { xs: 1, md: 2 } }}><ProductGallery product={props.product} /></Paper><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: { xs: 2, md: 4 } }}><PurchasePanel {...props} eyebrow="FAST CHECKOUT" /><ProductFacts product={props.product} /></Paper></Box><RelatedProducts products={props.products} product={props.product} onAdd={props.onRelatedAdd} /></Container>;
 }
 
 function WellnessProductDetail(props: DetailProps) {
   const router = useRouter();
-  return <Container maxWidth="xl" sx={{ py: { xs: 3, md: 7 } }}><Breadcrumbs sx={{ mb: 3 }}><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />} sx={{ color: "text.secondary", pl: 0 }}>Wellness shop</Button><Typography color="text.primary" noWrap sx={{ maxWidth: 360, fontWeight: 800 }}>{props.product.name}</Typography></Breadcrumbs><Box sx={{ display: "grid", gap: { xs: 3, lg: 6 }, gridTemplateColumns: { xs: "1fr", lg: "1.05fr .95fr" } }}><Box><ProductGallery product={props.product} /><Box sx={{ bgcolor: "#e5efe2", mt: 2, p: { xs: 2, md: 3 } }}><Typography sx={{ color: "#347153", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>HOW IT FITS</Typography><Typography sx={{ color: "#173b27", fontSize: 20, fontWeight: 850, mt: .5 }}>A practical addition to an everyday routine.</Typography><Typography sx={{ color: "#496653", lineHeight: 1.7, mt: 1 }}>Explore this product as part of your own routine. This demo description is intentionally general and does not make medical or performance claims.</Typography></Box></Box><Paper sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 0, p: { xs: 2.5, md: 5 } }}><PurchasePanel {...props} eyebrow="WELLNESS COLLECTION" /><ProductFacts product={props.product} /></Paper></Box><Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, mt: { xs: 5, md: 8 } }}><Paper sx={{ bgcolor: "#f0e8dc", borderRadius: 0, p: { xs: 2.5, md: 4 } }}><Typography sx={{ color: "#9a6634", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>PRODUCT DESCRIPTION</Typography><Typography component="h2" sx={{ color: "#3d352c", fontSize: 28, fontWeight: 850, mt: 1 }}>What to know before you choose.</Typography><Typography sx={{ color: "#665e54", lineHeight: 1.85, mt: 1.5, whiteSpace: "pre-line" }}>{props.product.description}</Typography></Paper><Paper sx={{ bgcolor: "#fff", border: 1, borderColor: "divider", borderRadius: 0, p: { xs: 2.5, md: 4 } }}><Typography sx={{ color: "#347153", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>PRODUCT DETAILS</Typography><Typography component="h2" sx={{ color: "#173b27", fontSize: 28, fontWeight: 850, mt: 1 }}>Simple, useful context.</Typography><Typography sx={{ color: "#607467", lineHeight: 1.85, mt: 1.5, whiteSpace: "pre-line" }}>{props.product.details || "Product details are presented from the shared TWC catalog fixture."}</Typography></Paper></Box><RelatedProducts product={props.product} onAdd={props.onRelatedAdd} /></Container>;
+  return <Container maxWidth="xl" sx={{ py: { xs: 3, md: 7 } }}><Breadcrumbs sx={{ mb: 3 }}><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />} sx={{ color: "text.secondary", pl: 0 }}>Wellness shop</Button><Typography color="text.primary" noWrap sx={{ maxWidth: 360, fontWeight: 800 }}>{props.product.name}</Typography></Breadcrumbs><Box sx={{ display: "grid", gap: { xs: 3, lg: 6 }, gridTemplateColumns: { xs: "1fr", lg: "1.05fr .95fr" } }}><Box><ProductGallery product={props.product} /><Box sx={{ bgcolor: "#e5efe2", mt: 2, p: { xs: 2, md: 3 } }}><Typography sx={{ color: "#347153", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>HOW IT FITS</Typography><Typography sx={{ color: "#173b27", fontSize: 20, fontWeight: 850, mt: .5 }}>A practical addition to an everyday routine.</Typography><Typography sx={{ color: "#496653", lineHeight: 1.7, mt: 1 }}>Explore this product as part of your own routine. This demo description is intentionally general and does not make medical or performance claims.</Typography></Box></Box><Paper sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 0, p: { xs: 2.5, md: 5 } }}><PurchasePanel {...props} eyebrow="WELLNESS COLLECTION" /><ProductFacts product={props.product} /></Paper></Box><Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, mt: { xs: 5, md: 8 } }}><Paper sx={{ bgcolor: "#f0e8dc", borderRadius: 0, p: { xs: 2.5, md: 4 } }}><Typography sx={{ color: "#9a6634", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>PRODUCT DESCRIPTION</Typography><Typography component="h2" sx={{ color: "#3d352c", fontSize: 28, fontWeight: 850, mt: 1 }}>What to know before you choose.</Typography><Typography sx={{ color: "#665e54", lineHeight: 1.85, mt: 1.5, whiteSpace: "pre-line" }}>{props.product.description}</Typography></Paper><Paper sx={{ bgcolor: "#fff", border: 1, borderColor: "divider", borderRadius: 0, p: { xs: 2.5, md: 4 } }}><Typography sx={{ color: "#347153", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>PRODUCT DETAILS</Typography><Typography component="h2" sx={{ color: "#173b27", fontSize: 28, fontWeight: 850, mt: 1 }}>Simple, useful context.</Typography><Typography sx={{ color: "#607467", lineHeight: 1.85, mt: 1.5, whiteSpace: "pre-line" }}>{props.product.details || "Product details are presented from the shared TWC catalog fixture."}</Typography></Paper></Box><RelatedProducts products={props.products} product={props.product} onAdd={props.onRelatedAdd} /></Container>;
 }
 
 function CorporateProductDetail(props: DetailProps) {
   const router = useRouter();
-  return <Container maxWidth="xl" sx={{ py: { xs: 3, md: 6 } }}><Stack direction={{ xs: "column", md: "row" }} sx={{ alignItems: { md: "end" }, justifyContent: "space-between", mb: 3, gap: 2 }}><Box><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>CORPORATE COLLECTIONS</Typography><Typography component="h1" sx={{ fontSize: { xs: 34, md: 52 }, fontWeight: 900, letterSpacing: "-.07em", mt: .5 }}>Product specification</Typography></Box><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />}>Back to catalog</Button></Stack><Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", lg: "1fr .9fr" } }}><ProductGallery product={props.product} /><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: { xs: 2, md: 4 } }}><PurchasePanel {...props} eyebrow="PRODUCT BRIEF" /><ProductFacts product={props.product} /></Paper></Box><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, mt: 3, p: { xs: 2, md: 4 } }}><Typography component="h2" sx={{ fontSize: 26, fontWeight: 900 }}>Details and specifications</Typography><Divider sx={{ my: 2 }} /><Typography color="text.secondary" sx={{ lineHeight: 1.9, whiteSpace: "pre-line" }}>{props.product.details || props.product.description}</Typography></Paper><RelatedProducts product={props.product} onAdd={props.onRelatedAdd} /></Container>;
+  return <Container maxWidth="xl" sx={{ py: { xs: 3, md: 6 } }}><Stack direction={{ xs: "column", md: "row" }} sx={{ alignItems: { md: "end" }, justifyContent: "space-between", mb: 3, gap: 2 }}><Box><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>CORPORATE COLLECTIONS</Typography><Typography component="h1" sx={{ fontSize: { xs: 34, md: 52 }, fontWeight: 900, letterSpacing: "-.07em", mt: .5 }}>Product specification</Typography></Box><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />}>Back to catalog</Button></Stack><Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", lg: "1fr .9fr" } }}><ProductGallery product={props.product} /><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: { xs: 2, md: 4 } }}><PurchasePanel {...props} eyebrow="PRODUCT BRIEF" /><ProductFacts product={props.product} /></Paper></Box><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, mt: 3, p: { xs: 2, md: 4 } }}><Typography component="h2" sx={{ fontSize: 26, fontWeight: 900 }}>Details and specifications</Typography><Divider sx={{ my: 2 }} /><Typography color="text.secondary" sx={{ lineHeight: 1.9, whiteSpace: "pre-line" }}>{props.product.details || props.product.description}</Typography></Paper><RelatedProducts products={props.products} product={props.product} onAdd={props.onRelatedAdd} /></Container>;
 }

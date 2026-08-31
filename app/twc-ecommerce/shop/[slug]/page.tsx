@@ -1,10 +1,10 @@
 import TwcProductDetailPage from "../../_components/TwcProductDetailPage";
-import { products } from "../../_components/twcProductCatalog";
+import { getStoreProducts } from "../../../../lib/storeProductRepository";
 import type { Metadata } from "next";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const product = products.find((item) => item.slug === slug);
+  const product = (await getStoreProducts(slug).catch(() => []))[0];
 
   if (!product) return { title: "Product not found | TWC Ecommerce" };
 

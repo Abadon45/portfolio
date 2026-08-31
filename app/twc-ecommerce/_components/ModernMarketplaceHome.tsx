@@ -9,12 +9,12 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Box, Button, Chip, Container, Divider, Paper, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import TwcProductCard from "./TwcProductCard";
-import { products, type StoreProduct } from "./TwcStoreProvider";
+import type { StoreProduct } from "./TwcStoreProvider";
 import { StorefrontCarousel } from "./StorefrontPrimitives";
 
-type Props = { categories: string[]; onAdd: (product: StoreProduct) => void; onShop: (category?: string) => void };
+type Props = { categories: string[]; products: StoreProduct[]; onAdd: (product: StoreProduct) => void; onShop: (category?: string) => void };
 
-export default function ModernMarketplaceHome({ categories, onAdd, onShop }: Props) {
+export default function ModernMarketplaceHome({ categories, products, onAdd, onShop }: Props) {
   const router = useRouter();
   const featured = products.slice(0, 8);
   const popular = products.slice(8, 16);

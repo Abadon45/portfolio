@@ -8,17 +8,18 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Box, Button, Chip, Container, Divider, Paper, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { products, type StoreProduct } from "./TwcStoreProvider";
+import { useTwcStore, type StoreProduct } from "./TwcStoreProvider";
 import TwcProductCard from "./TwcProductCard";
 import WellnessOrganicHome from "./WellnessOrganicHome";
 import ModernMarketplaceHome from "./ModernMarketplaceHome";
 import CorporateCommerceHome from "./CorporateCommerceHome";
-import { useStorefrontTheme } from "./twcEcommerceTheme";
-import { premiumMedia, selectPremiumProducts } from "./storefrontContent";
+import { useStorefrontMode, useStorefrontTheme } from "./twcEcommerceTheme";
+import { premiumMedia, selectBeautyCategories, selectPremiumProducts } from "./storefrontContent";
 import { StorefrontCarousel } from "./StorefrontPrimitives";
 
 export default function TwcHomeView({ onAdd }: { onAdd: (product: StoreProduct) => void }) {
   const { themeName } = useStorefrontTheme();
+  const { products } = useTwcStore();
   const router = useRouter();
   useEffect(() => {
     const section = new URLSearchParams(window.location.search).get("section");
@@ -30,19 +31,22 @@ export default function TwcHomeView({ onAdd }: { onAdd: (product: StoreProduct) 
   const categories = [...new Set(products.map((product) => product.category))].slice(0, 8);
   const openShop = (category?: string) => router.push(category ? `/twc-ecommerce/shop?category=${encodeURIComponent(category)}` : "/twc-ecommerce/shop");
 
-  if (themeName === "premium-beauty") return <PremiumBeautyHome categories={categories} onAdd={onAdd} onShop={openShop} />;
-  if (themeName === "modern-marketplace") return <ModernMarketplaceHome categories={categories} onAdd={onAdd} onShop={openShop} />;
-  if (themeName === "corporate-commerce") return <CorporateCommerceHome categories={categories} onAdd={onAdd} onShop={openShop} />;
-  return <WellnessOrganicHome categories={categories} onAdd={onAdd} onShop={openShop} />;
+  if (themeName === "premium-beauty") return <PremiumBeautyHome categories={categories} products={products} onAdd={onAdd} onShop={openShop} />;
+  if (themeName === "modern-marketplace") return <ModernMarketplaceHome categories={categories} products={products} onAdd={onAdd} onShop={openShop} />;
+  if (themeName === "corporate-commerce") return <CorporateCommerceHome categories={categories} products={products} onAdd={onAdd} onShop={openShop} />;
+  return <WellnessOrganicHome categories={categories} products={products} onAdd={onAdd} onShop={openShop} />;
 }
 
-function PremiumBeautyHome({ categories, onAdd, onShop }: HomeProps) {
+function PremiumBeautyHome({ categories, products, onAdd, onShop }: HomeProps) {
   const { themeConfig } = useStorefrontTheme();
   const curatedProducts = selectPremiumProducts(products);
+  const beautyCategories = selectBeautyCategories(products);
+  const spotlight = curatedProducts[0];
   return <>
     <PremiumHero onShop={() => onShop()} />
+    {spotlight && <BeautySpotlight product={spotlight} onAdd={onAdd} onShop={() => onShop()} />}
     <Box sx={{ bgcolor: "background.paper", py: { xs: 5, md: 8 } }}><Container maxWidth="lg"><Stack direction={{ xs: "column", sm: "row" }} sx={{ alignItems: { sm: "end" }, justifyContent: "space-between", mb: 3, gap: 2 }}><Box><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em" }}>THE NEW EDIT</Typography><Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 34, md: 50 }, fontWeight: 500 }}>Featured collection</Typography></Box><Button onClick={() => onShop()} endIcon={<ArrowForwardRoundedIcon />}>View all products</Button></Stack><ProductRail products={curatedProducts.slice(0, 4)} onAdd={onAdd} /></Container></Box>
-    <PremiumCategoryGrid categories={premiumMedia.categories} onSelect={onShop} />
+    <PremiumCategoryGrid categories={beautyCategories} onSelect={onShop} />
     <Container maxWidth="lg"><PremiumEditorial id="journal" image={premiumMedia.editorial.image} title="The beauty of a considered routine." copy="A little less noise. A little more intention. Explore products selected for the small rituals that help a day feel like your own." onShop={() => onShop()} /><PremiumCampaign image={premiumMedia.editorial.campaign} onShop={() => onShop()} /><PremiumAbout /><Box sx={{ py: { xs: 6, md: 10 } }}><SectionHeader eyebrow="DISCOVER YOUR NEXT FAVORITE" title="A collection with room to browse" action={<Button onClick={() => onShop()}>Shop the full edit</Button>} /><Box sx={{ display: "grid", gap: { xs: 2, md: 3 }, gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(3, 1fr)", md: "repeat(4, 1fr)" } }}>{curatedProducts.slice(4, 8).map((product) => <TwcProductCard key={product.slug} product={product} onAdd={() => onAdd(product)} />)}</Box></Box></Container>
     <Box sx={{ bgcolor: themeConfig.heroText, color: "#fff", px: 2, py: { xs: 7, md: 11 } }}><Container maxWidth="md" sx={{ textAlign: "center" }}><Typography sx={{ color: themeConfig.accent, fontSize: 11, fontWeight: 900, letterSpacing: ".15em" }}>A NOTE FROM TWC</Typography><Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 34, md: 56 }, fontWeight: 500, lineHeight: 1.04, mt: 1 }}>Good things are worth taking your time with.</Typography><Typography sx={{ color: "rgba(255,255,255,.72)", lineHeight: 1.8, mt: 2, mx: "auto", maxWidth: 580 }}>A portfolio storefront study inspired by the calm confidence of modern direct-to-consumer brands.</Typography><Button onClick={() => onShop()} sx={{ bgcolor: "#fff", color: themeConfig.heroText, mt: 3 }}>Start exploring</Button></Container></Box>
     <Container maxWidth="md"><PremiumNewsletter /></Container>
@@ -50,11 +54,19 @@ function PremiumBeautyHome({ categories, onAdd, onShop }: HomeProps) {
 }
 
 function PremiumHero({ onShop }: { onShop: () => void }) {
-  return <StorefrontCarousel interval={7000} label="Premium Beauty editorial hero">{premiumMedia.heroes.map((slide) => <Box key={slide.title} sx={{ minHeight: { xs: 620, md: 720 }, position: "relative" }}><Box component="img" src={slide.image} alt="" sx={{ height: "100%", inset: 0, objectFit: "cover", position: "absolute", width: "100%" }} /><Box sx={{ bgcolor: "rgba(35,18,24,.28)", inset: 0, position: "absolute" }} /><Container maxWidth="lg" sx={{ height: "100%", position: "relative" }}><Stack sx={{ color: "#fff", justifyContent: "center", maxWidth: 580, minHeight: { xs: 620, md: 720 }, pb: 6, px: { xs: 2, md: 0 } }} spacing={2}><Typography sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".18em" }}>{slide.eyebrow}</Typography><Typography component="h1" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 52, md: 84 }, fontWeight: 500, letterSpacing: "-.04em", lineHeight: .95 }}>{slide.title}</Typography><Typography sx={{ color: "rgba(255,255,255,.86)", fontSize: 16, lineHeight: 1.8, maxWidth: 470 }}>{slide.description}</Typography><Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ pt: 1 }}><Button onClick={onShop} sx={{ alignSelf: "flex-start", bgcolor: "#fff", color: "#3f2631", px: 3 }}>Shop the edit</Button><Button onClick={onShop} sx={{ alignSelf: "flex-start", borderColor: "rgba(255,255,255,.6)", color: "#fff", px: 3 }} variant="outlined">Explore collections</Button></Stack></Stack></Container></Box>)}</StorefrontCarousel>;
+  return <StorefrontCarousel interval={7000} label="Premium Beauty editorial hero">{premiumMedia.heroes.map((slide) => <Box key={slide.title} sx={{ minHeight: { xs: 620, md: 720 }, position: "relative" }}><Box component="img" src={slide.image} alt="" sx={{ height: "100%", inset: 0, objectFit: "cover", position: "absolute", width: "100%" }} /><Box sx={{ bgcolor: "rgba(35,18,24,.42)", inset: 0, position: "absolute" }} /><Container maxWidth="lg" sx={{ height: "100%", position: "relative" }}><Stack sx={{ color: "#fff", justifyContent: "center", maxWidth: 580, minHeight: { xs: 620, md: 720 }, pb: 6, px: { xs: 2, md: 0 } }} spacing={2}><Typography sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".18em" }}>{slide.eyebrow}</Typography><Typography component="h1" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 52, md: 84 }, fontWeight: 500, letterSpacing: "-.04em", lineHeight: .95 }}>{slide.title}</Typography><Typography sx={{ color: "rgba(255,255,255,.9)", fontSize: 16, lineHeight: 1.8, maxWidth: 470 }}>{slide.description}</Typography><Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ pt: 1 }}><Button onClick={onShop} sx={{ alignSelf: "flex-start", bgcolor: "#fff", color: "#3f2631", px: 3 }}>Shop beauty</Button><Button onClick={onShop} sx={{ alignSelf: "flex-start", borderColor: "rgba(255,255,255,.75)", color: "#fff", px: 3 }} variant="outlined">Explore collections</Button></Stack></Stack></Container></Box>)}</StorefrontCarousel>;
+}
+
+function BeautySpotlight({ product, onAdd, onShop }: { product: StoreProduct; onAdd: (product: StoreProduct) => void; onShop: () => void }) {
+  const { mode } = useStorefrontMode();
+  const surface = mode === "dark" ? "background.paper" : "#f8efed";
+  return <Box sx={{ bgcolor: "background.paper", py: { xs: 6, md: 10 } }}><Container maxWidth="lg"><Stack direction={{ xs: "column", sm: "row" }} sx={{ alignItems: { sm: "end" }, justifyContent: "space-between", mb: 3, gap: 2 }}><Box><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em" }}>THE BEAUTY EDIT</Typography><Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 34, md: 50 }, fontWeight: 500 }}>A signature piece for your routine.</Typography></Box><Button onClick={onShop} endIcon={<ArrowForwardRoundedIcon />}>Shop the edit</Button></Stack><Box sx={{ bgcolor: surface, border: 1, borderColor: "divider", display: "grid", gap: { xs: 3, md: 7 }, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, p: { xs: 2, md: 4 } }}><Box component="img" src={product.image} alt={product.name} sx={{ height: { xs: 310, md: 420 }, objectFit: "contain", width: "100%" }} /><Stack sx={{ alignSelf: "center", maxWidth: 440 }} spacing={1.5}><Typography color="text.secondary" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".14em", textTransform: "uppercase" }}>{product.brand || "Beauty catalogue"}</Typography><Typography component="h3" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 30, md: 42 }, fontWeight: 500, lineHeight: 1.05 }}>{product.name}</Typography><Typography color="text.secondary" sx={{ lineHeight: 1.8 }}>{product.description}</Typography><Typography sx={{ fontSize: 21, fontWeight: 900, mt: 1 }}>₱{product.price.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</Typography><Button onClick={() => onAdd(product)} sx={{ alignSelf: "flex-start", mt: 1 }} variant="contained">Add to basket</Button></Stack></Box></Container></Box>;
 }
 
 function PremiumCategoryGrid({ categories, onSelect }: { categories: { label: string; query: string; image: string }[]; onSelect: (category: string) => void }) {
-  return <Box id="collections" sx={{ bgcolor: "#f4e7e4", py: { xs: 6, md: 10 }, scrollMarginTop: 90 }}><Container maxWidth="lg"><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em" }}>SHOP BY CATEGORY</Typography><Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 34, md: 50 }, fontWeight: 500, mt: .5 }}>Find your kind of beautiful.</Typography><Box sx={{ display: "grid", gap: { xs: 2, md: 3 }, gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, mt: 4 }}>{categories.map((category) => <Button key={category.label} onClick={() => onSelect(category.query)} sx={{ display: "block", p: 0, textAlign: "left", textTransform: "none" }}><Box sx={{ overflow: "hidden", position: "relative" }}><Box component="img" src={category.image} alt={category.label} sx={{ display: "block", height: { xs: 190, md: 300 }, objectFit: "cover", transition: "transform .45s", width: "100%", "&:hover": { transform: "scale(1.04)" } }} /><Box sx={{ bgcolor: "rgba(40,20,28,.25)", inset: 0, position: "absolute" }} /></Box><Typography sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, mt: 1 }}>{category.label}</Typography></Button>)}</Box></Container></Box>;
+  const { mode } = useStorefrontMode();
+  const sectionSurface = mode === "dark" ? "background.paper" : "#f4e7e4";
+  return <Box id="collections" sx={{ bgcolor: sectionSurface, py: { xs: 6, md: 10 }, scrollMarginTop: 90 }}><Container maxWidth="lg"><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em" }}>SHOP BY CATEGORY</Typography><Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 34, md: 50 }, fontWeight: 500, mt: .5 }}>Find your kind of beautiful.</Typography><Box sx={{ display: "grid", gap: { xs: 2, md: 3 }, gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, mt: 4 }}>{categories.map((category) => <Button key={category.label} onClick={() => onSelect(category.query)} sx={{ display: "block", p: 0, textAlign: "left", textTransform: "none" }}><Box sx={{ overflow: "hidden", position: "relative" }}><Box component="img" src={category.image} alt={category.label} sx={{ display: "block", height: { xs: 190, md: 300 }, objectFit: "cover", transition: "transform .45s", width: "100%", "&:hover": { transform: "scale(1.04)" } }} /><Box sx={{ bgcolor: "rgba(40,20,28,.25)", inset: 0, position: "absolute" }} /></Box><Typography sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, mt: 1 }}>{category.label}</Typography></Button>)}</Box></Container></Box>;
 }
 
 function PremiumEditorial({ id, image, title, copy, onShop }: { id?: string; image: string; title: string; copy: string; onShop: () => void }) {
@@ -62,8 +74,10 @@ function PremiumEditorial({ id, image, title, copy, onShop }: { id?: string; ima
 }
 
 function PremiumAbout() {
+  const { mode } = useStorefrontMode();
+  const cardSurface = mode === "dark" ? "background.paper" : "#f8efed";
   const values = [["Browse with intention", "A slower, more spacious product discovery experience for a portfolio storefront."], ["One engine underneath", "The presentation changes by template while cart, checkout, shipping, and order state stay shared."], ["Made for the edit", "Content, imagery, and hierarchy are composed as a complete storefront—not just a color theme."]];
-  return <Box id="about" sx={{ borderTop: 1, borderColor: "divider", py: { xs: 6, md: 9 }, scrollMarginTop: 90 }}><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em" }}>ABOUT THIS STOREFRONT</Typography><Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 34, md: 48 }, fontWeight: 500, mt: .5 }}>A visual study in considered commerce.</Typography><Box sx={{ display: "grid", gap: { xs: 2, md: 3 }, gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, mt: 4 }}>{values.map(([title, copy]) => <Box key={title} sx={{ bgcolor: "#f8efed", p: { xs: 2.5, md: 3.5 } }}><Typography sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 23 }}>{title}</Typography><Typography color="text.secondary" sx={{ lineHeight: 1.8, mt: 1 }}>{copy}</Typography></Box>)}</Box></Box>;
+  return <Box id="about" sx={{ borderTop: 1, borderColor: "divider", py: { xs: 6, md: 9 }, scrollMarginTop: 90 }}><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em" }}>ABOUT THIS STOREFRONT</Typography><Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 34, md: 48 }, fontWeight: 500, mt: .5 }}>A visual study in considered commerce.</Typography><Box sx={{ display: "grid", gap: { xs: 2, md: 3 }, gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, mt: 4 }}>{values.map(([title, copy]) => <Box key={title} sx={{ bgcolor: cardSurface, border: 1, borderColor: "divider", p: { xs: 2.5, md: 3.5 } }}><Typography sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 23 }}>{title}</Typography><Typography color="text.secondary" sx={{ lineHeight: 1.8, mt: 1 }}>{copy}</Typography></Box>)}</Box></Box>;
 }
 
 function PremiumCampaign({ image, onShop }: { image: string; onShop: () => void }) {
@@ -74,14 +88,14 @@ function PremiumNewsletter() {
   return <Box sx={{ borderBottom: 1, borderColor: "divider", py: { xs: 7, md: 10 }, textAlign: "center" }}><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em" }}>STAY IN THE KNOW</Typography><Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 46 }, fontWeight: 500, mt: .5 }}>A better kind of inbox.</Typography><Typography color="text.secondary" sx={{ lineHeight: 1.8, mt: 1, mx: "auto", maxWidth: 520 }}>Demo newsletter content for new collections, considered finds, and occasional notes from the TWC edit.</Typography><Button sx={{ mt: 2 }} variant="outlined">Join the list</Button></Box>;
 }
 
-function WellnessHome({ categories, onAdd, onShop }: HomeProps) {
+function WellnessHome({ categories, products, onAdd, onShop }: HomeProps) {
   return <>
     <LifestyleHero onShop={onShop} />
     <Container maxWidth="xl"><TrustStrip /><Box id="collections" sx={{ scrollMarginTop: 90 }}><SectionHeader eyebrow="FIND YOUR FIT" title="Shop by wellness goal" /><CategoryTiles categories={categories} onSelect={onShop} /></Box><Box id="featured" sx={{ scrollMarginTop: 90 }}><SectionHeader eyebrow="CUSTOMER FAVORITES" title="Trending right now" action={<Button onClick={() => onShop()}>Shop all</Button>} /><ProductRail products={products.slice(0, 4)} onAdd={onAdd} /></Box><Box id="story" sx={{ scrollMarginTop: 90 }}><StoryBlock onShop={onShop} /></Box><Box id="benefits" sx={{ scrollMarginTop: 90 }}><BenefitBlock /></Box><Box id="faq" sx={{ scrollMarginTop: 90 }}><FaqBlock /></Box><CtaBlock onShop={onShop} /></Container>
   </>;
 }
 
-function MarketplaceHome({ categories, onAdd, onShop }: HomeProps) {
+function MarketplaceHome({ categories, products, onAdd, onShop }: HomeProps) {
   return <>
     <Container maxWidth="xl" sx={{ pt: 2 }}><CategoryTiles categories={categories} onSelect={onShop} compact /></Container>
     <MarketplaceHero onShop={onShop} />
@@ -89,14 +103,14 @@ function MarketplaceHome({ categories, onAdd, onShop }: HomeProps) {
   </>;
 }
 
-function CorporateHome({ categories, onAdd, onShop }: HomeProps) {
+function CorporateHome({ categories, products, onAdd, onShop }: HomeProps) {
   return <>
     <CorporateHero onShop={onShop} />
     <Container maxWidth="xl"><SectionHeader eyebrow="FEATURED COLLECTION" title="A sharper everyday assortment" action={<Button onClick={() => onShop()}>Explore products</Button>} /><ProductRail products={products.slice(0, 4)} onAdd={onAdd} /><SectionHeader eyebrow="COLLECTIONS" title="Built around the way you live" /><CategoryTiles categories={categories} onSelect={onShop} /><StoryBlock onShop={onShop} /><BenefitBlock /><CtaBlock onShop={onShop} /></Container>
   </>;
 }
 
-type HomeProps = { categories: string[]; onAdd: (product: StoreProduct) => void; onShop: (category?: string) => void };
+type HomeProps = { categories: string[]; products: StoreProduct[]; onAdd: (product: StoreProduct) => void; onShop: (category?: string) => void };
 
 function EditorialHero({ onShop }: { onShop: () => void }) { return <Box sx={{ bgcolor: "#f4e7e4" }}><Container maxWidth="lg"><Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1.1fr .9fr" }, minHeight: { md: 620 } }}><Box component="img" src="/images/twc/hero-banner.jpg" alt="Editorial TWC collection" sx={{ height: { xs: 330, md: 620 }, objectFit: "cover", width: "100%" }} /><Stack sx={{ alignSelf: "center", p: { xs: 3, md: 7 } }} spacing={2}><Typography sx={{ color: "#8b4962", fontSize: 11, fontWeight: 900, letterSpacing: ".17em" }}>TWC / THE NEW EDIT</Typography><Typography component="h1" sx={{ color: "#3f2631", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 48, md: 72 }, fontWeight: 500, lineHeight: .98 }}>Everyday, edited.</Typography><Typography sx={{ color: "#6d5059", lineHeight: 1.8 }}>A calmer way to browse useful products, personal style, and small upgrades for real routines.</Typography><Button onClick={() => onShop()} sx={{ alignSelf: "flex-start", bgcolor: "#8b4962", color: "#fff", px: 3 }}>Shop the collection</Button></Stack></Box></Container></Box>; }
 

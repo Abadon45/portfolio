@@ -42,6 +42,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <LoginClient
       authError={params?.authError}
       callbackUrl={safeCallbackUrl(params?.callbackUrl)}
+      facebookConfigured={Boolean(process.env.FACEBOOK_CLIENT_ID)}
+      microsoftConfigured={Boolean(process.env.MICROSOFT_CLIENT_ID)}
       initialMode={params?.mode === "register" ? "register" : "login"}
     />
   );

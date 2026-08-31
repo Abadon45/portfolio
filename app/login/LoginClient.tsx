@@ -18,8 +18,11 @@ import {
   Typography,
 } from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
+import FacebookIcon from "@mui/icons-material/Facebook";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import MicrosoftIcon from "@mui/icons-material/Microsoft";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
@@ -30,6 +33,8 @@ import { ParticleNetworkBackground } from "../components/portfolio/ParticleNetwo
 type LoginClientProps = {
   authError?: string;
   callbackUrl: string;
+  facebookConfigured?: boolean;
+  microsoftConfigured?: boolean;
   initialMode?: "login" | "register";
 };
 
@@ -38,6 +43,8 @@ type PortfolioUserType = "regular_user" | "public_school_teacher";
 export default function LoginClient({
   authError,
   callbackUrl,
+  facebookConfigured = false,
+  microsoftConfigured = false,
   initialMode = "login",
 }: LoginClientProps) {
   const router = useRouter();
@@ -59,6 +66,9 @@ export default function LoginClient({
     verificationCode: "",
   });
   const [googlePending, setGooglePending] = useState(false);
+  const [githubPending, setGithubPending] = useState(false);
+  const [microsoftPending, setMicrosoftPending] = useState(false);
+  const [facebookPending, setFacebookPending] = useState(false);
   const [pending, setPending] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -488,6 +498,77 @@ export default function LoginClient({
                     ? "Connecting to Google…"
                     : "Continue with Google"}
                 </Button>
+                <Button
+                  component="a"
+                  href={`/api/auth/github/start?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+                  aria-busy={githubPending}
+                  disabled={githubPending}
+                  onClick={(event) => {
+                    if (githubPending) {
+                      event.preventDefault();
+                      return;
+                    }
+                    setGithubPending(true);
+                  }}
+                  startIcon={<GitHubIcon />}
+                  sx={{
+                    borderColor: "rgba(191, 219, 254, 0.45)",
+                    color: "common.white",
+                  }}
+                  variant="outlined"
+                >
+                  {githubPending ? "Connecting to GitHub…" : "Continue with GitHub"}
+                </Button>
+                {microsoftConfigured && (
+                  <Button
+                    component="a"
+                    href={`/api/auth/microsoft/start?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+                    aria-busy={microsoftPending}
+                    disabled={microsoftPending}
+                    onClick={(event) => {
+                      if (microsoftPending) {
+                        event.preventDefault();
+                        return;
+                      }
+                      setMicrosoftPending(true);
+                    }}
+                    startIcon={<MicrosoftIcon />}
+                    sx={{
+                      borderColor: "rgba(191, 219, 254, 0.45)",
+                      color: "common.white",
+                    }}
+                    variant="outlined"
+                  >
+                    {microsoftPending
+                      ? "Connecting to Microsoft…"
+                      : "Continue with Microsoft"}
+                  </Button>
+                )}
+                {facebookConfigured && (
+                  <Button
+                    component="a"
+                    href={`/api/auth/facebook/start?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+                    aria-busy={facebookPending}
+                    disabled={facebookPending}
+                    onClick={(event) => {
+                      if (facebookPending) {
+                        event.preventDefault();
+                        return;
+                      }
+                      setFacebookPending(true);
+                    }}
+                    startIcon={<FacebookIcon />}
+                    sx={{
+                      borderColor: "rgba(191, 219, 254, 0.45)",
+                      color: "common.white",
+                    }}
+                    variant="outlined"
+                  >
+                    {facebookPending
+                      ? "Connecting to Facebook…"
+                      : "Continue with Facebook"}
+                  </Button>
+                )}
               </>
             )}
 

@@ -1,0 +1,5 @@
+-- Baseline for the existing portfolio_auth and saas_demo schemas.
+--
+-- This migration is intentionally empty. The tables already exist in Neon and were
+-- introspected into prisma/schema.prisma. Do not apply a from-empty migration to this
+-- database because it would attempt to recreate live tables.

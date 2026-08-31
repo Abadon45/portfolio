@@ -8,9 +8,9 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Box, Button, Chip, Container, Divider, Paper, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import TwcProductCard from "./TwcProductCard";
-import { products, type StoreProduct } from "./TwcStoreProvider";
+import type { StoreProduct } from "./TwcStoreProvider";
 
-type Props = { categories: string[]; onAdd: (product: StoreProduct) => void; onShop: (category?: string) => void };
+type Props = { categories: string[]; products: StoreProduct[]; onAdd: (product: StoreProduct) => void; onShop: (category?: string) => void };
 
 const wellnessImages = [
   "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=1200&q=85",
@@ -19,10 +19,10 @@ const wellnessImages = [
   "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=85",
 ];
 
-export default function WellnessOrganicHome({ categories, onAdd, onShop }: Props) {
+export default function WellnessOrganicHome({ categories, products, onAdd, onShop }: Props) {
   const router = useRouter();
-  const featured = productsForSection(0, 4);
-  const collection = productsForSection(4, 5);
+  const featured = products.slice(0, 4);
+  const collection = products.slice(4, 9);
 
   return <Box sx={{ bgcolor: "#f8fbf6" }}>
     <WellnessHero onShop={onShop} />
@@ -45,10 +45,6 @@ export default function WellnessOrganicHome({ categories, onAdd, onShop }: Props
       <NewsletterDemo />
     </Container>
   </Box>;
-}
-
-function productsForSection(start: number, count: number) {
-  return products.slice(start, start + count);
 }
 
 function WellnessHero({ onShop }: { onShop: Props["onShop"] }) {

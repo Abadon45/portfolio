@@ -42,3 +42,27 @@ export const premiumMedia = {
 };
 
 export const selectPremiumProducts = (items: StoreProduct[]) => items.slice(0, 12);
+
+export type BeautyCategoryTile = {
+  label: string;
+  query: string;
+  image: string;
+};
+
+export function selectBeautyCategories(items: StoreProduct[]): BeautyCategoryTile[] {
+  const categories = new Map<string, StoreProduct>();
+
+  items.forEach((product) => {
+    if (!categories.has(product.category)) categories.set(product.category, product);
+  });
+
+  const dynamicCategories = [...categories.entries()]
+    .slice(0, 6)
+    .map(([query, product]) => ({
+      label: query.includes("/") ? query.split("/").pop()?.trim() || query : query,
+      query,
+      image: product.image,
+    }));
+
+  return dynamicCategories.length ? dynamicCategories : premiumMedia.categories;
+}

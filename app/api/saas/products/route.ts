@@ -4,6 +4,7 @@ import {
   getSaaSData,
   type ProductMutation,
 } from "../../../../lib/saasDemoRepository";
+import { getAdminPortfolioUser } from "../../../../lib/portfolioAuth";
 
 export const runtime = "nodejs";
 
@@ -19,6 +20,14 @@ function isProductMutation(value: unknown): value is ProductMutation {
 }
 
 export async function GET() {
+  const admin = await getAdminPortfolioUser();
+  if (!admin) {
+    return NextResponse.json(
+      { message: "Administrator access is required." },
+      { status: 403 },
+    );
+  }
+
   try {
     const data = await getSaaSData();
     return NextResponse.json({ products: data.products });
@@ -28,6 +37,14 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const admin = await getAdminPortfolioUser();
+  if (!admin) {
+    return NextResponse.json(
+      { message: "Administrator access is required." },
+      { status: 403 },
+    );
+  }
+
   const payload: unknown = await request.json().catch(() => null);
 
   if (!isProductMutation(payload)) {

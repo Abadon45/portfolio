@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import {
-  createGoogleUser,
+  createOAuthUser,
   createSession,
   findUserByEmail,
-  findUserByGoogleId,
-  linkGoogleIdentityToUser,
+  findUserByProviderId,
+  linkOAuthIdentityToUser,
   normalizedAuthEmail,
   setSessionCookie,
-  synchronizeGoogleUser,
+  synchronizeOAuthUser,
 } from "../../../../../lib/portfolioAuth";
 
 export const runtime = "nodejs";
@@ -83,43 +83,34 @@ export async function GET(request: Request) {
       return redirectToLogin(request, "Google did not provide a verified email address.");
     }
 
-    const firstName = typeof profile.given_name === "string" ? profile.given_name : null;
-    const lastName = typeof profile.family_name === "string" ? profile.family_name : null;
     const fullName =
       typeof profile.name === "string" && profile.name.trim()
         ? profile.name.trim()
-        : [firstName, lastName].filter(Boolean).join(" ") || email;
+        : [profile.given_name, profile.family_name]
+            .filter((value): value is string => typeof value === "string" && Boolean(value.trim()))
+            .join(" ") || email;
     const avatarUrl = typeof profile.picture === "string" ? profile.picture : null;
 
-    let user = await findUserByGoogleId(providerUserId);
+    let user = await findUserByProviderId("google", providerUserId);
     if (user) {
-      user = await synchronizeGoogleUser(String(user.id), {
+      user = await synchronizeOAuthUser(String(user.id), "google", {
         email,
-        firstName,
-        lastName,
         fullName,
         avatarUrl,
       });
     } else {
       const sameEmailUser = await findUserByEmail(email);
       if (sameEmailUser) {
-        if (String(sameEmailUser.auth_provider) !== "password") {
-          return redirectToLogin(request, "This Google identity is already linked to another account.");
-        }
-
-        user = await linkGoogleIdentityToUser(String(sameEmailUser.id), providerUserId, {
+        user = await linkOAuthIdentityToUser(String(sameEmailUser.id), "google", providerUserId, {
           email,
-          firstName,
-          lastName,
           fullName,
           avatarUrl,
         });
       } else {
-        user = await createGoogleUser({
+        user = await createOAuthUser({
+          provider: "google",
           providerUserId,
           email,
-          firstName,
-          lastName,
           fullName,
           avatarUrl,
         });

@@ -7,8 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { products, type StoreProduct } from "./twcProductCatalog";
-export { products, titleCaseCategory } from "./twcProductCatalog";
+import type { StoreProduct } from "./twcProductCatalog";
 export type { StoreProduct } from "./twcProductCatalog";
 export type CartLine = { product: StoreProduct; quantity: number };
 
@@ -125,6 +124,7 @@ export type CheckoutQuote = {
   amount: number;
 };
 type StoreContextValue = {
+  products: StoreProduct[];
   cart: CartLine[];
   addToCart: (product: StoreProduct) => void;
   updateQuantity: (slug: string, change: number) => void;
@@ -157,8 +157,10 @@ export function useTwcStore() {
 
 export default function TwcStoreProvider({
   children,
+  products,
 }: {
   children: ReactNode;
+  products: StoreProduct[];
 }) {
   const [cart, setCart] = useState<CartLine[]>([]);
   const [selectedShop, setSelectedShop] = useState<string | null>(null);
@@ -169,6 +171,7 @@ export default function TwcStoreProvider({
     useState<StoreContextValue["lastOrder"]>(null);
   const value = useMemo<StoreContextValue>(
     () => ({
+      products,
       cart,
       addToCart: (product) => {
         setSelectedShop(product.shop);
@@ -215,7 +218,7 @@ export default function TwcStoreProvider({
         0,
       ),
     }),
-    [activeCheckout, cart, lastOrder, selectedShop],
+    [activeCheckout, cart, lastOrder, products, selectedShop],
   );
   return (
     <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

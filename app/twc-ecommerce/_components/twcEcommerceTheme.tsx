@@ -43,7 +43,7 @@ export const storefrontThemes: Record<StorefrontThemeName, StorefrontThemeConfig
   "corporate-commerce": { name: "Corporate Commerce", description: "Structured, polished, and brand-forward.", primary: "#173f5f", secondary: "#c28c36", accent: "#dce6ec", lightSurface: "#f7f9fb", darkSurface: "#0d1f2b", darkPaper: "#193747", darkText: "#f4f8fb", darkMuted: "#b8cbd8", lightDivider: "#d3dee5", darkDivider: "#365b6f", heroSurface: "#e8eef3", heroText: "#173044", radius: 1, density: "balanced", cardVariant: "compact", heroStyle: "structured", headerVariant: "corporate", productDetailVariant: "corporate", footerVariant: "corporate", homepage: ["hero", "featured", "categories", "story", "benefits", "cta"] },
 };
 
-const defaultThemeName: StorefrontThemeName = "wellness-organic";
+const defaultThemeName: StorefrontThemeName = "premium-beauty";
 export type StorefrontMode = "light" | "dark";
 type StorefrontThemeContextValue = { themeName: StorefrontThemeName; themeConfig: StorefrontThemeConfig; setThemeName: (themeName: StorefrontThemeName) => void };
 const StorefrontThemeContext = createContext<StorefrontThemeContextValue | null>(null);

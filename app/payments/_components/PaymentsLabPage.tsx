@@ -1,6 +1,5 @@
 "use client";
 
-import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import CodeRoundedIcon from "@mui/icons-material/CodeRounded";
 import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
@@ -161,7 +160,9 @@ export default function PaymentsLabPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get("stripe_session_id");
+    const xenditReturn = params.get("xendit_return");
     const wasCancelled = params.get("stripe_cancelled") === "true";
+    const xenditCancelled = params.get("xendit_cancelled") === "true";
 
     if (wasCancelled) {
       setProvider("stripe");
@@ -169,7 +170,44 @@ export default function PaymentsLabPage() {
       return;
     }
 
+    if (xenditCancelled) {
+      setProvider("xendit");
+      setCheckoutError("Xendit invoice checkout was cancelled. No payment was recorded.");
+      return;
+    }
+
     if (!sessionId) {
+      if (!xenditReturn) {
+        return;
+      }
+
+      const invoiceId = window.sessionStorage.getItem("xendit-invoice-id");
+
+      if (!invoiceId) {
+        setProvider("xendit");
+        setCheckoutError("The Xendit invoice could not be found in this browser session.");
+        return;
+      }
+
+      setProvider("xendit");
+      setStep("redirected");
+      setCheckoutError(null);
+
+      fetch(`/api/payments/xendit/invoice?invoice_id=${encodeURIComponent(invoiceId)}`)
+        .then(async (response) => {
+          const data = (await response.json()) as { message?: string; paid?: boolean };
+
+          if (!response.ok || !data.paid) {
+            throw new Error(data.message ?? "Xendit has not confirmed this invoice yet.");
+          }
+
+          setStep("fulfilled");
+        })
+        .catch((error: unknown) => {
+          setCheckoutError(error instanceof Error ? error.message : "Unable to verify Xendit payment.");
+          setStep("redirected");
+        });
+
       return;
     }
 
@@ -192,11 +230,6 @@ export default function PaymentsLabPage() {
         setStep("redirected");
       });
   }, []);
-
-  const advanceFlow = () => {
-    const next = flowSteps[Math.min(stepIndex + 1, flowSteps.length - 1)];
-    setStep(next.id);
-  };
 
   const resetFlow = () => {
     setStep("created");
@@ -231,6 +264,35 @@ export default function PaymentsLabPage() {
       window.open(data.url, "_blank", "noopener,noreferrer");
     } catch (error) {
       setCheckoutError(error instanceof Error ? error.message : "Unable to open Stripe Checkout.");
+    } finally {
+      setIsCreatingCheckout(false);
+    }
+  };
+
+  const openXenditInvoice = async () => {
+    setCheckoutError(null);
+    setIsCreatingCheckout(true);
+
+    try {
+      const response = await fetch("/api/payments/xendit/invoice", {
+        body: JSON.stringify({
+          amount: Number(amount),
+          externalId: "PAY-DEMO-2048",
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const data = (await response.json()) as { message?: string; invoiceId?: string; url?: string };
+
+      if (!response.ok || !data.url || !data.invoiceId) {
+        throw new Error(data.message ?? "Unable to open Xendit Invoice.");
+      }
+
+      window.sessionStorage.setItem("xendit-invoice-id", data.invoiceId);
+      setStep("redirected");
+      window.location.assign(data.url);
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : "Unable to open Xendit Invoice.");
     } finally {
       setIsCreatingCheckout(false);
     }
@@ -300,7 +362,7 @@ export default function PaymentsLabPage() {
               Payments are a state machine, not a button.
             </Typography>
             <Typography color="text.secondary" sx={{ fontSize: { xs: 16, md: 19 }, lineHeight: 1.7, maxWidth: 680 }}>
-              A hands-on comparison of the gateway flow I built around Xendit and a real Stripe test Checkout flow. Xendit remains a local simulation; Stripe redirects to its hosted test page and verifies the returned session server-side.
+              A hands-on comparison of the gateway flow I built around Xendit and a real Stripe test Checkout flow. Both providers now redirect to hosted test payment pages and verify the returned payment server-side.
             </Typography>
           </Stack>
 
@@ -355,8 +417,8 @@ export default function PaymentsLabPage() {
 
                 <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mt: 3 }}>
                   {provider === "xendit" ? (
-                    <Button disabled={step === "fulfilled"} onClick={advanceFlow} startIcon={step === "fulfilled" ? <CheckCircleRoundedIcon /> : <ArrowForwardRoundedIcon />} variant="contained">
-                      {step === "created" ? details.createLabel : step === "fulfilled" ? "Payment fulfilled" : "Advance simulation"}
+                    <Button disabled={isCreatingCheckout || step === "fulfilled"} onClick={openXenditInvoice} startIcon={step === "fulfilled" ? <CheckCircleRoundedIcon /> : <CreditCardRoundedIcon />} variant="contained">
+                      {isCreatingCheckout ? "Creating Invoice..." : step === "fulfilled" ? "Payment fulfilled" : "Open Xendit test Invoice"}
                     </Button>
                   ) : (
                     <Button disabled={isCreatingCheckout || step === "fulfilled"} onClick={openStripeCheckout} startIcon={step === "fulfilled" ? <CheckCircleRoundedIcon /> : <CreditCardRoundedIcon />} variant="contained">
@@ -367,10 +429,10 @@ export default function PaymentsLabPage() {
                     Reset flow
                   </Button>
                 </Stack>
-                {provider === "stripe" && step !== "fulfilled" && (
+                {step !== "fulfilled" && (
                   <Box sx={{ mt: 2 }}>
                     <Typography color="text.secondary" sx={{ fontSize: 12 }}>
-                      You will be redirected to Stripe&apos;s hosted test page. Return here after payment to verify the session.
+                      You will be redirected to {details.name}&apos;s hosted test page. Return here after payment to verify the payment server-side.
                     </Typography>
                     {checkoutError && (
                       <Typography color="error" sx={{ fontSize: 12, mt: 1 }}>
