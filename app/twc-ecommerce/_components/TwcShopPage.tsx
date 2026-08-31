@@ -13,20 +13,22 @@ import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import { Box, Button, Card, Chip, Container, InputAdornment, MenuItem, Select, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { products, useTwcStore } from "./TwcStoreProvider";
+import { useTwcStore, type StoreProduct } from "./TwcStoreProvider";
 import TwcProductCard from "./TwcProductCard";
 import { ProductGrid } from "./StorefrontPrimitives";
 import { useStorefrontTheme } from "./twcEcommerceTheme";
-import { premiumMedia } from "./storefrontContent";
+import { selectBeautyCategories } from "./storefrontContent";
 
 export default function TwcShopPage({ onCartOpen }: { onCartOpen?: () => void }) {
   const router = useRouter();
-  const { addToCart } = useTwcStore();
+  const { addToCart, products } = useTwcStore();
   const { themeConfig } = useStorefrontTheme();
+  const gridColumns = themeConfig.headerVariant === "marketplace" ? 5 : themeConfig.headerVariant === "corporate" ? 4 : themeConfig.headerVariant === "editorial" ? 6 : 4;
+  const batchSize = gridColumns * 2;
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [sort, setSort] = useState("featured");
-  const [visibleCount, setVisibleCount] = useState(16);
+  const [visibleCount, setVisibleCount] = useState(batchSize);
   const [loadingMore, setLoadingMore] = useState(false);
   const loadingMoreRef = useRef(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -41,9 +43,8 @@ export default function TwcShopPage({ onCartOpen }: { onCartOpen?: () => void })
   const filtered = useMemo(() => products.filter((product) => (category === "All" || product.category === category) && `${product.name} ${product.description} ${product.category}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) => sort === "price-low" ? a.price - b.price : sort === "price-high" ? b.price - a.price : a.name.localeCompare(b.name)), [category, query, sort]);
   const visibleProducts = filtered.slice(0, visibleCount);
   const hasMore = visibleProducts.length < filtered.length;
-  const filterKey = `${category}|${query}|${sort}`;
-  const gridColumns = themeConfig.headerVariant === "marketplace" ? 5 : themeConfig.headerVariant === "corporate" ? 4 : themeConfig.headerVariant === "editorial" ? 3 : 4;
-  useEffect(() => { setVisibleCount(16); setLoadingMore(false); loadingMoreRef.current = false; }, [filterKey]);
+  const filterKey = `${batchSize}|${category}|${query}|${sort}`;
+  useEffect(() => { setVisibleCount(batchSize); setLoadingMore(false); loadingMoreRef.current = false; }, [filterKey]);
   useEffect(() => {
     const target = loadMoreRef.current;
     if (!target || !hasMore) return;
@@ -52,25 +53,25 @@ export default function TwcShopPage({ onCartOpen }: { onCartOpen?: () => void })
       if (!entry.isIntersecting || loadingMoreRef.current) return;
       loadingMoreRef.current = true;
       setLoadingMore(true);
-      timer = window.setTimeout(() => { setVisibleCount((current) => Math.min(current + 16, filtered.length)); setLoadingMore(false); loadingMoreRef.current = false; }, 650);
+      timer = window.setTimeout(() => { setVisibleCount((current) => Math.min(current + batchSize, filtered.length)); setLoadingMore(false); loadingMoreRef.current = false; }, 650);
     }, { rootMargin: "240px" });
     observer.observe(target);
     return () => { observer.disconnect(); if (timer) window.clearTimeout(timer); };
   }, [filterKey, filtered.length, hasMore, visibleCount]);
-  const add = (product: (typeof products)[number]) => { addToCart(product); onCartOpen?.(); };
+  const add = (product: StoreProduct) => { addToCart(product); onCartOpen?.(); };
 
   return <Container maxWidth="xl" sx={{ py: { xs: 4, md: 7 } }}>
     <ShopIntro themeName={themeConfig.name} variant={themeConfig.headerVariant} count={filtered.length} onBack={() => router.push("/twc-ecommerce")} />
     {themeConfig.headerVariant === "wellness" && <WellnessShopDiscovery categories={categories.slice(1, 7)} onSelect={setCategory} />}
-    {themeConfig.headerVariant === "editorial" && <PremiumShopDiscovery categories={categories.slice(1, 5)} onSelect={setCategory} />}
+    {themeConfig.headerVariant === "editorial" && <PremiumShopDiscovery categories={selectBeautyCategories(products)} onSelect={setCategory} />}
     <ShopControls variant={themeConfig.headerVariant} query={query} category={category} sort={sort} categories={categories} onQueryChange={setQuery} onCategoryChange={setCategory} onSortChange={setSort} />
     <Stack direction={{ xs: "column", sm: "row" }} sx={{ alignItems: { sm: "center" }, justifyContent: "space-between", mb: 2, gap: 1 }}><Stack direction="row" spacing={1} sx={{ alignItems: "center" }}><Typography sx={{ fontWeight: 850 }}>{filtered.length} {themeConfig.headerVariant === "marketplace" ? "items" : "results"}</Typography>{category !== "All" && <Chip label={category} onDelete={() => setCategory("All")} size="small" color="primary" />}</Stack><Typography color="text.secondary" sx={{ fontSize: 13 }}>{themeConfig.headerVariant === "editorial" ? "A focused edit of the TWC collection." : themeConfig.headerVariant === "corporate" ? "Compare the assortment by collection and specification." : "Tap a product to see the full story."}</Typography></Stack>
-    {filtered.length ? <><ProductGrid columns={gridColumns} products={visibleProducts} onAdd={add} />{loadingMore && <ProductSkeletonGrid columns={gridColumns} count={Math.min(8, filtered.length - visibleCount)} variant={themeConfig.headerVariant} />}<Box ref={loadMoreRef} sx={{ minHeight: hasMore ? 24 : 0, py: hasMore ? 2 : 0 }} aria-busy={loadingMore}>{hasMore && <Typography color="text.secondary" sx={{ fontSize: 12, textAlign: "center" }}>{loadingMore ? "Loading more products…" : "Scroll for more products"}</Typography>}</Box></> : <Card sx={{ border: 1, borderColor: "divider", p: 7, textAlign: "center" }}><Typography variant="h3" sx={{ fontSize: 26, fontWeight: 900 }}>No products found</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>Try another search or clear the category filter.</Typography><Button onClick={() => { setQuery(""); setCategory("All"); }} sx={{ mt: 2 }} variant="contained">Reset filters</Button></Card>}
+    {filtered.length ? <><ProductGrid columns={gridColumns} products={visibleProducts} onAdd={add} />{loadingMore && <ProductSkeletonGrid columns={gridColumns} count={Math.min(batchSize, filtered.length - visibleCount)} variant={themeConfig.headerVariant} />}<Box ref={loadMoreRef} sx={{ minHeight: hasMore ? 24 : 0, py: hasMore ? 2 : 0 }} aria-busy={loadingMore}>{hasMore && <Typography color="text.secondary" sx={{ fontSize: 12, textAlign: "center" }}>{loadingMore ? "Loading more products…" : "Scroll for more products"}</Typography>}</Box></> : <Card sx={{ border: 1, borderColor: "divider", p: 7, textAlign: "center" }}><Typography variant="h3" sx={{ fontSize: 26, fontWeight: 900 }}>No products found</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>Try another search or clear the category filter.</Typography><Button onClick={() => { setQuery(""); setCategory("All"); }} sx={{ mt: 2 }} variant="contained">Reset filters</Button></Card>}
   </Container>;
 }
 
-function PremiumShopDiscovery({ categories, onSelect }: { categories: string[]; onSelect: (category: string) => void }) {
-  return <Box sx={{ mb: 4 }}><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em" }}>SHOP THE EDIT</Typography><Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(4, 1fr)" }, mt: 1.5 }}>{categories.map((category, index) => { const media = premiumMedia.categories[index % premiumMedia.categories.length]; return <Button key={category} onClick={() => onSelect(category)} sx={{ display: "block", p: 0, textAlign: "left", textTransform: "none" }}><Box component="img" src={media.image} alt="" sx={{ display: "block", height: { xs: 130, sm: 180 }, objectFit: "cover", width: "100%" }} /><Typography sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, mt: .75 }}>{category}</Typography></Button>; })}</Box></Box>;
+function PremiumShopDiscovery({ categories, onSelect }: { categories: ReturnType<typeof selectBeautyCategories>; onSelect: (category: string) => void }) {
+  return <Box sx={{ mb: 4 }}><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em" }}>SHOP THE BEAUTY EDIT</Typography><Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(4, 1fr)" }, mt: 1.5 }}>{categories.map((category) => <Button key={category.query} onClick={() => onSelect(category.query)} sx={{ display: "block", p: 0, textAlign: "left", textTransform: "none" }}><Box component="img" src={category.image} alt={`${category.label} collection`} sx={{ bgcolor: "#f8efed", display: "block", height: { xs: 130, sm: 180 }, objectFit: "contain", width: "100%" }} /><Typography sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, mt: .75 }}>{category.label}</Typography></Button>)}</Box></Box>;
 }
 
 function WellnessShopDiscovery({ categories, onSelect }: { categories: string[]; onSelect: (category: string) => void }) {

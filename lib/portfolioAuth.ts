@@ -203,6 +203,123 @@ export async function synchronizeGoogleUser(
   return rows[0] ?? null;
 }
 
+export async function findUserByProviderId(
+  provider: string,
+  providerUserId: string,
+) {
+  const sql = getNeonSql();
+  const rows = await sql`
+    select id, email, first_name, last_name, full_name, display_name, username, phone,
+      avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at,
+      is_active, last_login, created_at
+    from portfolio_auth.users u
+    where exists (
+      select 1 from portfolio_auth.user_identities i
+      where i.user_id = u.id
+        and i.provider = ${provider}
+        and i.provider_user_id = ${providerUserId}
+    )
+      or (u.auth_provider = ${provider} and u.provider_user_id = ${providerUserId})
+    limit 1
+  `;
+
+  return rows[0] ?? null;
+}
+
+export async function createOAuthUser({
+  provider,
+  providerUserId,
+  email,
+  fullName,
+  avatarUrl,
+}: {
+  provider: string;
+  providerUserId: string;
+  email: string;
+  fullName: string;
+  avatarUrl: string | null;
+}) {
+  const sql = getNeonSql();
+  const rows = await sql`
+    insert into portfolio_auth.users
+      (id, email, full_name, display_name, avatar_url,
+       password_hash, role, user_type, setup_completed, auth_provider, provider_user_id, email_verified_at)
+    values
+      (${randomUUID()}, ${email}, ${fullName}, ${fullName}, ${avatarUrl},
+       '', 'viewer', 'regular_user', false, ${provider}, ${providerUserId}, now())
+    returning id, email, first_name, last_name, full_name, display_name, username, phone,
+      avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at,
+      is_active, last_login, created_at
+  `;
+
+  await sql`
+    insert into portfolio_auth.user_identities (id, user_id, provider, provider_user_id)
+    values (${randomUUID()}, ${rows[0]?.id}, ${provider}, ${providerUserId})
+    on conflict (provider, provider_user_id) do nothing
+  `;
+
+  return rows[0] ?? null;
+}
+
+export async function linkOAuthIdentityToUser(
+  userId: string,
+  provider: string,
+  providerUserId: string,
+  profile: {
+    email: string;
+    fullName: string;
+    avatarUrl: string | null;
+  },
+) {
+  const sql = getNeonSql();
+  await sql`
+    insert into portfolio_auth.user_identities (id, user_id, provider, provider_user_id)
+    values (${randomUUID()}, ${userId}, ${provider}, ${providerUserId})
+    on conflict (provider, provider_user_id) do nothing
+  `;
+  const rows = await sql`
+    update portfolio_auth.users
+    set full_name = coalesce(full_name, ${profile.fullName}),
+      display_name = coalesce(nullif(display_name, ''), ${profile.fullName}),
+      avatar_url = coalesce(${profile.avatarUrl}, avatar_url),
+      email_verified_at = now(),
+      last_login = now(),
+      updated_at = now()
+    where id = ${userId}
+    returning id, email, first_name, last_name, full_name, display_name, username, phone,
+      avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at,
+      is_active, last_login, created_at
+  `;
+
+  return rows[0] ?? null;
+}
+
+export async function synchronizeOAuthUser(
+  userId: string,
+  provider: string,
+  profile: {
+    email: string;
+    fullName: string;
+    avatarUrl: string | null;
+  },
+) {
+  const sql = getNeonSql();
+  const rows = await sql`
+    update portfolio_auth.users
+    set email = ${profile.email},
+      avatar_url = ${profile.avatarUrl},
+      email_verified_at = coalesce(email_verified_at, now()),
+      last_login = now(),
+      updated_at = now()
+    where id = ${userId}
+    returning id, email, first_name, last_name, full_name, display_name, username, phone,
+      avatar_url, role, user_type, setup_completed, auth_provider, email_verified_at,
+      is_active, last_login, created_at
+  `;
+
+  return rows[0] ?? null;
+}
+
 export async function createPendingUser({
   email,
   displayName,

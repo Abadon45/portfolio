@@ -4,10 +4,19 @@ import {
   createSaaSPayout,
   createSaaSPriceRequest,
 } from "../../../../lib/saasDemoRepository";
+import { getAdminPortfolioUser } from "../../../../lib/portfolioAuth";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const admin = await getAdminPortfolioUser();
+  if (!admin) {
+    return NextResponse.json(
+      { message: "Administrator access is required." },
+      { status: 403 },
+    );
+  }
+
   const payload: unknown = await request.json().catch(() => null);
 
   if (!payload || typeof payload !== "object") {

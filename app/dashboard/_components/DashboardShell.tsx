@@ -60,7 +60,7 @@ const navigation = [
   { label: "Users", href: "/dashboard/users", icon: <GroupRoundedIcon /> },
   {
     label: "Products",
-    href: "/saas-platform",
+    href: "/dashboard/products",
     icon: <Inventory2RoundedIcon />,
   },
   {

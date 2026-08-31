@@ -6,11 +6,12 @@ import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined
 import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Box, Button, Container, Divider, Paper, Stack, Typography } from "@mui/material";
-import { products, type StoreProduct } from "./TwcStoreProvider";
+import type { StoreProduct } from "./TwcStoreProvider";
 import TwcProductCard from "./TwcProductCard";
 
 type Props = {
   categories: string[];
+  products: StoreProduct[];
   onAdd: (product: StoreProduct) => void;
   onShop: (category?: string) => void;
 };
@@ -21,7 +22,7 @@ const categoryDescriptions: Record<string, string> = {
   "sante beauty skin care": "Personal care essentials for a considered routine.",
 };
 
-export default function CorporateCommerceHome({ categories, onAdd, onShop }: Props) {
+export default function CorporateCommerceHome({ categories, products, onAdd, onShop }: Props) {
   const featured = products[0];
 
   return (
@@ -31,7 +32,7 @@ export default function CorporateCommerceHome({ categories, onAdd, onShop }: Pro
       {featured && <CorporateFeatured product={featured} onAdd={onAdd} onShop={onShop} />}
       <CorporateCategories categories={categories} onShop={onShop} />
       <Container maxWidth="xl">
-        <CorporateCollection onAdd={onAdd} onShop={onShop} />
+        <CorporateCollection products={products} onAdd={onAdd} onShop={onShop} />
         <CorporateStory onShop={onShop} />
         <CorporateOperatingModel />
         <CorporateFaq />
@@ -95,7 +96,7 @@ function CorporateCategories({ categories, onShop }: { categories: string[]; onS
   return <Box id="collections" sx={{ bgcolor: "background.paper", py: { xs: 6, md: 9 }, scrollMarginTop: 90 }}><Container maxWidth="xl"><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em" }}>COLLECTIONS</Typography><Typography component="h2" sx={{ color: "text.primary", fontSize: { xs: 34, md: 52 }, fontWeight: 900, letterSpacing: "-.07em", mt: .75 }}>Organized for confident browsing.</Typography><Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }, mt: 4 }}>{categories.slice(0, 8).map((category) => { const label = category.replace(/[-_]/g, " "); const description = categoryDescriptions[label.toLowerCase()] ?? "A focused part of the TWC catalog, ready to explore."; return <Paper key={category} onClick={() => onShop(category)} sx={{ bgcolor: "background.default", border: 1, borderColor: "divider", borderRadius: 0, cursor: "pointer", minHeight: 180, p: { xs: 2.5, md: 3 }, transition: "border-color .2s, transform .2s", "&:hover": { borderColor: "primary.main", transform: "translateY(-3px)" } }}><Typography color="primary.main" sx={{ fontSize: 12, fontWeight: 900, letterSpacing: ".1em", textTransform: "uppercase" }}>CATEGORY {String(categories.indexOf(category) + 1).padStart(2, "0")}</Typography><Typography sx={{ color: "text.primary", fontSize: 22, fontWeight: 900, mt: 4 }}>{label}</Typography><Typography color="text.secondary" sx={{ fontSize: 13, lineHeight: 1.6, mt: 1 }}>{description}</Typography><Typography color="primary.main" sx={{ fontSize: 13, fontWeight: 800, mt: 2 }}>Explore <ArrowForwardRoundedIcon sx={{ fontSize: 15, verticalAlign: "middle" }} /></Typography></Paper>; })}</Box></Container></Box>;
 }
 
-function CorporateCollection({ onAdd, onShop }: { onAdd: (product: StoreProduct) => void; onShop: () => void }) {
+function CorporateCollection({ products, onAdd, onShop }: { products: StoreProduct[]; onAdd: (product: StoreProduct) => void; onShop: () => void }) {
   return <Box id="products" sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: 90 }}><Stack direction={{ xs: "column", sm: "row" }} sx={{ alignItems: { sm: "end" }, justifyContent: "space-between", gap: 2, mb: 3 }}><Box><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em" }}>THE PRODUCT REGISTER</Typography><Typography component="h2" sx={{ color: "text.primary", fontSize: { xs: 34, md: 50 }, fontWeight: 900, letterSpacing: "-.07em", mt: .75 }}>A useful assortment.</Typography></Box><Button onClick={onShop} endIcon={<ArrowForwardRoundedIcon />}>View all products</Button></Stack><Box sx={{ display: "grid", gap: { xs: 2, md: 2.5 }, gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" } }}>{products.slice(0, 4).map((product) => <TwcProductCard key={product.slug} product={product} onAdd={() => onAdd(product)} />)}</Box></Box>;
 }
 

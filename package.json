@@ -9,7 +9,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:pull": "prisma db pull",
+    "db:migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
@@ -19,6 +23,8 @@
     "@mui/material": "^9.1.1",
     "@mui/material-nextjs": "^9.1.1",
     "@neondatabase/serverless": "^1.1.0",
+    "@prisma/adapter-neon": "^7.10.0",
+    "@prisma/client": "^7.10.0",
     "@tsparticles/engine": "^4.3.2",
     "@tsparticles/react": "^4.3.2",
     "@tsparticles/slim": "^4.3.2",
@@ -27,15 +33,19 @@
     "framer-motion": "^12.40.0",
     "libphonenumber-js": "^1.13.11",
     "next": "latest",
+    "playwright": "^1.62.1",
+    "prisma": "^7.10.0",
     "react": "latest",
     "react-dom": "latest",
     "stripe": "^22.5.0",
+    "ws": "^8.18.3",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@types/ws": "^8.18.1",
     "typescript": "latest"
   }
 }

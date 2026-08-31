@@ -1,25 +1,22 @@
 import { del, put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { appendStoreProductImage } from "../../../../../../lib/storeProductRepository";
+import { getAdminPortfolioUser } from "../../../../../../lib/portfolioAuth";
 
 export const runtime = "nodejs";
 
 const maxUploadBytes = 4.5 * 1024 * 1024;
 
-function isAuthorized(request: Request) {
-  const expectedSecret = process.env.BLOB_UPLOAD_SECRET;
-  return Boolean(
-    expectedSecret &&
-      request.headers.get("x-blob-upload-secret") === expectedSecret,
-  );
-}
-
 export async function POST(
   request: Request,
   context: { params: Promise<{ slug: string }> },
 ) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ message: "Upload is not authorized." }, { status: 401 });
+  const admin = await getAdminPortfolioUser();
+  if (!admin) {
+    return NextResponse.json(
+      { message: "Administrator access is required." },
+      { status: 403 },
+    );
   }
 
   if (

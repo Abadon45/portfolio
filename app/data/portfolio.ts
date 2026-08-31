@@ -45,7 +45,7 @@ export const profileSnapshot = [
   ["Location", "Davao City, Philippines"],
   [
     "Core stack",
-    "Next.js, React, TypeScript, Django, Neon, Vercel Blob",
+    "Next.js, React, TypeScript, Django, Prisma, Neon, Vercel Blob",
   ],
   ["Production scope", "60,000+ registered users"],
   [
@@ -78,6 +78,7 @@ export const skills = {
     "REST API Design",
     "PostgreSQL",
     "Neon Serverless Postgres",
+    "Prisma ORM",
     "NextAuth",
   ],
   "Architecture & Systems": [
