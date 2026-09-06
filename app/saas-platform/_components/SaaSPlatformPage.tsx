@@ -1,5 +1,7 @@
 "use client";
 
+import { dottedBackgroundSx } from "../../components/portfolio/dottedBackground";
+
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
@@ -2342,6 +2344,7 @@ function CommerceOsWorkspace() {
       <CssBaseline />
       <Box
         sx={{
+          ...dottedBackgroundSx(theme),
           bgcolor: "background.default",
           color: "text.primary",
           display: "flex",

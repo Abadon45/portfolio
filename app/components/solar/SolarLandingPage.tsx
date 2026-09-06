@@ -1,5 +1,7 @@
 "use client";
 
+import { Box } from "@mui/material";
+import { dottedBackgroundSx } from "../portfolio/dottedBackground";
 import { useState } from "react";
 import AssessmentDialog from "./AssessmentDialog";
 import ContactSection from "./ContactSection";
@@ -19,7 +21,7 @@ export default function SolarLandingPage() {
   const [assessmentOpen, setAssessmentOpen] = useState(false);
   const openAssessment = () => setAssessmentOpen(true);
   return (
-    <>
+    <Box sx={dottedBackgroundSx}>
       <SiteNav onAssessment={openAssessment} />
       <HeroSection onAssessment={openAssessment} />
       <TrustStrip />
@@ -36,6 +38,6 @@ export default function SolarLandingPage() {
         open={assessmentOpen}
         onClose={() => setAssessmentOpen(false)}
       />
-    </>
+    </Box>
   );
 }

@@ -22,7 +22,7 @@ import {
   Stepper,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTwcAlert } from "../../components/portfolio/TwcAlertSystem";
 import TwcAddressForm, { type TwcAddressValues } from "./TwcAddressForm";
@@ -46,29 +46,53 @@ export default function CheckoutJourney() {
     activeCheckout,
     setActiveCheckout,
     setLastOrder,
-    clearCart,
+    completeShop,
   } = useTwcStore();
   const { showModal, toastSuccess } = useTwcAlert();
   const { themeConfig } = useStorefrontTheme();
   const isEditorial = themeConfig.headerVariant === "editorial";
   const isMarketplace = themeConfig.headerVariant === "marketplace";
   const isCorporate = themeConfig.headerVariant === "corporate";
+  const checkoutColumns = isMarketplace
+    ? { xs: "minmax(0, 1fr)", md: "minmax(0, 1.2fr) minmax(0, .8fr)" }
+    : { xs: "minmax(0, 1fr)", lg: "minmax(0, 2fr) minmax(300px, 1fr)" };
   const checkoutCart = selectedShop
     ? cart.filter((line) => line.product.shop === selectedShop)
-    : cart;
+    : [];
   const checkoutTotal = checkoutCart.reduce(
     (sum, line) => sum + line.product.price * line.quantity,
     0,
   );
-  const [step, setStep] = useState(activeCheckout ? 2 : 1);
-  const [addressMode, setAddressMode] = useState<"another" | "saved">(
-    "another",
-  );
-  const [address, setAddress] = useState<TwcAddressValues | null>(null);
-  const [payment, setPayment] = useState("cod");
+  const [requestedStep, setStep] = useState(activeCheckout ? 2 : 1);
+  const step = activeCheckout ? requestedStep : 1;
+  const address = activeCheckout?.address;
+  const payment = activeCheckout?.payment ?? "cod";
+  const setPayment = (value: string) => {
+    if (activeCheckout && (value === "cod" || value === "xendit")) {
+      setActiveCheckout({ ...activeCheckout, payment: value });
+    }
+  };
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const quote = activeCheckout;
+  const pending = useRef(false);
+  const timer = useRef<number | undefined>(undefined);
+  const latestQuote = useRef(quote);
+  useEffect(() => {
+    latestQuote.current = quote;
+  }, [quote]);
+  useEffect(() => {
+    window.clearTimeout(timer.current);
+    pending.current = false;
+    setLoading(false);
+  }, [cart, selectedShop]);
+  useEffect(
+    () => () => {
+      window.clearTimeout(timer.current);
+      pending.current = false;
+    },
+    [],
+  );
   const displayQuote = quote ?? {
     itemsTotal: checkoutTotal,
     shippingFee: 0,
@@ -85,12 +109,16 @@ export default function CheckoutJourney() {
       setError("Select a shop with products before checkout.");
       return;
     }
-    setAddress(values);
+    if (pending.current || !selectedShop) return;
+    pending.current = true;
     setLoading(true);
     setError("");
-    window.setTimeout(() => {
+    timer.current = window.setTimeout(() => {
       const shippingFee = calculateDemoShippingFee(checkoutCart, values);
       const nextQuote: CheckoutQuote = {
+        payment,
+        address: values,
+        shop: selectedShop,
         orderNumber: `TWC-DEMO-${Date.now().toString().slice(-6)}`,
         status: "in_progress",
         itemsTotal: checkoutTotal,
@@ -101,6 +129,7 @@ export default function CheckoutJourney() {
         amount: checkoutTotal + shippingFee,
       };
       setActiveCheckout(nextQuote);
+      pending.current = false;
       setLoading(false);
       setStep(2);
       toastSuccess(
@@ -109,46 +138,20 @@ export default function CheckoutJourney() {
     }, 650);
   };
 
-  const saveSavedAddress = () => {
-    if (!checkoutCart.length) {
-      setError("Select a shop with products before checkout.");
+  const confirmPayment = () => {
+    if (
+      !quote ||
+      latestQuote.current !== quote ||
+      !checkoutCart.length ||
+      quote.shop !== selectedShop
+    ) {
+      pending.current = false;
       return;
     }
     setLoading(true);
-    setError("");
-    window.setTimeout(() => {
-      const shippingFee = calculateDemoShippingFee(checkoutCart, {
-        city: "Cotabato City",
-        province: "Cotabato",
-      });
-      const nextQuote: CheckoutQuote = {
-        orderNumber: `TWC-DEMO-${Date.now().toString().slice(-6)}`,
-        status: "in_progress",
-        itemsTotal: checkoutTotal,
-        shippingFee,
-        discountAmount: 0,
-        discountLabel: null,
-        platformFee: 0,
-        amount: checkoutTotal + shippingFee,
-      };
-      setActiveCheckout(nextQuote);
-      setLoading(false);
-      setStep(2);
-      toastSuccess(
-        `Saved address accepted. Order ${nextQuote.orderNumber} is in progress.`,
-      );
-    }, 650);
-  };
-
-  const confirmPayment = () => {
-    if (!quote) return;
-    setLoading(true);
-    window.setTimeout(() => {
+    timer.current = window.setTimeout(() => {
       const completedQuote = { ...quote, status: "for-booking" as const };
-      const shippingAddress =
-        addressMode === "saved"
-          ? "Noy Pangan · Brgy. Poblacion, Cotabato City"
-          : `${address?.name} ${address?.last_name}, ${address?.address}, ${address?.barangay}, ${address?.city}, ${address?.province} · ${address?.mobile}`;
+      const shippingAddress = `${quote.address.name} ${quote.address.last_name}, ${quote.address.address}, ${quote.address.barangay}, ${quote.address.city}, ${quote.address.province} · ${quote.address.mobile}`;
       setLastOrder({
         reference: quote.orderNumber,
         total: quote.amount,
@@ -158,7 +161,8 @@ export default function CheckoutJourney() {
         quote: completedQuote,
       });
       setActiveCheckout(null);
-      clearCart();
+      completeShop(quote.shop);
+      pending.current = false;
       setLoading(false);
       toastSuccess("Demo payment completed. Redirecting to your receipt.");
       router.push("/twc-ecommerce/thank-you");
@@ -166,6 +170,8 @@ export default function CheckoutJourney() {
   };
 
   const reviewPayment = async () => {
+    if (pending.current || !quote) return;
+    pending.current = true;
     const result = await showModal({
       title: "Confirm your order?",
       content:
@@ -177,13 +183,30 @@ export default function CheckoutJourney() {
       cancelText: "Review order",
     });
     if (result.action === "confirm") confirmPayment();
+    else pending.current = false;
   };
+
+  if (!checkoutCart.length) {
+    return (
+      <Container sx={{ py: 6 }}>
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Select a shop with items in your basket to start checkout.
+        </Alert>
+        <Button
+          variant="contained"
+          onClick={() => router.push("/twc-ecommerce/shop")}
+        >
+          Browse products
+        </Button>
+      </Container>
+    );
+  }
 
   return (
     <Container
-      maxWidth={isMarketplace ? "xl" : "lg"}
+      maxWidth="xl"
       sx={{
-        bgcolor: isCorporate ? "#f7f9fb" : undefined,
+        bgcolor: isCorporate ? "background.default" : undefined,
         py: { xs: 4, md: 7 },
       }}
     >
@@ -246,82 +269,18 @@ export default function CheckoutJourney() {
         </Stepper>
         {step === 1 && (
           <Box>
-            <Stack
-              direction="row"
-              sx={{ alignItems: "center", gap: 2, mb: 2, flexWrap: "wrap" }}
-            >
-              <Typography sx={{ fontWeight: 800 }}>Delivery option</Typography>
-              <RadioGroup
-                row
-                value={addressMode}
-                onChange={(event) =>
-                  setAddressMode(event.target.value as "another" | "saved")
-                }
-              >
-                <Stack direction="row" sx={{ alignItems: "center" }}>
-                  <Radio value="another" />
-                  <Typography sx={{ fontSize: 14 }}>Another address</Typography>
-                </Stack>
-                <Stack direction="row" sx={{ alignItems: "center" }}>
-                  <Radio value="saved" />
-                  <Typography sx={{ fontSize: 14 }}>Saved address</Typography>
-                </Stack>
-              </RadioGroup>
-            </Stack>
             <Box
               sx={{
                 display: "grid",
                 gap: 3,
-                gridTemplateColumns: { xs: "1fr", md: "1.2fr .8fr" },
+                gridTemplateColumns: checkoutColumns,
               }}
             >
-              {addressMode === "another" ? (
-                <TwcAddressForm submitting={loading} onSubmit={saveShipping} />
-              ) : (
-                <Card sx={{ p: { xs: 2, md: 3 }, borderRadius: 3 }}>
-                  <Typography
-                    variant="h3"
-                    sx={{ fontSize: 22, fontWeight: 800 }}
-                  >
-                    Saved address
-                  </Typography>
-                  <Alert severity="info" sx={{ mt: 2 }}>
-                    Noy Pangan · Brgy. Poblacion, Cotabato City · address_id:
-                    101
-                  </Alert>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      mt: 2,
-                      gap: 1,
-                    }}
-                  >
-                    <Button
-                      onClick={() => router.push("/twc-ecommerce/shop")}
-                      startIcon={<ArrowBackRoundedIcon />}
-                      sx={{ color: "text.secondary" }}
-                    >
-                      Shop more
-                    </Button>
-                    <Button
-                      disabled={loading}
-                      onClick={saveSavedAddress}
-                      startIcon={
-                        loading ? (
-                          <CircularProgress size={16} />
-                        ) : (
-                          <ArrowForwardRoundedIcon />
-                        )
-                      }
-                      variant="contained"
-                    >
-                      {loading ? "Saving address…" : "Continue to payment"}
-                    </Button>
-                  </Stack>
-                </Card>
-              )}
+              <TwcAddressForm
+                initialData={address}
+                submitting={loading}
+                onSubmit={saveShipping}
+              />
               <Summary quote={displayQuote} items={checkoutCart} />
             </Box>
             {error && (
@@ -340,7 +299,7 @@ export default function CheckoutJourney() {
             sx={{
               display: "grid",
               gap: 3,
-              gridTemplateColumns: { xs: "1fr", md: "1.2fr .8fr" },
+              gridTemplateColumns: checkoutColumns,
             }}
           >
             <Card
@@ -451,9 +410,9 @@ export default function CheckoutJourney() {
               quote={displayQuote}
               items={checkoutCart}
               address={
-                addressMode === "saved"
-                  ? "Noy Pangan · Saved default address"
-                  : `${address?.name ?? "Guest customer"}, ${address?.address ?? "Address pending"}`
+                address
+                  ? `${address.name} ${address.last_name}, ${address.address}, ${address.barangay}, ${address.city}, ${address.province} · ${address.mobile}`
+                  : "Address pending"
               }
             />
           </Box>
@@ -468,7 +427,7 @@ function Summary({
   items,
   address,
 }: {
-  quote: CheckoutQuote;
+  quote: Omit<CheckoutQuote, "address" | "shop" | "payment">;
   items: CartLine[];
   address?: string;
 }) {

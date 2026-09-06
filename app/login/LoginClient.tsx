@@ -28,7 +28,7 @@ import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { FloatingHomeButton } from "../components/FloatingHomeButton";
-import { ParticleNetworkBackground } from "../components/portfolio/ParticleNetworkBackground";
+import { DotBackground } from "../components/portfolio/DotBackground";
 
 type LoginClientProps = {
   authError?: string;
@@ -173,6 +173,7 @@ export default function LoginClient({
       component="main"
       sx={{
         alignItems: "center",
+        bgcolor: "#050b16",
         display: "flex",
         justifyContent: "center",
         minHeight: "100vh",
@@ -188,7 +189,7 @@ export default function LoginClient({
         },
       }}
     >
-      <ParticleNetworkBackground />
+      <DotBackground dotColors={{ light: "#f8fafc", dark: "#f8fafc" }} strength={0.12} />
       <FloatingHomeButton />
       <Card
         sx={{

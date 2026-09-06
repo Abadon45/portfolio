@@ -1,3 +1,4 @@
+import { dottedBackgroundSx } from "../portfolio/dottedBackground";
 import {
   Box,
   Card,
@@ -40,11 +41,12 @@ export default function ServicesSection() {
   return (
     <Box
       id="services"
-      sx={{
+      sx={(theme) => ({
+        ...dottedBackgroundSx(theme),
         bgcolor: "background.default",
         color: "text.primary",
         py: { xs: 8, md: 14 },
-      }}
+      })}
     >
       <Container maxWidth="lg">
         <Stack spacing={2} sx={{ mb: { xs: 5, md: 7 }, maxWidth: 690 }}>

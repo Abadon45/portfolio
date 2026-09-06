@@ -8,8 +8,14 @@ import {
   type ReactNode,
 } from "react";
 import type { StoreProduct } from "./twcProductCatalog";
+import type { TwcAddressValues } from "./TwcAddressForm";
 export type { StoreProduct } from "./twcProductCatalog";
 export type CartLine = { product: StoreProduct; quantity: number };
+
+export function cartQuantityLimit(product: StoreProduct) {
+  const stock = product.unlimitedStock ? Infinity : (product.stock ?? Infinity);
+  return Math.max(0, Math.min(stock, product.maximumOrderQuantity ?? Infinity));
+}
 
 type DemoDestination = { city?: string; province?: string };
 type ShippingZone = "MANILA" | "LUZON" | "VISAYAS" | "MINDANAO" | "ISLAND";
@@ -37,12 +43,7 @@ const destinationZone = ({
   province = "",
 }: DemoDestination): ShippingZone => {
   const location = `${city} ${province}`.toLowerCase();
-  if (
-    /manila|makati|pasay|pasig|taguig|quezon|caloocan|mandaluyong|marikina|paranaque|parañaque|muntinlupa|malabon|navotas|valenzuela|san juan|las pinas|las piñas|pateros/.test(
-      location,
-    )
-  )
-    return "MANILA";
+  if (/metro[\s-]manila|ncr|national capital/i.test(province)) return "MANILA";
   if (
     /cebu|bohol|iloilo|bacolod|leyte|samar|negros|capiz|aklan|antique/.test(
       location,
@@ -101,8 +102,13 @@ export function calculateDemoShippingFee(
   else {
     const boxes = chosen ? 1 : Math.ceil(totals.slots / 250);
     const boxType = chosen ?? "BL";
-    const minimumWeight = ({ BXS: 3, BS: 4, BM: 6, BL: 10 } as Record<string, number>)[boxType] ?? 10;
-    const packagingFee = ({ BXS: 30, BS: 40, BM: 50, BL: 80 } as Record<string, number>)[boxType] ?? 80;
+    const minimumWeight =
+      ({ BXS: 3, BS: 4, BM: 6, BL: 10 } as Record<string, number>)[boxType] ??
+      10;
+    const packagingFee =
+      ({ BXS: 30, BS: 40, BM: 50, BL: 80 } as Record<string, number>)[
+        boxType
+      ] ?? 80;
     const weight = Math.max(totals.weight / boxes, minimumWeight);
     const bracket = [0.5, 1, 3, 4, 5, 6, 7, 8, 9, 10].findIndex(
       (limit) => weight <= limit,
@@ -114,6 +120,9 @@ export function calculateDemoShippingFee(
 }
 
 export type CheckoutQuote = {
+  payment: "cod" | "xendit";
+  address: TwcAddressValues;
+  shop: string;
   orderNumber: string;
   status: "in_progress" | "for-booking";
   itemsTotal: number;
@@ -125,11 +134,13 @@ export type CheckoutQuote = {
 };
 type StoreContextValue = {
   products: StoreProduct[];
+  catalogueUnavailable: boolean;
   cart: CartLine[];
   addToCart: (product: StoreProduct) => void;
   updateQuantity: (slug: string, change: number) => void;
   removeFromCart: (slug: string) => void;
   clearCart: () => void;
+  completeShop: (shop: string) => void;
   selectedShop: string | null;
   setSelectedShop: (shop: string | null) => void;
   activeCheckout: CheckoutQuote | null;
@@ -158,9 +169,11 @@ export function useTwcStore() {
 export default function TwcStoreProvider({
   children,
   products,
+  catalogueUnavailable = false,
 }: {
   children: ReactNode;
   products: StoreProduct[];
+  catalogueUnavailable?: boolean;
 }) {
   const [cart, setCart] = useState<CartLine[]>([]);
   const [selectedShop, setSelectedShop] = useState<string | null>(null);
@@ -172,8 +185,11 @@ export default function TwcStoreProvider({
   const value = useMemo<StoreContextValue>(
     () => ({
       products,
+      catalogueUnavailable,
       cart,
       addToCart: (product) => {
+        if (cartQuantityLimit(product) < 1) return;
+        setActiveCheckout(null);
         setSelectedShop(product.shop);
         setCart((current) => {
           const found = current.find(
@@ -182,32 +198,61 @@ export default function TwcStoreProvider({
           return found
             ? current.map((line) =>
                 line.product.slug === product.slug
-                  ? { ...line, quantity: line.quantity + 1 }
+                  ? {
+                      ...line,
+                      quantity: Math.min(
+                        line.quantity + 1,
+                        cartQuantityLimit(product),
+                      ),
+                    }
                   : line,
               )
             : [...current, { product, quantity: 1 }];
         });
       },
-      updateQuantity: (slug, change) =>
+      updateQuantity: (slug, change) => {
+        setActiveCheckout(null);
         setCart((current) =>
           current.flatMap((line) =>
             line.product.slug === slug
               ? line.quantity + change > 0
-                ? [{ ...line, quantity: line.quantity + change }]
+                ? [
+                    {
+                      ...line,
+                      quantity: Math.min(
+                        line.quantity + change,
+                        cartQuantityLimit(line.product),
+                      ),
+                    },
+                  ]
                 : []
               : [line],
           ),
-        ),
-      removeFromCart: (slug) =>
+        );
+      },
+      removeFromCart: (slug) => {
+        setActiveCheckout(null);
         setCart((current) =>
           current.filter((line) => line.product.slug !== slug),
-        ),
+        );
+      },
+      completeShop: (shop) => {
+        setCart((current) =>
+          current.filter((line) => line.product.shop !== shop),
+        );
+        setSelectedShop(null);
+        setActiveCheckout(null);
+      },
       clearCart: () => {
+        setActiveCheckout(null);
         setCart([]);
         setSelectedShop(null);
       },
       selectedShop,
-      setSelectedShop,
+      setSelectedShop: (shop) => {
+        if (shop !== selectedShop) setActiveCheckout(null);
+        setSelectedShop(shop);
+      },
       activeCheckout,
       setActiveCheckout,
       lastOrder,
@@ -218,7 +263,14 @@ export default function TwcStoreProvider({
         0,
       ),
     }),
-    [activeCheckout, cart, lastOrder, products, selectedShop],
+    [
+      activeCheckout,
+      cart,
+      catalogueUnavailable,
+      lastOrder,
+      products,
+      selectedShop,
+    ],
   );
   return (
     <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

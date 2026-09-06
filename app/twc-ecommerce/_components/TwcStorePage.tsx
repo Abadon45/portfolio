@@ -1,11 +1,14 @@
 "use client";
 
+import { dottedBackgroundSx } from "../../components/portfolio/dottedBackground";
+
 import { useMemo, useState } from "react";
 import { Box, CssBaseline, ThemeProvider } from "@mui/material";
 import { FloatingHomeButton } from "../../components/FloatingHomeButton";
 import ScrollToTopButton from "../../components/ScrollToTopButton";
 import { useTwcAlert } from "../../components/portfolio/TwcAlertSystem";
 import CheckoutJourney from "./CheckoutJourney";
+import CatalogueStatus from "./CatalogueStatus";
 import TwcCartDrawer from "./TwcCartDrawer";
 import TwcEshopNavbar from "./TwcEshopNavbar";
 import TwcHomeView from "./TwcHomeView";
@@ -39,25 +42,43 @@ function ThemedStorePage({ view }: { view: View }) {
 
   const addProduct = (product: StoreProduct) => {
     addToCart(product);
+    setDrawerOpen(true);
     toastSuccess(`${product.name} added to your basket`);
   };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ bgcolor: "background.default", color: "text.primary", minHeight: "100vh" }}>
+      <Box
+        sx={{
+          ...dottedBackgroundSx(theme),
+          bgcolor: "background.default",
+          color: "text.primary",
+          minHeight: "100vh",
+        }}
+      >
         <AnnouncementBar />
         <TwcEshopNavbar
           count={cartCount}
           mode={mode}
           onCart={() => setDrawerOpen(true)}
-          onToggleMode={() => setMode((current) => (current === "dark" ? "light" : "dark"))}
+          onToggleMode={() =>
+            setMode((current) => (current === "dark" ? "light" : "dark"))
+          }
         />
         <TwcCartDrawer onClose={() => setDrawerOpen(false)} open={drawerOpen} />
+        <CatalogueStatus />
         {view === "home" && <TwcHomeView onAdd={addProduct} />}
-        {view === "shop" && <TwcShopPage onCartOpen={() => setDrawerOpen(true)} />}
+        {view === "shop" && (
+          <TwcShopPage onCartOpen={() => setDrawerOpen(true)} />
+        )}
         {view === "checkout" && <CheckoutJourney />}
-        {view === "thank-you" && <><TwcThankYouView /><TransactionMeta /></>}
+        {view === "thank-you" && (
+          <>
+            <TwcThankYouView />
+            <TransactionMeta />
+          </>
+        )}
         <TwcStoreFooter />
         <ScrollToTopButton threshold={520} />
         <FloatingHomeButton />
@@ -73,21 +94,43 @@ function TransactionMeta() {
 
   return (
     <Box sx={{ mx: "auto", maxWidth: 900, pb: 6, px: { xs: 2, md: 3 } }}>
-      <Box sx={{ bgcolor: "action.hover", border: 1, borderColor: "divider", p: { xs: 2, md: 3 } }}>
-        <Box component="pre" sx={{ color: "text.secondary", fontFamily: "monospace", fontSize: 12, mb: 0, mt: 0, overflowX: "auto", whiteSpace: "pre-wrap" }}>
-          {JSON.stringify({
-            shippingInfo: {
-              success: true,
-              order_number: lastOrder.quote.orderNumber,
-              amount: lastOrder.quote.amount.toFixed(2),
-              shipping_fee: lastOrder.quote.shippingFee.toFixed(2),
+      <Box
+        sx={{
+          bgcolor: "action.hover",
+          border: 1,
+          borderColor: "divider",
+          p: { xs: 2, md: 3 },
+        }}
+      >
+        <Box
+          component="pre"
+          sx={{
+            color: "text.secondary",
+            fontFamily: "monospace",
+            fontSize: 12,
+            mb: 0,
+            mt: 0,
+            overflowX: "auto",
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {JSON.stringify(
+            {
+              shippingInfo: {
+                success: true,
+                order_number: lastOrder.quote.orderNumber,
+                amount: lastOrder.quote.amount.toFixed(2),
+                shipping_fee: lastOrder.quote.shippingFee.toFixed(2),
+              },
+              payment: {
+                success: true,
+                order_status: lastOrder.quote.status,
+                payment_method: lastOrder.payment,
+              },
             },
-            payment: {
-              success: true,
-              order_status: lastOrder.quote.status,
-              payment_method: lastOrder.payment,
-            },
-          }, null, 2)}
+            null,
+            2,
+          )}
         </Box>
       </Box>
     </Box>

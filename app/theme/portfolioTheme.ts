@@ -163,6 +163,7 @@ export const createPortfolioTheme = (
   mode: PaletteMode,
   activeTheme: PortfolioThemeName = "executive",
   customPrimary = "#1a237e",
+  fontFamily = 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 ) => {
   const isDark = mode === "dark";
   const palette = portfolioThemePalettes[activeTheme === "custom" ? "executive" : activeTheme];
@@ -201,8 +202,7 @@ export const createPortfolioTheme = (
       borderRadius: 8,
     },
     typography: {
-      fontFamily:
-        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      fontFamily,
       h1: {
         fontWeight: 850,
         letterSpacing: 0,

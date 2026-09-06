@@ -19,7 +19,7 @@ import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import SpaceDashboardRoundedIcon from "@mui/icons-material/SpaceDashboardRounded";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { navItems } from "../../data/portfolio";
 import ThemeToggle from "../solar/ThemeToggle";
@@ -27,8 +27,8 @@ import ThemeToggle from "../solar/ThemeToggle";
 type PortfolioAppBarProps = {
   initialUser?: PortfolioNavUser | null;
   isDark: boolean;
-  onScrollToSection: (sectionId: string) => void;
-  onScrollToTop: () => void;
+  onScrollToSection?: (sectionId: string) => void;
+  onScrollToTop?: () => void;
   onToggleMode: () => void;
 };
 
@@ -67,14 +67,22 @@ function userInitials(user: PortfolioNavUser) {
 export function PortfolioAppBar({
   initialUser = null,
   isDark,
+  onToggleMode,
   onScrollToSection,
   onScrollToTop,
-  onToggleMode,
 }: PortfolioAppBarProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isHomepage = pathname === "/";
   const [authState, setAuthState] = useState<
     "loading" | "authenticated" | "unauthenticated"
-  >(initialUser === undefined ? "loading" : initialUser ? "authenticated" : "unauthenticated");
+  >(
+    initialUser === undefined
+      ? "loading"
+      : initialUser
+        ? "authenticated"
+        : "unauthenticated",
+  );
   const [user, setUser] = useState<PortfolioNavUser | null>(initialUser);
   const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(
     null,
@@ -100,7 +108,8 @@ export function PortfolioAppBar({
         setAuthState(nextUser ? "authenticated" : "unauthenticated");
       })
       .catch(() => {
-        if (active && initialUser === undefined) setAuthState("unauthenticated");
+        if (active && initialUser === undefined)
+          setAuthState("unauthenticated");
       });
 
     return () => {
@@ -123,9 +132,7 @@ export function PortfolioAppBar({
       position="sticky"
       sx={{
         backdropFilter: "blur(16px)",
-        bgcolor: isDark
-          ? "rgba(15, 23, 42, 0.88)"
-          : "rgba(251, 252, 255, 0.88)",
+        bgcolor: "background.paper",
         borderBottom: 1,
         borderColor: "divider",
       }}
@@ -142,10 +149,11 @@ export function PortfolioAppBar({
           }}
         >
           <MuiLink
-            component="button"
-            underline="none"
-            aria-label="Back to top"
+            component={NextLink}
+            href={isHomepage ? "#top" : "/"}
             onClick={onScrollToTop}
+            underline="none"
+            aria-label={isHomepage ? "Back to top" : "Home"}
             sx={{
               alignItems: "center",
               bgcolor: "transparent",
@@ -175,7 +183,7 @@ export function PortfolioAppBar({
                 component="strong"
                 sx={{ display: "block", fontWeight: 850, lineHeight: 1.1 }}
               >
-                Emmanuel "Noy" Pangan
+                Noy Pangan
               </Typography>
               <Typography
                 color="text.secondary"
@@ -191,12 +199,14 @@ export function PortfolioAppBar({
             component="nav"
             aria-label="Primary navigation"
             direction="row"
-            spacing={0.5}
+            spacing={{ xs: 0, sm: 0.5 }}
             sx={{
               alignItems: "center",
               maxWidth: "100%",
               minHeight: 40,
-              overflowX: { xs: "auto", sm: "visible" },
+              flexWrap: { xs: "wrap", sm: "nowrap" },
+              rowGap: 1,
+              overflowX: "visible",
               overflowY: "hidden",
               pb: { xs: 0.5, sm: 0 },
               scrollbarWidth: "none",
@@ -206,11 +216,36 @@ export function PortfolioAppBar({
               },
             }}
           >
+            {!isHomepage && (
+              <Button
+                component={NextLink}
+                href="/"
+                color="inherit"
+                size="small"
+              >
+                Home
+              </Button>
+            )}
             {navItems.map((item) => (
               <Button
                 color="inherit"
                 key={item.href}
-                onClick={() => onScrollToSection(item.href.replace("#", ""))}
+                scroll={item.href !== "#work" && item.href !== "#about"}
+                component={NextLink}
+                href={
+                  item.href === "#work"
+                    ? "/work"
+                    : item.href === "#about"
+                      ? "/about"
+                      : isHomepage
+                        ? item.href
+                        : `/${item.href}`
+                }
+                onClick={
+                  onScrollToSection
+                    ? () => onScrollToSection(item.href.slice(1))
+                    : undefined
+                }
                 size="small"
                 sx={{
                   color: "text.secondary",
@@ -223,7 +258,7 @@ export function PortfolioAppBar({
                   },
                 }}
               >
-                {item.label}
+                {item.href === "#about" ? "Experience" : item.label}
               </Button>
             ))}
             <ThemeToggle
@@ -437,7 +472,7 @@ export function PortfolioAppBar({
                   },
                 }}
               >
-                Login
+                Account
               </Button>
             )}
           </Stack>
@@ -455,8 +490,17 @@ function AccountActionSkeleton() {
       spacing={0.75}
       sx={{ alignItems: "center", flexShrink: 0, px: 0.75 }}
     >
-      <Skeleton animation="wave" variant="circular" sx={{ height: 28, width: 28 }} />
-      <Box sx={{ display: { xs: "none", sm: "block" }, width: { sm: 96, md: 132 } }}>
+      <Skeleton
+        animation="wave"
+        variant="circular"
+        sx={{ height: 28, width: 28 }}
+      />
+      <Box
+        sx={{
+          display: { xs: "none", sm: "block" },
+          width: { sm: 96, md: 132 },
+        }}
+      >
         <Skeleton animation="wave" height={14} width="82%" />
         <Skeleton animation="wave" height={11} width="48%" />
       </Box>
