@@ -67,20 +67,44 @@ export const storefrontThemes: Record<
 > = {
   "premium-beauty": {
     name: "Premium Beauty",
-    description: "Editorial, spacious, and image-led.",
-    primary: "#8b4962",
-    secondary: "#c49374",
-    accent: "#ead9d7",
-    lightSurface: "#fffaf8",
-    darkSurface: "#24151c",
-    darkPaper: "#321f29",
-    darkText: "#fff7f4",
-    darkMuted: "#d8bfc3",
-    lightDivider: "#ead9d7",
-    darkDivider: "#5b3947",
-    heroSurface: "#f4e7e4",
-    heroText: "#3f2631",
+    description: "A fragrance-led Premium Beauty storefront.",
+    primary: "#392631",
+    secondary: "#98556f",
+    accent: "#e8bdcc",
+    lightSurface: "#f8eff3",
+    darkSurface: "#181116",
+    darkPaper: "#261b22",
+    darkText: "#f7eff3",
+    darkMuted: "#d1bdc6",
+    lightDivider: "#e6d3dc",
+    darkDivider: "#493640",
+    heroSurface: "#f1e3e9",
+    heroText: "#392631",
     radius: 3,
+    density: "airy",
+    cardVariant: "premium",
+    heroStyle: "editorial",
+    headerVariant: "editorial",
+    productDetailVariant: "editorial",
+    footerVariant: "minimal",
+    homepage: ["hero", "featured", "story", "categories", "cta"],
+  },
+  "wellness-organic": {
+    name: "Wellness Organic",
+    description: "An organic wellness storefront featuring the Santé catalog.",
+    primary: "#183826",
+    secondary: "#ac4437",
+    accent: "#ddc7ab",
+    lightSurface: "#f3e9e0",
+    darkSurface: "#142019",
+    darkPaper: "#1d2d22",
+    darkText: "#f3e9e0",
+    darkMuted: "#d4c5b5",
+    lightDivider: "#ddc7ab",
+    darkDivider: "#455449",
+    heroSurface: "#f3e9e0",
+    heroText: "#183826",
+    radius: 2,
     density: "airy",
     cardVariant: "premium",
     heroStyle: "editorial",
@@ -97,57 +121,23 @@ export const storefrontThemes: Record<
       "cta",
     ],
   },
-  "wellness-organic": {
-    name: "Wellness Organic",
-    description: "Natural, calm, and trust-focused.",
-    primary: "#347153",
-    secondary: "#b47a42",
-    accent: "#dcebdc",
-    lightSurface: "#f8fbf6",
-    darkSurface: "#10241a",
-    darkPaper: "#1a3325",
-    darkText: "#f2fbf0",
-    darkMuted: "#bcd6c2",
-    lightDivider: "#d7e4d2",
-    darkDivider: "#385c46",
-    heroSurface: "#e4f0e4",
-    heroText: "#173b27",
-    radius: 3,
-    density: "balanced",
-    cardVariant: "standard",
-    heroStyle: "organic",
-    headerVariant: "wellness",
-    productDetailVariant: "wellness",
-    footerVariant: "wellness",
-    homepage: [
-      "hero",
-      "trust",
-      "categories",
-      "featured",
-      "story",
-      "benefits",
-      "testimonials",
-      "faq",
-      "cta",
-    ],
-  },
   "modern-marketplace": {
     name: "Modern Marketplace",
     description: "Fast discovery and information density.",
     primary: "#2457c5",
     secondary: "#e07a35",
     accent: "#dce8ff",
-    lightSurface: "#f5f8fc",
-    darkSurface: "#101a35",
-    darkPaper: "#1b2a4a",
-    darkText: "#f3f6ff",
-    darkMuted: "#b9c9ec",
-    lightDivider: "#c8d9fb",
-    darkDivider: "#354b79",
-    heroSurface: "#e6efff",
+    lightSurface: "#f5f7fa",
+    darkSurface: "#111a2a",
+    darkPaper: "#1a2639",
+    darkText: "#f4f6fa",
+    darkMuted: "#b8c2d1",
+    lightDivider: "#dce2e9",
+    darkDivider: "#344154",
+    heroSurface: "#e9eff7",
     heroText: "#142c63",
-    radius: 1,
-    density: "dense",
+    radius: 2,
+    density: "balanced",
     cardVariant: "marketplace",
     heroStyle: "marketplace",
     headerVariant: "marketplace",
@@ -157,21 +147,22 @@ export const storefrontThemes: Record<
   },
   "corporate-commerce": {
     name: "Corporate Commerce",
-    description: "Structured, polished, and brand-forward.",
-    primary: "#173f5f",
-    secondary: "#c28c36",
-    accent: "#dce6ec",
-    lightSurface: "#f7f9fb",
-    darkSurface: "#0d1f2b",
-    darkPaper: "#193747",
-    darkText: "#f4f8fb",
-    darkMuted: "#b8cbd8",
-    lightDivider: "#d3dee5",
-    darkDivider: "#365b6f",
-    heroSurface: "#e8eef3",
-    heroText: "#173044",
-    radius: 1,
-    density: "balanced",
+    description:
+      "An elevated catalog experience with clear product details and a considered checkout.",
+    primary: "#24494e",
+    secondary: "#8d6d4f",
+    accent: "#b9d0ce",
+    lightSurface: "#f5f6f2",
+    darkSurface: "#172423",
+    darkPaper: "#202f2d",
+    darkText: "#f5f5ef",
+    darkMuted: "#c1ceca",
+    lightDivider: "#d9dfda",
+    darkDivider: "#3c504d",
+    heroSurface: "#e9eeea",
+    heroText: "#1a302e",
+    radius: 2,
+    density: "airy",
     cardVariant: "compact",
     heroStyle: "structured",
     headerVariant: "corporate",
@@ -181,7 +172,7 @@ export const storefrontThemes: Record<
   },
 };
 
-const defaultThemeName: StorefrontThemeName = "premium-beauty";
+const defaultThemeName: StorefrontThemeName = "wellness-organic";
 export type StorefrontMode = "light" | "dark";
 type StorefrontThemeContextValue = {
   themeName: StorefrontThemeName;
@@ -206,6 +197,15 @@ export function StorefrontThemeProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
     try {
+      const requestedTheme = new URLSearchParams(window.location.search).get(
+        "theme",
+      );
+      if (requestedTheme && requestedTheme in storefrontThemes) {
+        setThemeName(requestedTheme as StorefrontThemeName);
+        setHydrated(true);
+        return;
+      }
+
       const savedTheme =
         window.localStorage.getItem("twc-ecommerce-theme") ??
         window.localStorage.getItem("twc-storefront-theme");
@@ -263,28 +263,30 @@ export function useStorefrontMode() {
 
 export function StorefrontModeProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<StorefrontMode>("light");
-  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     try {
       const savedMode = window.localStorage.getItem("twc-ecommerce-mode");
       if (savedMode === "light" || savedMode === "dark") setMode(savedMode);
     } catch {
-      // Mode changes still work when browser storage is unavailable.
+      // The mode toggle remains available for the current page session.
     }
-    setHydrated(true);
   }, []);
 
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem("twc-ecommerce-mode", mode);
-    } catch {
-      // Keep the current mode for this session.
-    }
-  }, [hydrated, mode]);
+  const updateMode: StorefrontModeContextValue["setMode"] = (nextMode) => {
+    setMode((current) => {
+      const value =
+        typeof nextMode === "function" ? nextMode(current) : nextMode;
+      try {
+        window.localStorage.setItem("twc-ecommerce-mode", value);
+      } catch {
+        // Keep the selected mode in memory when browser storage is unavailable.
+      }
+      return value;
+    });
+  };
 
-  const value = useMemo(() => ({ mode, setMode }), [mode]);
+  const value = useMemo(() => ({ mode, setMode: updateMode }), [mode]);
   return (
     <StorefrontModeContext.Provider value={value}>
       {children}
@@ -297,6 +299,10 @@ export function createTwcEcommerceTheme(
   themeName: StorefrontThemeName = defaultThemeName,
 ): Theme {
   const storefront = storefrontThemes[themeName];
+  const isPremiumTheme = themeName === "premium-beauty";
+  const isMarketplaceTheme = themeName === "modern-marketplace";
+  const isWellnessTheme = themeName === "wellness-organic";
+  const isEditorialTheme = isPremiumTheme || isWellnessTheme;
   const portfolioBase = createPortfolioTheme(mode, "classic");
   const surface =
     mode === "dark" ? storefront.darkSurface : storefront.lightSurface;
@@ -305,16 +311,49 @@ export function createTwcEcommerceTheme(
       mode,
       primary: {
         main: mode === "dark" ? storefront.accent : storefront.primary,
-        contrastText: mode === "dark" ? storefront.darkSurface : "#fff",
+        contrastText:
+          mode === "dark"
+            ? isMarketplaceTheme
+              ? "#111a2a"
+              : storefront.darkSurface
+            : "#fff",
       },
-      secondary: { main: storefront.secondary },
+      secondary: {
+        main: storefront.secondary,
+        ...(isEditorialTheme ? { contrastText: "#fff" } : {}),
+      },
       background: {
         default: surface,
-        paper: mode === "dark" ? storefront.darkPaper : "#ffffff",
+        paper:
+          mode === "dark"
+            ? storefront.darkPaper
+            : isPremiumTheme
+              ? "#f9fbfc"
+              : isWellnessTheme
+                ? "#fbf7f1"
+                : "#ffffff",
       },
       text: {
-        primary: mode === "dark" ? storefront.darkText : "#17241e",
-        secondary: mode === "dark" ? storefront.darkMuted : "#52675a",
+        primary:
+          mode === "dark"
+            ? storefront.darkText
+            : isMarketplaceTheme
+              ? "#202a36"
+              : isWellnessTheme
+                ? "#1b2920"
+                : isPremiumTheme
+                  ? "#20292d"
+                  : "#17241e",
+        secondary:
+          mode === "dark"
+            ? storefront.darkMuted
+            : isMarketplaceTheme
+              ? "#5d6875"
+              : isWellnessTheme
+                ? "#50574d"
+                : isPremiumTheme
+                  ? "#526167"
+                  : "#52675a",
       },
       divider:
         mode === "dark" ? storefront.darkDivider : storefront.lightDivider,
@@ -322,18 +361,15 @@ export function createTwcEcommerceTheme(
     shape: { borderRadius: storefront.radius * 4 },
     typography: {
       fontFamily:
-        themeName === "premium-beauty"
-          ? 'Georgia, "Times New Roman", serif'
-          : 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     },
     components: {
       MuiButton: {
         styleOverrides: {
           root: {
             borderRadius: storefront.radius * 4,
-            textTransform:
-              themeName === "modern-marketplace" ? "uppercase" : "none",
-            fontWeight: 800,
+            textTransform: "none",
+            fontWeight: isEditorialTheme ? 600 : 800,
           },
         },
       },
@@ -341,10 +377,9 @@ export function createTwcEcommerceTheme(
         styleOverrides: {
           root: {
             borderRadius: storefront.radius * 4,
-            boxShadow:
-              themeName === "premium-beauty"
-                ? "0 18px 45px rgba(100, 45, 65, .08)"
-                : "0 8px 24px rgba(20, 45, 70, .06)",
+            boxShadow: isEditorialTheme
+              ? "none"
+              : "0 8px 24px rgba(20, 45, 70, .06)",
           },
         },
       },

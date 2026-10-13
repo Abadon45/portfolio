@@ -1,11 +1,8 @@
 "use client";
 
-import ExploreRoundedIcon from "@mui/icons-material/ExploreRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
-import NorthRoundedIcon from "@mui/icons-material/NorthRounded";
 import {
   Box,
-  Button,
   Chip,
   Container,
   Divider,
@@ -19,18 +16,22 @@ import { NightcurrentHero } from "./NightcurrentHero";
 const locations = [
   [
     "The Blackwater Shelf",
-    "A basalt shoreline where the tide leaves behind glassy mineral fragments and unfamiliar signals.",
-    "#e8aa71",
+    "A basalt shoreline where the tide leaves behind glassy mineral " +
+      "fragments and unfamiliar signals.",
+    "/images/nightcurrent/world/blackwater-shelf.webp",
+    "Basalt sea stacks and tide pools at the Blackwater Shelf.",
   ],
   [
     "Station 04",
     "An abandoned weather station still transmitting one incomplete reading every midnight.",
-    "#9ab7c2",
+    "/images/nightcurrent/world/station-04.webp",
+    "The isolated weather station on its rocky island.",
   ],
   [
     "The Lantern Fields",
     "Wind-bent grasslands lit by small blue organisms that gather around old survey markers.",
-    "#87b69c",
+    "/images/nightcurrent/world/lantern-fields.webp",
+    "A coastal meadow above the sea at first light.",
   ],
 ] as const;
 
@@ -38,7 +39,8 @@ const reportRows = [
   [
     "Historical structure",
     "Recovered",
-    "Navigation rhythm, cinematic sequencing, and environmental depth were used as design evidence.",
+    "Navigation rhythm, cinematic sequencing, and environmental depth " +
+      "were used as design evidence.",
   ],
   [
     "Original visual assets",
@@ -48,12 +50,14 @@ const reportRows = [
   [
     "Backend integrations",
     "Unavailable",
-    "The demo is a self-contained frontend reconstruction; no purchase, account, or analytics system is invented.",
+    "The demo is a self-contained frontend reconstruction; no purchase, " +
+      "account, or analytics system is invented.",
   ],
   [
     "Parallax behavior",
-    "Reconstructed",
-    "A single camera drives hero-relative pointer and scroll depth with a static reduced-motion presentation.",
+    "Restored",
+    "Sea, headland, and nearshore layers move at separate rates, with a " +
+      "static presentation for reduced-motion preferences.",
   ],
 ] as const;
 
@@ -66,61 +70,6 @@ export function NightcurrentPage() {
         minHeight: "100vh",
       }}
     >
-      <Box
-        component="header"
-        sx={{
-          alignItems: "center",
-          display: "flex",
-          justifyContent: "space-between",
-          left: 0,
-          px: { xs: 2.5, md: 6 },
-          py: 2.5,
-          position: "absolute",
-          right: 0,
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <Box sx={{ alignItems: "center", display: "flex", gap: 1.2 }}>
-          <NorthRoundedIcon sx={{ color: "#e8aa71" }} />
-          <Typography
-            sx={{
-              fontSize: "0.75rem",
-              fontWeight: 800,
-              letterSpacing: "0.2em",
-            }}
-          >
-            NIGHTCURRENT
-          </Typography>
-        </Box>
-        <Stack
-          direction="row"
-          spacing={3}
-          sx={{ display: { xs: "none", sm: "flex" } }}
-        >
-          {[
-            ["World", "world"],
-            ["Story", "story"],
-            ["Recovery", "recovery"],
-          ].map(([label, id]) => (
-            <Typography
-              key={id}
-              component="a"
-              href={`#${id}`}
-              sx={{
-                color: "inherit",
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textDecoration: "none",
-              }}
-            >
-              {label}
-            </Typography>
-          ))}
-        </Stack>
-      </Box>
-
       <Box component="main">
         <NightcurrentHero />
 
@@ -163,27 +112,17 @@ export function NightcurrentPage() {
               </Box>
               <Box sx={{ flex: 1, pt: { md: 6 } }}>
                 <Typography
-                  sx={{ color: "#53686b", fontSize: "1.1rem", lineHeight: 1.8 }}
+                  sx={{
+                    color: "#53686b",
+                    fontSize: "1.05rem",
+                    lineHeight: 1.8,
+                  }}
                 >
                   Tideglass Island sits just outside the shipping lanes:
                   volcanic, wind-scoured, and threaded with the remains of a
                   research program no one remembers commissioning. Every place
                   has a trace. Every trace points farther out.
                 </Typography>
-                <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
-                  <ExploreRoundedIcon sx={{ color: "#b76e4f" }} />
-                  <Typography
-                    sx={{
-                      color: "#53686b",
-                      fontSize: "0.8rem",
-                      fontWeight: 800,
-                      letterSpacing: "0.1em",
-                      pt: 0.4,
-                    }}
-                  >
-                    EXPLORE THE UNMARKED
-                  </Typography>
-                </Stack>
               </Box>
             </Stack>
             <Box
@@ -194,31 +133,44 @@ export function NightcurrentPage() {
                 mt: 10,
               }}
             >
-              {locations.map(([title, text, accent]) => (
+              {locations.map(([title, text, image, alt]) => (
                 <Box
                   key={title}
                   sx={{
                     bgcolor: "#e4dccb",
-                    minHeight: 280,
-                    overflow: "hidden",
-                    p: 3,
-                    position: "relative",
+                    minWidth: 0,
                   }}
                 >
                   <Box
                     sx={{
-                      bgcolor: accent,
-                      clipPath:
-                        "polygon(0 45%, 40% 20%, 75% 50%, 100% 27%, 100% 100%, 0 100%)",
-                      inset: 0,
-                      opacity: 0.75,
-                      position: "absolute",
+                      aspectRatio: "1.45 / 1",
+                      overflow: "hidden",
                     }}
-                  />
-                  <Box sx={{ position: "relative", zIndex: 1, mt: 19 }}>
+                  >
+                    <Box
+                      component="img"
+                      src={image}
+                      alt={alt}
+                      loading="lazy"
+                      sx={{
+                        display: "block",
+                        height: "100%",
+                        objectFit: "cover",
+                        transition:
+                          "transform 450ms cubic-bezier(0.2, 0.7, 0.2, 1)",
+                        width: "100%",
+                        "&:hover": { transform: "scale(1.035)" },
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ minHeight: 148, p: 2.5 }}>
                     <Typography
                       component="h3"
-                      sx={{ fontFamily: "Georgia, serif", fontSize: "1.7rem" }}
+                      sx={{
+                        fontFamily: "Georgia, serif",
+                        fontSize: { xs: "1.45rem", md: "1.55rem" },
+                        lineHeight: 1.12,
+                      }}
                     >
                       {title}
                     </Typography>
@@ -227,7 +179,7 @@ export function NightcurrentPage() {
                         color: "#53686b",
                         fontSize: "0.9rem",
                         lineHeight: 1.5,
-                        mt: 1,
+                        mt: 1.25,
                       }}
                     >
                       {text}
@@ -421,13 +373,6 @@ export function NightcurrentPage() {
               reconstruction study. No original game artwork, branding, story,
               or backend services are reproduced.
             </Typography>
-            <Button
-              href="/"
-              variant="outlined"
-              sx={{ borderColor: "#e8aa71", color: "#e8aa71", mt: 4 }}
-            >
-              Return to portfolio
-            </Button>
           </Container>
         </Box>
       </Box>

@@ -12,6 +12,7 @@ import {
   Box,
   Breadcrumbs,
   Button,
+  ButtonBase,
   Card,
   Chip,
   Container,
@@ -33,8 +34,17 @@ import TwcCartDrawer from "./TwcCartDrawer";
 import TwcEshopNavbar from "./TwcEshopNavbar";
 import TwcProductCard from "./TwcProductCard";
 import { useTwcStore, type StoreProduct } from "./TwcStoreProvider";
-import { createTwcEcommerceTheme, useStorefrontMode, useStorefrontTheme } from "./twcEcommerceTheme";
+import {
+  createTwcEcommerceTheme,
+  useStorefrontMode,
+  useStorefrontTheme,
+} from "./twcEcommerceTheme";
 import TwcStoreFooter from "./TwcStoreFooter";
+import {
+  selectPremiumBeautyProducts,
+  santeProductImage,
+} from "./storefrontContent";
+import { santeFlyerFont } from "./santeTypography";
 
 const money = (value: number) =>
   `₱${value.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
@@ -51,7 +61,10 @@ function ThemedProductDetailPage({ slug }: { slug: string }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { themeName } = useStorefrontTheme();
   const { mode, setMode } = useStorefrontMode();
-  const theme = useMemo(() => createTwcEcommerceTheme(mode, themeName), [mode, themeName]);
+  const theme = useMemo(
+    () => createTwcEcommerceTheme(mode, themeName),
+    [mode, themeName],
+  );
   if (!product)
     return (
       <ThemeProvider theme={theme}>
@@ -132,16 +145,49 @@ function ProductDetail({
   const router = useRouter();
   const { themeConfig } = useStorefrontTheme();
   if (themeConfig.productDetailVariant === "editorial") {
-    return <EditorialProductDetail products={products} product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
+    return (
+      <EditorialProductDetail
+        added={added}
+        onAdd={onAdd}
+        onRelatedAdd={onRelatedAdd}
+        product={product}
+        products={products}
+        storefrontName={themeConfig.name}
+      />
+    );
   }
   if (themeConfig.productDetailVariant === "conversion") {
-    return <MarketplaceProductDetail products={products} product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
+    return (
+      <MarketplaceProductDetail
+        products={products}
+        product={product}
+        added={added}
+        onAdd={onAdd}
+        onRelatedAdd={onRelatedAdd}
+      />
+    );
   }
   if (themeConfig.productDetailVariant === "corporate") {
-    return <CorporateProductDetail products={products} product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
+    return (
+      <CorporateProductDetail
+        products={products}
+        product={product}
+        added={added}
+        onAdd={onAdd}
+        onRelatedAdd={onRelatedAdd}
+      />
+    );
   }
   if (themeConfig.productDetailVariant === "wellness") {
-    return <WellnessProductDetail products={products} product={product} added={added} onAdd={onAdd} onRelatedAdd={onRelatedAdd} />;
+    return (
+      <WellnessProductDetail
+        products={products}
+        product={product}
+        added={added}
+        onAdd={onAdd}
+        onRelatedAdd={onRelatedAdd}
+      />
+    );
   }
   const isEditorial = false;
   const isConversion = false;
@@ -193,7 +239,10 @@ function ProductDetail({
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: isConversion ? ".8fr 1.2fr" : "1.05fr .95fr" },
+            gridTemplateColumns: {
+              xs: "1fr",
+              lg: isConversion ? ".8fr 1.2fr" : "1.05fr .95fr",
+            },
           }}
         >
           <Box sx={{ bgcolor: "action.hover", p: { xs: 2, md: 4 } }}>
@@ -216,7 +265,7 @@ function ProductDetail({
                 label="Tap to zoom"
                 size="small"
                 sx={{
-            bgcolor: isEditorial ? "background.paper" : "action.hover",
+                  bgcolor: isEditorial ? "background.paper" : "action.hover",
                   left: 16,
                   position: "absolute",
                   top: 16,
@@ -241,7 +290,9 @@ function ProductDetail({
                   <Box
                     key={image}
                     sx={{
-                bgcolor: isEditorial ? "action.hover" : "background.paper",
+                      bgcolor: isEditorial
+                        ? "action.hover"
+                        : "background.paper",
                       border: 1,
                       borderColor: "divider",
                       borderRadius: 2,
@@ -287,7 +338,9 @@ function ProductDetail({
             <Typography
               component="h1"
               sx={{
-                fontFamily: isEditorial ? 'Georgia, "Times New Roman", serif' : undefined,
+                fontFamily: isEditorial
+                  ? 'Georgia, "Times New Roman", serif'
+                  : undefined,
                 fontSize: { xs: 32, md: isConversion ? 42 : 50 },
                 fontWeight: isEditorial ? 500 : 900,
                 letterSpacing: "-.07em",
@@ -305,7 +358,11 @@ function ProductDetail({
             </Typography>
             <Typography
               color="primary.main"
-              sx={{ fontSize: { xs: 30, md: 38 }, fontWeight: 900, mt: isConversion ? 1 : 2 }}
+              sx={{
+                fontSize: { xs: 30, md: 38 },
+                fontWeight: 900,
+                mt: isConversion ? 1 : 2,
+              }}
             >
               {money(product.price * quantity)}
             </Typography>
@@ -390,7 +447,41 @@ function ProductDetail({
           </Box>
         </Box>
       </Paper>
-      {isWellness && <Paper sx={{ bgcolor: "action.hover", border: 0, mt: 3, p: { xs: 2, md: 3 } }}><Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ justifyContent: "space-between" }}><Box><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".12em" }}>WHY IT FITS</Typography><Typography sx={{ fontWeight: 800, mt: .5 }}>A considered addition to an everyday routine.</Typography></Box><Typography color="text.secondary" sx={{ maxWidth: 520, lineHeight: 1.7 }}>Explore the product story, features, and specifications below before adding it to your basket.</Typography></Stack></Paper>}
+      {isWellness && (
+        <Paper
+          sx={{
+            bgcolor: "action.hover",
+            border: 0,
+            mt: 3,
+            p: { xs: 2, md: 3 },
+          }}
+        >
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={2}
+            sx={{ justifyContent: "space-between" }}
+          >
+            <Box>
+              <Typography
+                color="primary.main"
+                sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".12em" }}
+              >
+                WHY IT FITS
+              </Typography>
+              <Typography sx={{ fontWeight: 800, mt: 0.5 }}>
+                A considered addition to an everyday routine.
+              </Typography>
+            </Box>
+            <Typography
+              color="text.secondary"
+              sx={{ maxWidth: 520, lineHeight: 1.7 }}
+            >
+              Explore the product story, features, and specifications below
+              before adding it to your basket.
+            </Typography>
+          </Stack>
+        </Paper>
+      )}
       <Paper
         sx={{
           border: 1,
@@ -522,62 +613,801 @@ type DetailProps = {
   onRelatedAdd: (product: StoreProduct) => void;
 };
 
-function ProductGallery({ product, editorial = false }: { product: DetailProps["product"]; editorial?: boolean }) {
+function ProductGallery({
+  product,
+  editorial = false,
+}: {
+  product: DetailProps["product"];
+  editorial?: boolean;
+}) {
   const [lightbox, setLightbox] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
-  const gallery = product.images.length ? product.images : [product.image];
-  const moveImage = (direction: number) => setSelectedImage((current) => (current + direction + gallery.length) % gallery.length);
-  return <Box>
-    <Box onClick={() => setLightbox(true)} sx={{ alignItems: "center", bgcolor: editorial ? "background.paper" : "action.hover", cursor: "zoom-in", display: "flex", height: { xs: 360, md: editorial ? 650 : 500 }, justifyContent: "center", overflow: "hidden", p: { xs: 2, md: 4 }, position: "relative" }}>
-      <Box component="img" src={gallery[selectedImage]} alt={product.name} sx={{ height: "100%", objectFit: "contain", width: "100%" }} />
-      {gallery.length > 1 && <><IconButton aria-label="Previous product image" onClick={(event) => { event.stopPropagation(); moveImage(-1); }} sx={{ bgcolor: "rgba(255,255,255,.86)", left: 12, position: "absolute", top: "50%" }}><ArrowBackRoundedIcon fontSize="small" /></IconButton><IconButton aria-label="Next product image" onClick={(event) => { event.stopPropagation(); moveImage(1); }} sx={{ bgcolor: "rgba(255,255,255,.86)", position: "absolute", right: 12, top: "50%" }}><ArrowForwardRoundedIcon fontSize="small" /></IconButton></>}
+  const primaryImage = santeProductImage(product);
+  const gallery = product.images.length
+    ? [
+        primaryImage,
+        ...product.images.filter((image) => image !== primaryImage),
+      ]
+    : [primaryImage];
+  const moveImage = (direction: number) =>
+    setSelectedImage(
+      (current) => (current + direction + gallery.length) % gallery.length,
+    );
+  return (
+    <Box>
+      <Box
+        sx={{
+          alignItems: "center",
+          bgcolor: editorial ? "background.paper" : "action.hover",
+          display: "flex",
+          height: { xs: 360, md: editorial ? 650 : 500 },
+          justifyContent: "center",
+          overflow: "hidden",
+          p: { xs: 2, md: 4 },
+          position: "relative",
+        }}
+      >
+        <ButtonBase
+          component="button"
+          type="button"
+          aria-label={`Enlarge ${product.name} image`}
+          onClick={() => setLightbox(true)}
+          sx={{
+            alignItems: "center",
+            bgcolor: "transparent",
+            cursor: "zoom-in",
+            display: "flex",
+            flex: 1,
+            height: "100%",
+            justifyContent: "center",
+            width: "100%",
+            "&:focus-visible": {
+              outline: "2px solid",
+              outlineColor: "primary.main",
+              outlineOffset: -2,
+            },
+          }}
+        >
+          <Box
+            component="img"
+            src={gallery[selectedImage]}
+            alt={product.name}
+            width={900}
+            height={900}
+            sx={{ height: "100%", objectFit: "contain", width: "100%" }}
+          />
+        </ButtonBase>
+        {gallery.length > 1 && (
+          <>
+            <IconButton
+              aria-label="Previous product image"
+              onClick={(event) => {
+                event.stopPropagation();
+                moveImage(-1);
+              }}
+              sx={{
+                bgcolor: "rgba(255,255,255,.86)",
+                left: 12,
+                position: "absolute",
+                top: "50%",
+              }}
+            >
+              <ArrowBackRoundedIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              aria-label="Next product image"
+              onClick={(event) => {
+                event.stopPropagation();
+                moveImage(1);
+              }}
+              sx={{
+                bgcolor: "rgba(255,255,255,.86)",
+                position: "absolute",
+                right: 12,
+                top: "50%",
+              }}
+            >
+              <ArrowForwardRoundedIcon fontSize="small" />
+            </IconButton>
+          </>
+        )}
+      </Box>
+      {gallery.length > 1 && (
+        <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+          {gallery.slice(0, 5).map((image, index) => (
+            <Box
+              component="button"
+              key={image}
+              type="button"
+              aria-label={`Show product image ${index + 1}`}
+              onClick={() => setSelectedImage(index)}
+              sx={{
+                bgcolor: "background.paper",
+                border: 1,
+                borderColor:
+                  selectedImage === index ? "primary.main" : "divider",
+                cursor: "pointer",
+                height: 64,
+                p: 0.5,
+                width: 64,
+                "&:focus-visible": {
+                  outline: "2px solid",
+                  outlineColor: "primary.main",
+                  outlineOffset: 2,
+                },
+              }}
+            >
+              <Box
+                component="img"
+                src={image}
+                alt={`${product.name} thumbnail`}
+                width={64}
+                height={64}
+                sx={{ height: "100%", objectFit: "contain", width: "100%" }}
+              />
+            </Box>
+          ))}
+        </Stack>
+      )}
+      <Dialog
+        open={lightbox}
+        onClose={() => setLightbox(false)}
+        maxWidth="lg"
+        fullWidth
+      >
+        <Box
+          sx={{
+            alignItems: "center",
+            bgcolor: "background.paper",
+            display: "flex",
+            justifyContent: "center",
+            minHeight: { xs: 400, md: 700 },
+            p: 4,
+            position: "relative",
+          }}
+        >
+          <IconButton
+            onClick={() => setLightbox(false)}
+            sx={{ position: "absolute", right: 12, top: 12 }}
+            aria-label="Close product image"
+          >
+            <CloseRoundedIcon />
+          </IconButton>
+          <Box
+            component="img"
+            src={gallery[selectedImage]}
+            alt={product.name}
+            sx={{ maxHeight: 640, maxWidth: "100%", objectFit: "contain" }}
+          />
+        </Box>
+      </Dialog>
     </Box>
-    {gallery.length > 1 && <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>{gallery.slice(0, 5).map((image, index) => <Box component="button" key={image} onClick={() => setSelectedImage(index)} sx={{ bgcolor: "background.paper", border: 1, borderColor: selectedImage === index ? "primary.main" : "divider", cursor: "pointer", height: 64, p: .5, width: 64 }}><Box component="img" src={image} alt={`${product.name} thumbnail`} sx={{ height: "100%", objectFit: "contain", width: "100%" }} /></Box>)}</Stack>}
-    <Dialog open={lightbox} onClose={() => setLightbox(false)} maxWidth="lg" fullWidth><Box sx={{ alignItems: "center", bgcolor: "background.paper", display: "flex", justifyContent: "center", minHeight: { xs: 400, md: 700 }, p: 4, position: "relative" }}><IconButton onClick={() => setLightbox(false)} sx={{ position: "absolute", right: 12, top: 12 }} aria-label="Close product image"><CloseRoundedIcon /></IconButton><Box component="img" src={gallery[selectedImage]} alt={product.name} sx={{ maxHeight: 640, maxWidth: "100%", objectFit: "contain" }} /></Box></Dialog>
-  </Box>;
+  );
 }
 
-function PurchasePanel({ product, added, onAdd, eyebrow = "PRODUCT DETAILS" }: DetailProps & { eyebrow?: string }) {
+function PurchasePanel({
+  product,
+  added,
+  onAdd,
+  eyebrow = "PRODUCT DETAILS",
+  hideBuyNow = false,
+}: DetailProps & { eyebrow?: string; hideBuyNow?: boolean }) {
   const [quantity, setQuantity] = useState(1);
-  return <Stack spacing={2.25}>
-    <Stack direction="row" spacing={1}><Chip label={product.shop} color="primary" size="small" />{!product.unlimitedStock && <Chip label={`${product.stock} in stock`} color="success" size="small" variant="outlined" />}</Stack>
-    <Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>{eyebrow}</Typography>
-    <Typography component="h1" sx={{ fontFamily: eyebrow === "THE EDIT" ? 'Georgia, "Times New Roman", serif' : undefined, fontSize: { xs: 34, md: 54 }, fontWeight: eyebrow === "THE EDIT" ? 500 : 900, letterSpacing: "-.07em", lineHeight: 1.02 }}>{product.name}</Typography>
-    <Typography color="text.secondary" sx={{ lineHeight: 1.8 }}>{product.description}</Typography>
-    <Typography color="primary.main" sx={{ fontSize: { xs: 30, md: 38 }, fontWeight: 900 }}>₱{(product.price * quantity).toLocaleString("en-PH", { minimumFractionDigits: 2 })}</Typography>
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}><Typography color="text.secondary" sx={{ fontSize: 13 }}>Qty</Typography><IconButton disabled={quantity <= 1} onClick={() => setQuantity((value) => value - 1)} sx={{ border: 1, borderColor: "divider" }} aria-label="Decrease quantity">−</IconButton><Typography sx={{ fontWeight: 900, minWidth: 24, textAlign: "center" }}>{quantity}</Typography><IconButton onClick={() => setQuantity((value) => Math.min(99, value + 1))} sx={{ border: 1, borderColor: "divider" }} aria-label="Increase quantity">+</IconButton></Stack>
-    <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}><Button disabled={added} onClick={() => onAdd(quantity)} startIcon={added ? <CheckRoundedIcon /> : <AddShoppingCartRoundedIcon />} size="large" variant="contained">{added ? "Added to cart" : "Add to cart"}</Button><Button disabled={added} onClick={() => onAdd(quantity)} size="large" variant="outlined">Buy now</Button></Stack>
-    <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}><Stack direction="row" spacing={.75} sx={{ alignItems: "center" }}><LocalShippingOutlinedIcon color="primary" fontSize="small" /><Typography color="text.secondary" sx={{ fontSize: 12 }}>Nationwide demo delivery</Typography></Stack><Stack direction="row" spacing={.75} sx={{ alignItems: "center" }}><SecurityOutlinedIcon color="primary" fontSize="small" /><Typography color="text.secondary" sx={{ fontSize: 12 }}>Secure offline flow</Typography></Stack></Stack>
-  </Stack>;
+  const isSante = eyebrow === "SANTÉ PRODUCT";
+  return (
+    <Stack spacing={2.25}>
+      <Stack direction="row" spacing={1}>
+        <Chip label={product.shop} color="primary" size="small" />
+        {!product.unlimitedStock && (
+          <Chip
+            label={`${product.stock} in stock`}
+            color="success"
+            size="small"
+            variant="outlined"
+          />
+        )}
+      </Stack>
+      <Typography
+        color="primary.main"
+        sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}
+      >
+        {eyebrow}
+      </Typography>
+      <Typography
+        className={isSante ? santeFlyerFont.className : undefined}
+        component="h1"
+        sx={{
+          fontSize: { xs: 34, md: 54 },
+          fontWeight: isSante ? 500 : 900,
+          letterSpacing: isSante ? "-.03em" : "-.07em",
+          lineHeight: 1.02,
+        }}
+      >
+        {product.name}
+      </Typography>
+      <Typography color="text.secondary" sx={{ lineHeight: 1.8 }}>
+        {product.description}
+      </Typography>
+      <Typography
+        color="primary.main"
+        sx={{ fontSize: { xs: 30, md: 38 }, fontWeight: 900 }}
+      >
+        ₱
+        {(product.price * quantity).toLocaleString("en-PH", {
+          minimumFractionDigits: 2,
+        })}
+      </Typography>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+        <Typography color="text.secondary" sx={{ fontSize: 13 }}>
+          Qty
+        </Typography>
+        <IconButton
+          disabled={quantity <= 1}
+          onClick={() => setQuantity((value) => value - 1)}
+          sx={{ border: 1, borderColor: "divider" }}
+          aria-label="Decrease quantity"
+        >
+          −
+        </IconButton>
+        <Typography sx={{ fontWeight: 900, minWidth: 24, textAlign: "center" }}>
+          {quantity}
+        </Typography>
+        <IconButton
+          onClick={() => setQuantity((value) => Math.min(99, value + 1))}
+          sx={{ border: 1, borderColor: "divider" }}
+          aria-label="Increase quantity"
+        >
+          +
+        </IconButton>
+      </Stack>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+        <Button
+          disabled={added}
+          onClick={() => onAdd(quantity)}
+          startIcon={
+            added ? <CheckRoundedIcon /> : <AddShoppingCartRoundedIcon />
+          }
+          size="large"
+          variant="contained"
+        >
+          {added ? "Added to cart" : "Add to cart"}
+        </Button>
+        {!hideBuyNow && (
+          <Button
+            disabled={added}
+            onClick={() => onAdd(quantity)}
+            size="large"
+            variant="outlined"
+          >
+            Buy now
+          </Button>
+        )}
+      </Stack>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}
+      >
+        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+          <LocalShippingOutlinedIcon color="primary" fontSize="small" />
+          <Typography color="text.secondary" sx={{ fontSize: 12 }}>
+            Nationwide demo delivery
+          </Typography>
+        </Stack>
+        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+          <SecurityOutlinedIcon color="primary" fontSize="small" />
+          <Typography color="text.secondary" sx={{ fontSize: 12 }}>
+            Secure offline flow
+          </Typography>
+        </Stack>
+      </Stack>
+    </Stack>
+  );
 }
 
 function ProductFacts({ product }: { product: DetailProps["product"] }) {
-  return <Stack divider={<Divider flexItem />} spacing={1.5} sx={{ borderTop: 1, borderColor: "divider", mt: 3, pt: 2 }}>{[["Shop", product.shop], ["Category", product.category], ["Availability", product.unlimitedStock ? "Available for demo" : `${product.stock} units`], ["Delivery", "Calculated at checkout"]].map(([label, value]) => <Stack direction="row" key={label} sx={{ justifyContent: "space-between", gap: 2 }}><Typography color="text.secondary" sx={{ fontSize: 13 }}>{label}</Typography><Typography sx={{ fontSize: 13, fontWeight: 800, textAlign: "right" }}>{value}</Typography></Stack>)}</Stack>;
+  return (
+    <Stack
+      divider={<Divider flexItem />}
+      spacing={1.5}
+      sx={{ borderTop: 1, borderColor: "divider", mt: 3, pt: 2 }}
+    >
+      {[
+        ["Shop", product.shop],
+        ["Category", product.category],
+        [
+          "Availability",
+          product.unlimitedStock
+            ? "Available for demo"
+            : `${product.stock} units`,
+        ],
+        ["Delivery", "Calculated at checkout"],
+      ].map(([label, value]) => (
+        <Stack
+          direction="row"
+          key={label}
+          sx={{ justifyContent: "space-between", gap: 2 }}
+        >
+          <Typography color="text.secondary" sx={{ fontSize: 13 }}>
+            {label}
+          </Typography>
+          <Typography
+            sx={{ fontSize: 13, fontWeight: 800, textAlign: "right" }}
+          >
+            {value}
+          </Typography>
+        </Stack>
+      ))}
+    </Stack>
+  );
 }
 
-function RelatedProducts({ products, product, onAdd }: { products: StoreProduct[]; product: DetailProps["product"]; onAdd: DetailProps["onRelatedAdd"] }) {
-  const related = products.filter((item) => item.slug !== product.slug && item.category === product.category).slice(0, 4);
+function RelatedProducts({
+  products,
+  product,
+  onAdd,
+}: {
+  products: StoreProduct[];
+  product: DetailProps["product"];
+  onAdd: DetailProps["onRelatedAdd"];
+}) {
+  const related = products
+    .filter(
+      (item) =>
+        item.slug !== product.slug && item.category === product.category,
+    )
+    .slice(0, 4);
   const router = useRouter();
   if (!related.length) return null;
-  return <Box sx={{ mt: { xs: 6, md: 10 } }}><Stack direction="row" sx={{ alignItems: "end", justifyContent: "space-between", mb: 2 }}><Box><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>COMPLETE THE COLLECTION</Typography><Typography component="h2" sx={{ fontSize: { xs: 28, md: 40 }, fontWeight: 900, letterSpacing: "-.06em", mt: .5 }}>More from {product.category}</Typography></Box><Button onClick={() => router.push("/twc-ecommerce/shop")}>View all</Button></Stack><Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(4, minmax(0, 1fr))" } }}>{related.map((item) => <TwcProductCard key={item.slug} product={item} onAdd={() => onAdd(item)} />)}</Box></Box>;
+  return (
+    <Box sx={{ mt: { xs: 6, md: 10 } }}>
+      <Stack
+        direction="row"
+        sx={{ alignItems: "end", justifyContent: "space-between", mb: 2 }}
+      >
+        <Box>
+          <Typography
+            color="primary.main"
+            sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}
+          >
+            COMPLETE THE COLLECTION
+          </Typography>
+          <Typography
+            component="h2"
+            sx={{
+              fontSize: { xs: 28, md: 40 },
+              fontWeight: 900,
+              letterSpacing: "-.06em",
+              mt: 0.5,
+            }}
+          >
+            More from {product.category}
+          </Typography>
+        </Box>
+        <Button onClick={() => router.push("/twc-ecommerce/shop")}>
+          View all
+        </Button>
+      </Stack>
+      <Box
+        sx={{
+          display: "grid",
+          gap: 2,
+          gridTemplateColumns: {
+            xs: "repeat(2, minmax(0, 1fr))",
+            sm: "repeat(4, minmax(0, 1fr))",
+          },
+        }}
+      >
+        {related.map((item) => (
+          <TwcProductCard
+            key={item.slug}
+            product={item}
+            onAdd={() => onAdd(item)}
+          />
+        ))}
+      </Box>
+    </Box>
+  );
 }
 
-function EditorialProductDetail(props: DetailProps) {
+function EditorialProductDetail({
+  storefrontName,
+  ...props
+}: DetailProps & { storefrontName: string }) {
   const router = useRouter();
-  return <Container maxWidth="lg" sx={{ py: { xs: 3, md: 7 } }}><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />} sx={{ color: "text.secondary", mb: 3 }}>Back to the edit</Button><Box sx={{ display: "grid", gap: { xs: 4, md: 9 }, gridTemplateColumns: { xs: "1fr", md: "1.15fr .85fr" } }}><ProductGallery editorial product={props.product} /><Box sx={{ alignSelf: "center" }}><PurchasePanel {...props} eyebrow="THE EDIT" /><Typography color="text.secondary" sx={{ borderLeft: 2, borderColor: "primary.main", lineHeight: 1.8, mt: 4, pl: 2 }}>A considered addition to a slower, more intentional daily ritual.</Typography></Box></Box><Paper sx={{ bgcolor: "background.paper", borderTop: 1, borderColor: "divider", borderRadius: 0, mt: { xs: 7, md: 12 }, p: { xs: 2.5, sm: 3.5, md: 5 } }}><Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 30, md: 44 }, fontWeight: 500 }}>The story behind the choice.</Typography><Divider sx={{ borderColor: "divider", my: { xs: 2, md: 3 } }} /><Typography color="text.secondary" sx={{ lineHeight: 1.9, maxWidth: 720, whiteSpace: "pre-line" }}>{props.product.details || props.product.description}</Typography></Paper><RelatedProducts products={props.products} product={props.product} onAdd={props.onRelatedAdd} /></Container>;
+  const isWellnessStore = storefrontName === "Wellness Organic";
+  const isPremiumBeauty = storefrontName === "Premium Beauty";
+  const relatedProducts = isPremiumBeauty
+    ? selectPremiumBeautyProducts(props.products)
+    : props.products;
+
+  return (
+    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 7 } }}>
+      <Button
+        onClick={() => router.push("/twc-ecommerce/shop")}
+        startIcon={<ArrowBackRoundedIcon />}
+        sx={{ color: "text.secondary", mb: 3 }}
+      >
+        Back to {storefrontName} shop
+      </Button>
+      <Box
+        sx={{
+          display: "grid",
+          gap: { xs: 4, md: 9 },
+          gridTemplateColumns: { xs: "1fr", md: "1.15fr .85fr" },
+        }}
+      >
+        <ProductGallery editorial product={props.product} />
+        <Box sx={{ alignSelf: "center" }}>
+          <PurchasePanel
+            {...props}
+            eyebrow={
+              isWellnessStore
+                ? "SANTÉ PRODUCT"
+                : isPremiumBeauty
+                  ? "PREMIUM BEAUTY"
+                  : "BEAUTY & CARE"
+            }
+            hideBuyNow={isPremiumBeauty}
+          />
+          <Typography color="text.secondary" sx={{ lineHeight: 1.8, mt: 3 }}>
+            Review the product description and details before adding it to your
+            basket.
+          </Typography>
+        </Box>
+      </Box>
+      <Paper
+        sx={{
+          bgcolor: "background.paper",
+          borderTop: 1,
+          borderColor: "divider",
+          borderRadius: 0,
+          mt: { xs: 7, md: 12 },
+          p: { xs: 2.5, sm: 3.5, md: 5 },
+        }}
+      >
+        <Typography
+          component="h2"
+          sx={{
+            fontFamily: 'Georgia, "Times New Roman", serif',
+            fontSize: { xs: 30, md: 44 },
+            fontWeight: 500,
+          }}
+        >
+          Product description and details
+        </Typography>
+        <Divider sx={{ borderColor: "divider", my: { xs: 2, md: 3 } }} />
+        <Typography
+          color="text.secondary"
+          sx={{ lineHeight: 1.9, maxWidth: 720, whiteSpace: "pre-line" }}
+        >
+          {props.product.details || props.product.description}
+        </Typography>
+      </Paper>
+      <RelatedProducts
+        products={relatedProducts}
+        product={props.product}
+        onAdd={props.onRelatedAdd}
+      />
+    </Container>
+  );
 }
 
 function MarketplaceProductDetail(props: DetailProps) {
   const router = useRouter();
-  return <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 } }}><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />} sx={{ color: "text.secondary", mb: 2 }}>Back to results</Button><Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: ".9fr 1.1fr" } }}><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: { xs: 1, md: 2 } }}><ProductGallery product={props.product} /></Paper><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: { xs: 2, md: 4 } }}><PurchasePanel {...props} eyebrow="FAST CHECKOUT" /><ProductFacts product={props.product} /></Paper></Box><RelatedProducts products={props.products} product={props.product} onAdd={props.onRelatedAdd} /></Container>;
+  return (
+    <Container maxWidth="xl" sx={{ py: { xs: 2.5, md: 5 } }}>
+      <Breadcrumbs sx={{ mb: { xs: 2, md: 3 } }}>
+        <Button
+          onClick={() => router.push("/twc-ecommerce/shop")}
+          startIcon={<ArrowBackRoundedIcon />}
+          sx={{ color: "text.secondary", pl: 0 }}
+        >
+          All products
+        </Button>
+        <Typography
+          color="text.primary"
+          noWrap
+          sx={{ maxWidth: { xs: 180, sm: 420 }, fontWeight: 650 }}
+        >
+          {props.product.name}
+        </Typography>
+      </Breadcrumbs>
+      <Box
+        sx={{
+          alignItems: "start",
+          display: "grid",
+          gap: { xs: 2, lg: 3 },
+          gridTemplateColumns: {
+            xs: "1fr",
+            lg: "minmax(0, 1.08fr) minmax(380px, .92fr)",
+          },
+        }}
+      >
+        <Paper
+          sx={{
+            bgcolor: "background.paper",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1.5,
+            minWidth: 0,
+            overflow: "hidden",
+            p: { xs: 1, sm: 2 },
+          }}
+        >
+          <ProductGallery product={props.product} />
+        </Paper>
+        <Paper
+          sx={{
+            bgcolor: "background.paper",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1.5,
+            minWidth: 0,
+            p: { xs: 2, sm: 3, md: 3.5 },
+          }}
+        >
+          <PurchasePanel {...props} eyebrow="PRODUCT DETAILS" />
+          <ProductFacts product={props.product} />
+        </Paper>
+      </Box>
+      <RelatedProducts
+        products={props.products}
+        product={props.product}
+        onAdd={props.onRelatedAdd}
+      />
+    </Container>
+  );
 }
 
 function WellnessProductDetail(props: DetailProps) {
   const router = useRouter();
-  return <Container maxWidth="xl" sx={{ py: { xs: 3, md: 7 } }}><Breadcrumbs sx={{ mb: 3 }}><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />} sx={{ color: "text.secondary", pl: 0 }}>Wellness shop</Button><Typography color="text.primary" noWrap sx={{ maxWidth: 360, fontWeight: 800 }}>{props.product.name}</Typography></Breadcrumbs><Box sx={{ display: "grid", gap: { xs: 3, lg: 6 }, gridTemplateColumns: { xs: "1fr", lg: "1.05fr .95fr" } }}><Box><ProductGallery product={props.product} /><Box sx={{ bgcolor: "#e5efe2", mt: 2, p: { xs: 2, md: 3 } }}><Typography sx={{ color: "#347153", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>HOW IT FITS</Typography><Typography sx={{ color: "#173b27", fontSize: 20, fontWeight: 850, mt: .5 }}>A practical addition to an everyday routine.</Typography><Typography sx={{ color: "#496653", lineHeight: 1.7, mt: 1 }}>Explore this product as part of your own routine. This demo description is intentionally general and does not make medical or performance claims.</Typography></Box></Box><Paper sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 0, p: { xs: 2.5, md: 5 } }}><PurchasePanel {...props} eyebrow="WELLNESS COLLECTION" /><ProductFacts product={props.product} /></Paper></Box><Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, mt: { xs: 5, md: 8 } }}><Paper sx={{ bgcolor: "#f0e8dc", borderRadius: 0, p: { xs: 2.5, md: 4 } }}><Typography sx={{ color: "#9a6634", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>PRODUCT DESCRIPTION</Typography><Typography component="h2" sx={{ color: "#3d352c", fontSize: 28, fontWeight: 850, mt: 1 }}>What to know before you choose.</Typography><Typography sx={{ color: "#665e54", lineHeight: 1.85, mt: 1.5, whiteSpace: "pre-line" }}>{props.product.description}</Typography></Paper><Paper sx={{ bgcolor: "#fff", border: 1, borderColor: "divider", borderRadius: 0, p: { xs: 2.5, md: 4 } }}><Typography sx={{ color: "#347153", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>PRODUCT DETAILS</Typography><Typography component="h2" sx={{ color: "#173b27", fontSize: 28, fontWeight: 850, mt: 1 }}>Simple, useful context.</Typography><Typography sx={{ color: "#607467", lineHeight: 1.85, mt: 1.5, whiteSpace: "pre-line" }}>{props.product.details || "Product details are presented from the shared TWC catalog fixture."}</Typography></Paper></Box><RelatedProducts products={props.products} product={props.product} onAdd={props.onRelatedAdd} /></Container>;
+  return (
+    <Container maxWidth="xl" sx={{ py: { xs: 3, md: 7 } }}>
+      <Breadcrumbs sx={{ mb: 3 }}>
+        <Button
+          onClick={() => router.push("/twc-ecommerce/shop")}
+          startIcon={<ArrowBackRoundedIcon />}
+          sx={{ color: "text.secondary", pl: 0 }}
+        >
+          Wellness shop
+        </Button>
+        <Typography
+          color="text.primary"
+          noWrap
+          sx={{ maxWidth: 360, fontWeight: 800 }}
+        >
+          {props.product.name}
+        </Typography>
+      </Breadcrumbs>
+      <Box
+        sx={{
+          display: "grid",
+          gap: { xs: 3, lg: 6 },
+          gridTemplateColumns: { xs: "1fr", lg: "1.05fr .95fr" },
+        }}
+      >
+        <Box>
+          <ProductGallery product={props.product} />
+          <Box sx={{ bgcolor: "#e5efe2", mt: 2, p: { xs: 2, md: 3 } }}>
+            <Typography
+              sx={{
+                color: "#347153",
+                fontSize: 11,
+                fontWeight: 900,
+                letterSpacing: ".14em",
+              }}
+            >
+              HOW IT FITS
+            </Typography>
+            <Typography
+              sx={{ color: "#173b27", fontSize: 20, fontWeight: 850, mt: 0.5 }}
+            >
+              A practical addition to an everyday routine.
+            </Typography>
+            <Typography sx={{ color: "#496653", lineHeight: 1.7, mt: 1 }}>
+              Explore this product as part of your own routine. This demo
+              description is intentionally general and does not make medical or
+              performance claims.
+            </Typography>
+          </Box>
+        </Box>
+        <Paper
+          sx={{
+            bgcolor: "background.paper",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 0,
+            p: { xs: 2.5, md: 5 },
+          }}
+        >
+          <PurchasePanel {...props} eyebrow="WELLNESS COLLECTION" />
+          <ProductFacts product={props.product} />
+        </Paper>
+      </Box>
+      <Box
+        sx={{
+          display: "grid",
+          gap: 2,
+          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+          mt: { xs: 5, md: 8 },
+        }}
+      >
+        <Paper
+          sx={{ bgcolor: "#f0e8dc", borderRadius: 0, p: { xs: 2.5, md: 4 } }}
+        >
+          <Typography
+            sx={{
+              color: "#9a6634",
+              fontSize: 11,
+              fontWeight: 900,
+              letterSpacing: ".14em",
+            }}
+          >
+            PRODUCT DESCRIPTION
+          </Typography>
+          <Typography
+            component="h2"
+            sx={{ color: "#3d352c", fontSize: 28, fontWeight: 850, mt: 1 }}
+          >
+            What to know before you choose.
+          </Typography>
+          <Typography
+            sx={{
+              color: "#665e54",
+              lineHeight: 1.85,
+              mt: 1.5,
+              whiteSpace: "pre-line",
+            }}
+          >
+            {props.product.description}
+          </Typography>
+        </Paper>
+        <Paper
+          sx={{
+            bgcolor: "#fff",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 0,
+            p: { xs: 2.5, md: 4 },
+          }}
+        >
+          <Typography
+            sx={{
+              color: "#347153",
+              fontSize: 11,
+              fontWeight: 900,
+              letterSpacing: ".14em",
+            }}
+          >
+            PRODUCT DETAILS
+          </Typography>
+          <Typography
+            component="h2"
+            sx={{ color: "#173b27", fontSize: 28, fontWeight: 850, mt: 1 }}
+          >
+            Simple, useful context.
+          </Typography>
+          <Typography
+            sx={{
+              color: "#607467",
+              lineHeight: 1.85,
+              mt: 1.5,
+              whiteSpace: "pre-line",
+            }}
+          >
+            {props.product.details ||
+              "Product details are presented from the shared TWC catalog fixture."}
+          </Typography>
+        </Paper>
+      </Box>
+      <RelatedProducts
+        products={props.products}
+        product={props.product}
+        onAdd={props.onRelatedAdd}
+      />
+    </Container>
+  );
 }
 
 function CorporateProductDetail(props: DetailProps) {
   const router = useRouter();
-  return <Container maxWidth="xl" sx={{ py: { xs: 3, md: 6 } }}><Stack direction={{ xs: "column", md: "row" }} sx={{ alignItems: { md: "end" }, justifyContent: "space-between", mb: 3, gap: 2 }}><Box><Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>CORPORATE COLLECTIONS</Typography><Typography component="h1" sx={{ fontSize: { xs: 34, md: 52 }, fontWeight: 900, letterSpacing: "-.07em", mt: .5 }}>Product specification</Typography></Box><Button onClick={() => router.push("/twc-ecommerce/shop")} startIcon={<ArrowBackRoundedIcon />}>Back to catalog</Button></Stack><Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", lg: "1fr .9fr" } }}><ProductGallery product={props.product} /><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: { xs: 2, md: 4 } }}><PurchasePanel {...props} eyebrow="PRODUCT BRIEF" /><ProductFacts product={props.product} /></Paper></Box><Paper sx={{ border: 1, borderColor: "divider", borderRadius: 1, mt: 3, p: { xs: 2, md: 4 } }}><Typography component="h2" sx={{ fontSize: 26, fontWeight: 900 }}>Details and specifications</Typography><Divider sx={{ my: 2 }} /><Typography color="text.secondary" sx={{ lineHeight: 1.9, whiteSpace: "pre-line" }}>{props.product.details || props.product.description}</Typography></Paper><RelatedProducts products={props.products} product={props.product} onAdd={props.onRelatedAdd} /></Container>;
+  return (
+    <Container maxWidth="xl" sx={{ py: { xs: 2.5, md: 5 } }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        sx={{
+          alignItems: { sm: "center" },
+          justifyContent: "space-between",
+          mb: { xs: 2, md: 3 },
+          gap: 1.5,
+        }}
+      >
+        <Button
+          onClick={() => router.push("/twc-ecommerce/shop")}
+          startIcon={<ArrowBackRoundedIcon />}
+          sx={{ alignSelf: "flex-start", color: "text.secondary", pl: 0 }}
+        >
+          Back to collection
+        </Button>
+        <Typography color="text.secondary" sx={{ fontSize: 12 }}>
+          {props.product.category}
+          {props.product.brand ? ` · ${props.product.brand}` : ""}
+        </Typography>
+      </Stack>
+
+      <Box
+        sx={{
+          alignItems: "start",
+          display: "grid",
+          gap: { xs: 2, lg: 3 },
+          gridTemplateColumns: {
+            xs: "1fr",
+            lg: "minmax(0, 1.08fr) minmax(390px, .92fr)",
+          },
+        }}
+      >
+        <Paper
+          sx={{
+            bgcolor: "background.paper",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1.5,
+            minWidth: 0,
+            overflow: "hidden",
+            p: { xs: 1, sm: 2 },
+          }}
+        >
+          <ProductGallery product={props.product} />
+        </Paper>
+        <Paper
+          sx={{
+            bgcolor: "background.paper",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1.5,
+            minWidth: 0,
+            p: { xs: 2, sm: 3, md: 3.5 },
+          }}
+        >
+          <PurchasePanel {...props} eyebrow="PRODUCT DETAILS" />
+          <ProductFacts product={props.product} />
+        </Paper>
+      </Box>
+
+      <Paper
+        sx={{
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: "divider",
+          borderRadius: 1.5,
+          mt: { xs: 2, md: 3 },
+          p: { xs: 2, md: 3.5 },
+        }}
+      >
+        <Typography
+          component="h2"
+          sx={{
+            fontFamily: 'Georgia, "Times New Roman", serif',
+            fontSize: { xs: 23, md: 30 },
+            fontWeight: 400,
+          }}
+        >
+          Product information
+        </Typography>
+        <Divider sx={{ my: 2 }} />
+        <Typography
+          color="text.secondary"
+          sx={{ lineHeight: 1.85, maxWidth: 820, whiteSpace: "pre-line" }}
+        >
+          {props.product.details || props.product.description}
+        </Typography>
+      </Paper>
+      <RelatedProducts
+        products={props.products}
+        product={props.product}
+        onAdd={props.onRelatedAdd}
+      />
+    </Container>
+  );
 }

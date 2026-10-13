@@ -162,6 +162,7 @@ export default function ThemeToggle({ mode: controlledMode, onToggle, compact = 
           cursor: "pointer",
           transition: "transform 180ms ease",
           "&:hover": { transform: "translateY(-1px)" },
+          "&:active": { transform: "scale(0.97)" },
           "&:focus-visible": {
             outline: "3px solid",
             outlineColor: "primary.light",
@@ -186,7 +187,8 @@ export default function ThemeToggle({ mode: controlledMode, onToggle, compact = 
             overflow: "hidden",
             transform: compact ? "scale(0.78)" : "none",
             transformOrigin: "center",
-            transition: "background 500ms ease, border-color 400ms ease",
+            transition:
+              "background 300ms ease-out, border-color 200ms ease-out",
             ...reducedMotion,
           }}
         >

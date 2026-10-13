@@ -36,8 +36,8 @@ export function ProjectsSection() {
         sx={{ mb: { xs: 7, md: 10 }, scrollMarginTop: 96 }}
       >
         <SectionHeading
-          eyebrow="Selected Projects"
-          title="Portfolio case studies"
+          eyebrow="Production experience"
+          title="Platform work, with my role made clear."
         />
         <MotionBox variants={staggerContainer} sx={{ display: "grid", gap: 2 }}>
           {featuredProject && (
@@ -67,6 +67,12 @@ export function ProjectsSection() {
               >
                 <Box>
                   <Eyebrow>{featuredProject.eyebrow}</Eyebrow>
+                  <Typography
+                    color="text.secondary"
+                    sx={{ fontSize: 12, fontWeight: 700, mb: 1, textTransform: "uppercase", letterSpacing: ".08em" }}
+                  >
+                    Full Stack Web Developer · Jan 2024 – Jun 2026
+                  </Typography>
                   <Typography
                     component="h3"
                     variant="h3"
@@ -200,6 +206,25 @@ export function ProjectsSection() {
               </MotionCard>
             ))}
           </MotionBox>
+
+          <Box
+            sx={{
+              borderTop: 1,
+              borderColor: "divider",
+              mt: 3,
+              pt: 3,
+            }}
+          >
+            <SectionHeading
+              eyebrow="Portfolio reconstructions and product studies"
+              title="Interactive work you can explore."
+            />
+            <Typography color="text.secondary" sx={{ maxWidth: 680, lineHeight: 1.7 }}>
+              These local demos show how I approach product UI and workflows.
+              They use fictional or sanitized data and are separate from my
+              production work at TWC IT Solutions.
+            </Typography>
+          </Box>
         </MotionBox>
       </Box>
     </SectionMotion>

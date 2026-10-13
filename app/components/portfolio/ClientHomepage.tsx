@@ -3,9 +3,12 @@ import ArrowOutwardRoundedIcon from "@mui/icons-material/ArrowOutwardRounded";
 import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import DashboardCustomizeOutlinedIcon from "@mui/icons-material/DashboardCustomizeOutlined";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import { Box, Button, Divider, Link, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { Eyebrow } from "./Eyebrow";
+import { proofMetrics } from "../../data/portfolio";
 
 const selectedWork = [
   {
@@ -85,7 +88,7 @@ export function ClientHomepage() {
         }}
       >
         <Box>
-          <Eyebrow>Independent developer · Based in the Philippines</Eyebrow>
+          <Eyebrow>Full-stack engineer · Davao City, Philippines · Remote-ready</Eyebrow>
           <Typography
             component="h1"
             sx={{
@@ -98,10 +101,10 @@ export function ClientHomepage() {
               textWrap: "balance",
             }}
           >
-            Your next idea.
+            I build the systems
             <br />
             <Box component="span" sx={{ color: "primary.main" }}>
-              Built for the web.
+              behind the storefront.
             </Box>
           </Typography>
           <Typography
@@ -114,9 +117,44 @@ export function ClientHomepage() {
               mt: 3,
             }}
           >
-            I’m Noy. I build websites, online stores, and custom web apps that
-            help businesses move forward.
+            I’m Noy Pangan, a full-stack developer focused on SaaS and
+            e-commerce. I build customer-facing experiences and the APIs,
+            identity, and operational tools that keep them working.
           </Typography>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
+              gap: 1.5,
+              mt: 3.5,
+              maxWidth: 620,
+            }}
+          >
+            {proofMetrics.map((metric) => (
+              <Box
+                key={metric.label}
+                sx={{ borderLeft: 2, borderColor: "primary.main", pl: 1.5 }}
+              >
+                <Typography
+                  component="strong"
+                  sx={{
+                    display: "block",
+                    fontSize: 22,
+                    fontWeight: 800,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {metric.value}
+                </Typography>
+                <Typography
+                  color="text.secondary"
+                  sx={{ fontSize: 12, lineHeight: 1.4, mt: 0.5 }}
+                >
+                  {metric.label}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
           <Box
             sx={{
               display: "grid",
@@ -163,7 +201,7 @@ export function ClientHomepage() {
             </Button>
           </Box>
           <Typography color="text.secondary" sx={{ fontSize: 12, mt: 2 }}>
-            Full-stack development · Open to remote projects
+            Open to full-time remote roles and select project work
           </Typography>
         </Box>
         <Box
@@ -202,7 +240,7 @@ export function ClientHomepage() {
                 Noy Pangan
               </Typography>
               <Typography color="text.secondary" sx={{ fontSize: 12 }}>
-                Your partner from idea to launch.
+                Full-stack engineer · Open to remote roles
               </Typography>
             </Box>
             <Box
@@ -237,7 +275,7 @@ export function ClientHomepage() {
                 ...sectionHeading,
               }}
             >
-              A few things I’ve built.
+              Production platforms and hands-on demos.
             </Typography>
           </Box>
           <Button
@@ -305,7 +343,7 @@ export function ClientHomepage() {
                   letterSpacing: ".1em",
                 }}
               >
-                {project.category} · Demo
+                {project.category} · Portfolio demo
               </Typography>
               <Typography
                 component="h3"
@@ -408,13 +446,14 @@ export function ClientHomepage() {
             color="text.secondary"
             sx={{ ...bodyCopy, fontWeight: 500 }}
           >
-            I’m a full-stack developer and small-business owner in Davao City.
-            I’ve worked on production commerce platforms serving over 60,000
-            registered users, from storefronts to the tools behind them.
+            At TWC IT Solutions, I helped modernize a commerce platform serving
+            60,000+ registered users. My work spanned the Next.js frontend,
+            frontend-facing Django APIs, authentication, checkout, and
+            supplier storefront tooling.
           </Typography>
           <Typography color="text.secondary" sx={{ ...bodyCopy, mt: 2 }}>
-            I bring that experience to clear, practical web experiences — with
-            care for both your customers and the people running your business.
+            I’m now looking for a full-stack or frontend-focused role where I
+            can contribute across product UI and the systems behind it.
           </Typography>
           <Button
             component={NextLink}
@@ -487,6 +526,22 @@ export function ClientHomepage() {
             sx={{ fontSize: 14 }}
           >
             LinkedIn
+          </Link>
+        </Stack>
+        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+          <Link
+            href="https://linkedin.com/in/emmanuel-pangan-071502a7"
+            color="text.secondary"
+            aria-label="LinkedIn profile"
+          >
+            <LinkedInIcon />
+          </Link>
+          <Link
+            href="https://github.com/Abadon45"
+            color="text.secondary"
+            aria-label="GitHub profile"
+          >
+            <GitHubIcon />
           </Link>
         </Stack>
       </Box>

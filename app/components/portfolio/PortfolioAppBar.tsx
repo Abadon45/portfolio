@@ -226,6 +226,18 @@ export function PortfolioAppBar({
                 Home
               </Button>
             )}
+            {isHomepage && (
+              <Button
+                component={NextLink}
+                href="/work"
+                scroll={false}
+                color="inherit"
+                size="small"
+                sx={{ color: "text.secondary", whiteSpace: "nowrap" }}
+              >
+                Case studies
+              </Button>
+            )}
             {navItems.map((item) => (
               <Button
                 color="inherit"
@@ -234,7 +246,9 @@ export function PortfolioAppBar({
                 component={NextLink}
                 href={
                   item.href === "#work"
-                    ? "/work"
+                    ? isHomepage
+                      ? "#work"
+                      : "/work"
                     : item.href === "#about"
                       ? "/about"
                       : isHomepage

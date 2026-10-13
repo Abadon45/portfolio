@@ -3,9 +3,9 @@
 import { useSyncExternalStore } from "react";
 import type { PaletteMode } from "@mui/material";
 
-const key = "portfolio-theme-mode";
+const key = "portfolio-theme-mode-v2";
 const changeEvent = "portfolio-theme-change";
-let currentMode: PaletteMode = "light";
+let currentMode: PaletteMode = "dark";
 
 function getMode(): PaletteMode {
   try {
@@ -27,7 +27,7 @@ function subscribe(onChange: () => void) {
 }
 
 function getServerMode(): PaletteMode {
-  return "light";
+  return "dark";
 }
 
 export function usePortfolioMode() {
@@ -38,7 +38,7 @@ export function usePortfolioMode() {
     try {
       localStorage.setItem(key, currentMode);
     } catch {
-      // The preference remains shared for this browser session.
+      // Keep the in-memory preference for this browser session.
     }
     window.dispatchEvent(new Event(changeEvent));
   }

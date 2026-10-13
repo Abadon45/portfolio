@@ -1,12 +1,9 @@
 "use client";
 
-import DarkModeRoundedIcon from "@mui/icons-material/DarkModeRounded";
-import LightModeRoundedIcon from "@mui/icons-material/LightModeRounded";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
   AppBar,
   Badge,
@@ -32,6 +29,7 @@ import {
   useStorefrontTheme,
   type StorefrontThemeName,
 } from "./twcEcommerceTheme";
+import ThemeToggle from "../../components/solar/ThemeToggle";
 
 export default function TwcEshopNavbar({
   count,
@@ -53,7 +51,14 @@ export default function TwcEshopNavbar({
     router.push(path);
   };
   const goToSection = (
-    section: "collections" | "journal" | "about" | "story" | "benefits" | "faq",
+    section:
+      | "collections"
+      | "journal"
+      | "about"
+      | "story"
+      | "benefits"
+      | "faq"
+      | "bestsellers",
   ) => {
     setMenuOpen(false);
     if (window.location.pathname === "/twc-ecommerce") {
@@ -205,17 +210,7 @@ export default function TwcEshopNavbar({
                 ))}
               </Select>
             </FormControl>
-            <IconButton
-              onClick={onToggleMode}
-              aria-label="Toggle light and dark mode"
-              sx={{ color: "text.secondary" }}
-            >
-              {mode === "dark" ? (
-                <LightModeRoundedIcon />
-              ) : (
-                <DarkModeRoundedIcon />
-              )}
-            </IconButton>
+            <ThemeToggle compact mode={mode} onToggle={onToggleMode} />
             <IconButton
               onClick={onCart}
               aria-label="Open basket"
@@ -313,34 +308,158 @@ type NavbarProps = {
   submitSearch: () => void;
   go: (path: string) => void;
   goToSection: (
-    section: "collections" | "journal" | "about" | "story" | "benefits" | "faq",
+    section:
+      | "collections"
+      | "journal"
+      | "about"
+      | "story"
+      | "benefits"
+      | "faq"
+      | "bestsellers",
   ) => void;
 };
 
 function HeaderLogo({
   onClick,
   centered = false,
+  brand,
 }: {
   onClick: () => void;
   centered?: boolean;
+  brand?: string;
+}) {
+  if (brand) {
+    return (
+      <Button
+        onClick={onClick}
+        sx={{
+          color: "primary.main",
+          fontSize: centered ? { xs: 18, md: 21 } : { xs: 22, md: 25 },
+          minWidth: "auto",
+          p: centered ? 0.5 : 0,
+          textTransform: "none",
+        }}
+      >
+        <Box
+          component="span"
+          sx={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+        >
+          {brand}
+        </Box>
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      onClick={onClick}
+      startIcon={centered ? undefined : <ShoppingBagOutlinedIcon />}
+      sx={{
+        color: "text.primary",
+        fontSize: centered ? { xs: 17, md: 19 } : 18,
+        fontWeight: centered ? 600 : 900,
+        letterSpacing: centered ? ".04em" : "-.04em",
+        minWidth: "auto",
+        p: centered ? 1 : 0,
+        textTransform: "none",
+      }}
+    >
+      {centered ? (
+        <Stack spacing={0} sx={{ alignItems: "center", lineHeight: 1 }}>
+          <Box
+            component="span"
+            sx={{
+              fontFamily: 'Georgia, "Times New Roman", serif',
+              fontSize: { xs: 22, md: 25 },
+              letterSpacing: ".08em",
+            }}
+          >
+            TWC
+          </Box>
+          <Box
+            component="span"
+            sx={{
+              color: "primary.main",
+              fontSize: 8,
+              fontWeight: 700,
+              letterSpacing: ".25em",
+              mt: 0.25,
+            }}
+          >
+            ONLINE
+          </Box>
+        </Stack>
+      ) : (
+        <>
+          TWC{" "}
+          <Box component="span" sx={{ color: "primary.main", ml: 0.5 }}>
+            ONLINE
+          </Box>
+        </>
+      )}
+    </Button>
+  );
+}
+
+function EditorialNavLink({
+  children,
+  onClick,
+}: {
+  children: string;
+  onClick: () => void;
 }) {
   return (
     <Button
       onClick={onClick}
-      startIcon={<ShoppingBagOutlinedIcon />}
+      disableRipple
       sx={{
-        color: "text.primary",
-        fontSize: centered ? { xs: 18, md: 22 } : 18,
-        fontWeight: 900,
-        letterSpacing: "-.04em",
+        color: "text.secondary",
+        fontSize: 11,
+        fontWeight: 650,
+        letterSpacing: ".035em",
+        minHeight: 42,
         minWidth: "auto",
-        p: 0,
+        px: { md: 0.65, lg: 1.1 },
+        position: "relative",
+        textTransform: "none",
+        transition: "color 150ms ease-out",
+        whiteSpace: "nowrap",
+        "&::after": {
+          bgcolor: "primary.main",
+          bottom: 5,
+          content: '""',
+          height: "1px",
+          left: "50%",
+          position: "absolute",
+          transform: "translateX(-50%) scaleX(0)",
+          transformOrigin: "center",
+          transition: "transform 180ms ease-out",
+          width: "calc(100% - 20px)",
+        },
+        "&:hover": {
+          bgcolor: "transparent",
+          color: "text.primary",
+          "&::after": { transform: "translateX(-50%) scaleX(1)" },
+        },
+        "&.MuiButton-root:hover": {
+          backgroundColor: "transparent",
+          color: "text.primary",
+        },
+        "&:active": { transform: "scale(0.98)" },
+        "&:focus-visible": {
+          bgcolor: "transparent",
+          color: "text.primary",
+          outline: "2px solid",
+          outlineColor: "primary.main",
+          outlineOffset: 2,
+        },
+        "@media (prefers-reduced-motion: reduce)": {
+          transition: "none",
+          "&::after": { transition: "none" },
+        },
       }}
     >
-      TWC{" "}
-      <Box component="span" sx={{ color: "primary.main", ml: 0.5 }}>
-        ONLINE
-      </Box>
+      {children}
     </Button>
   );
 }
@@ -382,15 +501,7 @@ function HeaderModeButton({
   mode,
   onToggleMode,
 }: Pick<NavbarProps, "mode" | "onToggleMode">) {
-  return (
-    <IconButton
-      onClick={onToggleMode}
-      aria-label="Toggle light and dark mode"
-      sx={{ color: "text.secondary" }}
-    >
-      {mode === "dark" ? <LightModeRoundedIcon /> : <DarkModeRoundedIcon />}
-    </IconButton>
-  );
+  return <ThemeToggle compact mode={mode} onToggle={onToggleMode} />;
 }
 
 function MarketplaceNavbar(props: NavbarProps) {
@@ -460,17 +571,32 @@ function MarketplaceNavbar(props: NavbarProps) {
               py: 0.75,
             }}
           >
-            <Button onClick={() => props.go("/twc-ecommerce/shop")}>
-              Categories
+            <Button
+              onClick={() => props.go("/twc-ecommerce")}
+              sx={{
+                color: "text.secondary",
+                "&:hover": { bgcolor: "action.hover", color: "text.primary" },
+                "&:focus-visible": {
+                  outline: "2px solid",
+                  outlineColor: "primary.main",
+                },
+              }}
+            >
+              Home
             </Button>
-            <Button onClick={() => props.go("/twc-ecommerce/shop")}>
-              Deals
-            </Button>
-            <Button onClick={() => props.go("/twc-ecommerce/shop")}>
-              New arrivals
-            </Button>
-            <Button onClick={() => props.go("/twc-ecommerce/shop")}>
-              Best sellers
+            <Button
+              onClick={() => props.go("/twc-ecommerce/shop")}
+              sx={{
+                color: "text.primary",
+                fontWeight: 750,
+                "&:hover": { bgcolor: "action.hover", color: "primary.main" },
+                "&:focus-visible": {
+                  outline: "2px solid",
+                  outlineColor: "primary.main",
+                },
+              }}
+            >
+              All products
             </Button>
           </Stack>
         </Container>
@@ -481,6 +607,12 @@ function MarketplaceNavbar(props: NavbarProps) {
 }
 
 function EditorialNavbar(props: NavbarProps) {
+  const storefrontLabel =
+    props.themeName === "premium-beauty"
+      ? "Premium Beauty"
+      : "Wellness Organic";
+  const isBeauty = props.themeName === "premium-beauty";
+
   return (
     <>
       <AppBar
@@ -493,66 +625,162 @@ function EditorialNavbar(props: NavbarProps) {
           borderColor: "divider",
         }}
       >
-        <Container maxWidth="lg">
+        <Container
+          maxWidth="xl"
+          disableGutters
+          sx={{ px: { xs: 1.5, sm: 3, lg: 4 } }}
+        >
           <Stack
             direction="row"
             sx={{
               alignItems: "center",
+              gap: { xs: 0.5, md: 1.5, xl: 3 },
               justifyContent: "space-between",
-              minHeight: { xs: 68, md: 82 },
+              minHeight: { xs: 62, md: 64 },
             }}
           >
             <IconButton
               onClick={() => props.setMenuOpen(true)}
-              sx={{ display: { xs: "inline-flex", md: "none" } }}
-              aria-label="Open editorial menu"
+              sx={{
+                color: "text.primary",
+                display: { xs: "inline-flex", md: "none" },
+                minHeight: 44,
+                minWidth: 44,
+              }}
+              aria-label={`Open ${storefrontLabel} menu`}
             >
               <MenuRoundedIcon />
             </IconButton>
-            <HeaderLogo centered onClick={() => props.go("/twc-ecommerce")} />
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ alignItems: "center", display: { xs: "none", md: "flex" } }}
+            <Box sx={{ display: { xs: "none", md: "block" }, flexShrink: 0 }}>
+              <HeaderLogo
+                centered
+                brand={storefrontLabel}
+                onClick={() => props.go("/twc-ecommerce")}
+              />
+            </Box>
+            <Box
+              sx={{
+                display: { xs: "flex", md: "none" },
+                flex: 1,
+                justifyContent: "center",
+              }}
             >
-              <Button
-                onClick={() => props.go("/twc-ecommerce/shop")}
-                sx={{ color: "text.primary", fontSize: 12 }}
-              >
-                Shop
-              </Button>
-              <Button
+              <HeaderLogo
+                centered
+                brand={storefrontLabel}
+                onClick={() => props.go("/twc-ecommerce")}
+              />
+            </Box>
+            <Stack
+              component="nav"
+              aria-label={`${storefrontLabel} storefront navigation`}
+              direction="row"
+              spacing={{ md: 0, lg: 0.5 }}
+              sx={{
+                alignItems: "center",
+                display: { xs: "none", md: "flex" },
+                flex: 1,
+                justifyContent: "center",
+                minWidth: 0,
+              }}
+            >
+              <EditorialNavLink onClick={() => props.go("/twc-ecommerce/shop")}>
+                {isBeauty ? "Beauty & style" : "Shop"}
+              </EditorialNavLink>
+              <EditorialNavLink
                 onClick={() => props.goToSection("collections")}
-                sx={{ color: "text.primary", fontSize: 12 }}
               >
                 Collections
-              </Button>
-              <Button
-                onClick={() => props.goToSection("journal")}
-                sx={{ color: "text.primary", fontSize: 12 }}
-              >
-                Journal
-              </Button>
+              </EditorialNavLink>
+              <EditorialNavLink onClick={() => props.goToSection("story")}>
+                {isBeauty ? "Beauty notes" : "Our story"}
+              </EditorialNavLink>
             </Stack>
-            <Stack direction="row" sx={{ alignItems: "center" }}>
-              <IconButton
-                onClick={() => props.go("/twc-ecommerce/shop")}
-                aria-label="Search products"
-                sx={{ display: { xs: "none", sm: "inline-flex" } }}
-              >
-                <SearchRoundedIcon />
-              </IconButton>
-              <IconButton
-                onClick={() => props.goToSection("about")}
-                aria-label="About this storefront"
-                sx={{ display: { xs: "none", sm: "inline-flex" } }}
-              >
-                <InfoOutlinedIcon />
-              </IconButton>
-              <Box sx={{ display: { xs: "none", lg: "block" } }}>
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: "center",
+                flexShrink: 0,
+                ml: { md: "auto", lg: 0 },
+              }}
+            >
+              {props.themeName === "premium-beauty" ? (
+                <>
+                  <TextField
+                    autoComplete="off"
+                    value={props.query}
+                    onChange={(event) => props.setQuery(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") props.submitSearch();
+                    }}
+                    placeholder="Search beauty & more"
+                    size="small"
+                    aria-label="Search beauty and style products"
+                    sx={{
+                      display: { xs: "none", lg: "flex" },
+                      mr: 1,
+                      width: 190,
+                    }}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchRoundedIcon fontSize="small" />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+                  <IconButton
+                    onClick={() => props.go("/twc-ecommerce/shop")}
+                    aria-label="Browse and search products"
+                    sx={{
+                      color: "text.secondary",
+                      display: { xs: "none", md: "inline-flex", lg: "none" },
+                    }}
+                  >
+                    <SearchRoundedIcon />
+                  </IconButton>
+                </>
+              ) : (
+                <IconButton
+                  onClick={() => props.go("/twc-ecommerce/shop")}
+                  aria-label="Search products"
+                  sx={{
+                    color: "text.secondary",
+                    display: { xs: "none", md: "inline-flex" },
+                  }}
+                >
+                  <SearchRoundedIcon />
+                </IconButton>
+              )}
+              <Box sx={{ display: { xs: "none", md: "block" }, mx: 0.5 }}>
                 <ThemeSelect {...props} />
               </Box>
-              <ThemeModeAndCart {...props} />
+              <Box sx={{ display: { xs: "none", md: "block" } }}>
+                <ThemeModeAndCart {...props} />
+              </Box>
+              <IconButton
+                onClick={props.onCart}
+                aria-label={`Open basket, ${props.count} items`}
+                sx={{
+                  color: "text.primary",
+                  display: { xs: "inline-flex", md: "none" },
+                  minHeight: 44,
+                  minWidth: 44,
+                }}
+              >
+                <Badge badgeContent={props.count} color="primary">
+                  <ShoppingBagOutlinedIcon />
+                </Badge>
+              </IconButton>
+              <Box sx={{ display: { xs: "block", md: "none" }, ml: 0.25 }}>
+                <ThemeToggle
+                  compact
+                  mode={props.mode}
+                  onToggle={props.onToggleMode}
+                />
+              </Box>
             </Stack>
           </Stack>
         </Container>
@@ -809,6 +1037,11 @@ function WellnessDrawer(props: NavbarProps) {
 function PremiumDrawer(props: NavbarProps) {
   const theme = storefrontThemes[props.themeName];
   const dark = props.mode === "dark";
+  const isPremiumBeauty = props.themeName === "premium-beauty";
+  const storefrontLabel = isPremiumBeauty
+    ? "Premium Beauty"
+    : "Wellness Organic";
+
   return (
     <Drawer
       anchor="left"
@@ -817,8 +1050,8 @@ function PremiumDrawer(props: NavbarProps) {
     >
       <Box
         sx={{
-          bgcolor: dark ? theme.darkPaper : "#fffaf8",
-          color: dark ? theme.darkText : "#3f2631",
+          bgcolor: dark ? theme.darkPaper : theme.lightSurface,
+          color: dark ? theme.darkText : theme.primary,
           minHeight: "100%",
           p: 3,
           width: 320,
@@ -830,7 +1063,10 @@ function PremiumDrawer(props: NavbarProps) {
           direction="row"
           sx={{ alignItems: "center", justifyContent: "space-between" }}
         >
-          <HeaderLogo onClick={() => props.go("/twc-ecommerce")} />
+          <HeaderLogo
+            brand={storefrontLabel}
+            onClick={() => props.go("/twc-ecommerce")}
+          />
           <IconButton
             onClick={() => props.setMenuOpen(false)}
             aria-label="Close menu"
@@ -840,14 +1076,22 @@ function PremiumDrawer(props: NavbarProps) {
         </Stack>
         <Typography
           sx={{
-            color: dark ? theme.accent : "#8b4962",
+            color: dark ? theme.accent : theme.primary,
             fontSize: 11,
             fontWeight: 900,
             letterSpacing: ".16em",
-            mt: 6,
+            mt: 4,
           }}
         >
-          THE TWC EDIT
+          {isPremiumBeauty ? "PREMIUM BEAUTY" : "SANTÉ WELLNESS SHOP"}
+        </Typography>
+        <Typography
+          color="text.secondary"
+          sx={{ fontSize: 14, lineHeight: 1.6, mt: 1 }}
+        >
+          {isPremiumBeauty
+            ? "Browse beauty, fragrance, accessories, or search the collection."
+            : "Good choices for real routines."}
         </Typography>
         <Stack spacing={1} sx={{ mt: 2 }}>
           <Button
@@ -861,7 +1105,20 @@ function PremiumDrawer(props: NavbarProps) {
               px: 0,
             }}
           >
-            Shop
+            {isPremiumBeauty ? "Shop beauty & style" : "Shop all products"}
+          </Button>
+          <Button
+            onClick={() => props.goToSection("story")}
+            sx={{
+              color: "inherit",
+              justifyContent: "flex-start",
+              fontFamily: 'Georgia, "Times New Roman", serif',
+              fontSize: 24,
+              fontWeight: 500,
+              px: 0,
+            }}
+          >
+            {isPremiumBeauty ? "Beauty notes" : "Our story"}
           </Button>
           <Button
             onClick={() => props.goToSection("collections")}
@@ -874,37 +1131,68 @@ function PremiumDrawer(props: NavbarProps) {
               px: 0,
             }}
           >
-            Collections
+            {isPremiumBeauty ? "Featured beauty" : "Product lines"}
           </Button>
-          <Button
-            onClick={() => props.goToSection("journal")}
-            sx={{
-              color: "inherit",
-              justifyContent: "flex-start",
-              fontFamily: 'Georgia, "Times New Roman", serif',
-              fontSize: 24,
-              fontWeight: 500,
-              px: 0,
-            }}
-          >
-            Journal
-          </Button>
-          <Button
-            onClick={() => props.goToSection("about")}
-            sx={{
-              color: "inherit",
-              justifyContent: "flex-start",
-              fontFamily: 'Georgia, "Times New Roman", serif',
-              fontSize: 24,
-              fontWeight: 500,
-              px: 0,
-            }}
-          >
-            About
-          </Button>
+          {!isPremiumBeauty && (
+            <Button
+              onClick={() => props.goToSection("bestsellers")}
+              sx={{
+                color: "inherit",
+                justifyContent: "flex-start",
+                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontSize: 24,
+                fontWeight: 500,
+                px: 0,
+              }}
+            >
+              Shop products
+            </Button>
+          )}
+          {!isPremiumBeauty && (
+            <Button
+              onClick={() => props.goToSection("bestsellers")}
+              sx={{
+                color: "inherit",
+                justifyContent: "flex-start",
+                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontSize: 24,
+                fontWeight: 500,
+                px: 0,
+              }}
+            >
+              Featured products
+            </Button>
+          )}
         </Stack>
         <Divider sx={{ my: 3 }} />
+        <TextField
+          fullWidth
+          label={isPremiumBeauty ? "Search beauty & more" : "Search products"}
+          value={props.query}
+          onChange={(event) => props.setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              props.setMenuOpen(false);
+              props.submitSearch();
+            }
+          }}
+          size="small"
+          sx={{ mb: 1.5 }}
+        />
+        <Divider sx={{ my: 2 }} />
         <ThemeSelect {...props} />
+        <Stack
+          direction="row"
+          sx={{ alignItems: "center", justifyContent: "space-between", mt: 1 }}
+        >
+          <Typography color="text.secondary" sx={{ fontSize: 12 }}>
+            Appearance
+          </Typography>
+          <HeaderModeButton
+            mode={props.mode}
+            onToggleMode={props.onToggleMode}
+          />
+        </Stack>
         <Button
           onClick={() => {
             props.setMenuOpen(false);
@@ -934,9 +1222,9 @@ function CorporateNavbar(props: NavbarProps) {
       >
         <Container maxWidth="xl">
           <Typography
-            sx={{ fontSize: 11, fontWeight: 800, letterSpacing: ".08em" }}
+            sx={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em" }}
           >
-            TWC COMMERCE PLATFORM · OFFLINE PORTFOLIO DEMONSTRATION
+            A TWC ONLINE STOREFRONT · PORTFOLIO DEMONSTRATION
           </Typography>
         </Container>
       </Box>
@@ -953,7 +1241,7 @@ function CorporateNavbar(props: NavbarProps) {
         <Container maxWidth="xl">
           <Toolbar
             disableGutters
-            sx={{ gap: { xs: 0.5, md: 3 }, minHeight: 76 }}
+            sx={{ gap: { xs: 0.5, md: 2 }, minHeight: { xs: 68, md: 76 } }}
           >
             <IconButton
               onClick={() => props.setMenuOpen(true)}
@@ -965,41 +1253,43 @@ function CorporateNavbar(props: NavbarProps) {
             <HeaderLogo onClick={() => props.go("/twc-ecommerce")} />
             <Stack
               direction="row"
-              spacing={1}
-              sx={{ display: { xs: "none", lg: "flex" } }}
+              spacing={0.5}
+              sx={{ display: { xs: "none", lg: "flex" }, ml: 1 }}
             >
               <Button
                 onClick={() => props.go("/twc-ecommerce/shop")}
-                sx={{ color: "text.primary" }}
+                sx={corporateNavButtonSx}
               >
                 Products
               </Button>
               <Button
-                onClick={() => props.goToSection("benefits")}
-                sx={{ color: "text.primary" }}
-              >
-                Solutions
-              </Button>
-              <Button
                 onClick={() => props.goToSection("collections")}
-                sx={{ color: "text.primary" }}
+                sx={corporateNavButtonSx}
               >
                 Collections
               </Button>
-              <Button
-                onClick={() => props.goToSection("about")}
-                sx={{ color: "text.primary" }}
-              >
-                About
-              </Button>
-              <Button
-                onClick={() => props.goToSection("faq")}
-                sx={{ color: "text.primary" }}
-              >
-                Support
-              </Button>
             </Stack>
             <Box sx={{ flexGrow: 1 }} />
+            <TextField
+              autoComplete="off"
+              value={props.query}
+              onChange={(event) => props.setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") props.submitSearch();
+              }}
+              placeholder="Search the collection"
+              size="small"
+              sx={{ display: { xs: "none", md: "flex" }, maxWidth: 260 }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchRoundedIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
             <Box sx={{ display: { xs: "none", lg: "block" } }}>
               <ThemeSelect {...props} />
             </Box>
@@ -1011,6 +1301,32 @@ function CorporateNavbar(props: NavbarProps) {
     </>
   );
 }
+
+const corporateNavButtonSx = {
+  color: "text.primary",
+  minHeight: 42,
+  px: 1.25,
+  position: "relative",
+  "&::after": {
+    bgcolor: "primary.main",
+    bottom: 5,
+    content: '""',
+    height: "1px",
+    left: 10,
+    position: "absolute",
+    transform: "scaleX(0)",
+    transformOrigin: "left",
+    transition: "transform .22s cubic-bezier(.2,.7,.2,1)",
+    width: "calc(100% - 20px)",
+  },
+  "&:hover": { bgcolor: "transparent", color: "text.primary" },
+  "&:hover::after, &:focus-visible::after": { transform: "scaleX(1)" },
+  "&:focus-visible": {
+    outline: "2px solid",
+    outlineColor: "primary.main",
+    outlineOffset: 2,
+  },
+};
 
 function CorporateDrawer(props: NavbarProps) {
   const theme = storefrontThemes[props.themeName];
@@ -1088,16 +1404,6 @@ function CorporateDrawer(props: NavbarProps) {
             Products
           </Button>
           <Button
-            onClick={() => props.goToSection("benefits")}
-            sx={{
-              color: "inherit",
-              justifyContent: "flex-start",
-              fontWeight: 800,
-            }}
-          >
-            Solutions
-          </Button>
-          <Button
             onClick={() => props.goToSection("collections")}
             sx={{
               color: "inherit",
@@ -1106,26 +1412,6 @@ function CorporateDrawer(props: NavbarProps) {
             }}
           >
             Collections
-          </Button>
-          <Button
-            onClick={() => props.goToSection("about")}
-            sx={{
-              color: "inherit",
-              justifyContent: "flex-start",
-              fontWeight: 800,
-            }}
-          >
-            About
-          </Button>
-          <Button
-            onClick={() => props.goToSection("faq")}
-            sx={{
-              color: "inherit",
-              justifyContent: "flex-start",
-              fontWeight: 800,
-            }}
-          >
-            Support
           </Button>
         </Stack>
         <Divider sx={{ my: 3 }} />
@@ -1174,13 +1460,23 @@ function ThemeModeAndCart(
 }
 
 function VariantDrawer(props: NavbarProps) {
+  const isMarketplace =
+    storefrontThemes[props.themeName].headerVariant === "marketplace";
   return (
     <Drawer
       anchor="left"
       onClose={() => props.setMenuOpen(false)}
       open={props.menuOpen}
     >
-      <Box sx={{ p: 2, width: 300 }}>
+      <Box
+        sx={{
+          bgcolor: isMarketplace ? "background.paper" : undefined,
+          color: "text.primary",
+          minHeight: "100%",
+          p: 2,
+          width: 300,
+        }}
+      >
         <Stack
           direction="row"
           sx={{ alignItems: "center", justifyContent: "space-between" }}
@@ -1214,9 +1510,17 @@ function VariantDrawer(props: NavbarProps) {
           </Button>
           <Button
             onClick={() => props.go("/twc-ecommerce/shop")}
-            sx={{ justifyContent: "flex-start" }}
+            sx={{
+              color: "text.primary",
+              justifyContent: "flex-start",
+              "&:hover": { bgcolor: "action.hover", color: "primary.main" },
+              "&:focus-visible": {
+                outline: "2px solid",
+                outlineColor: "primary.main",
+              },
+            }}
           >
-            Shop
+            All products
           </Button>
           <ThemeSelect {...props} />
           <Button

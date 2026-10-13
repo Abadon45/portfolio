@@ -1,61 +1,130 @@
 "use client";
 
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import CategoryRoundedIcon from "@mui/icons-material/CategoryRounded";
-import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
-import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
-import { Box, Button, Chip, Container, Divider, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Container, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import TwcProductCard from "./TwcProductCard";
 import type { StoreProduct } from "./TwcStoreProvider";
-import { StorefrontCarousel } from "./StorefrontPrimitives";
 
-type Props = { categories: string[]; products: StoreProduct[]; onAdd: (product: StoreProduct) => void; onShop: (category?: string) => void };
+type Props = {
+  categories: string[];
+  products: StoreProduct[];
+  onAdd: (product: StoreProduct) => void;
+  onShop: (category?: string) => void;
+};
 
 export default function ModernMarketplaceHome({ categories, products, onAdd, onShop }: Props) {
   const router = useRouter();
-  const featured = products.slice(0, 8);
-  const popular = products.slice(8, 16);
-  return <Box sx={{ bgcolor: "#f5f8fc" }}>
-    <MarketplaceHero onShop={onShop} />
-    <Container maxWidth="xl" sx={{ py: { xs: 3, md: 5 } }}>
-      <MarketplaceCategoryRail categories={categories} onSelect={onShop} />
-      <MarketplaceTrust />
-      <MarketplaceMerchandising onShop={onShop} />
-      <MarketplaceProducts eyebrow="FEATURED PRODUCTS" title="Popular across the catalog" products={featured} onAdd={onAdd} onShop={onShop} />
-      <MarketplaceSplit />
-      <MarketplaceProducts eyebrow="MORE TO DISCOVER" title="Keep exploring" products={popular} onAdd={onAdd} onShop={onShop} />
-      <Box sx={{ bgcolor: "#2457c5", color: "#fff", my: { xs: 6, md: 10 }, p: { xs: 3, md: 6 } }}><Stack direction={{ xs: "column", md: "row" }} sx={{ alignItems: { md: "center" }, justifyContent: "space-between", gap: 3 }}><Box><Typography sx={{ color: "#dce8ff", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>ONE CATALOG, MANY POSSIBILITIES</Typography><Typography component="h2" sx={{ fontSize: { xs: 30, md: 46 }, fontWeight: 950, letterSpacing: "-.07em", mt: 1 }}>Search less. Find more.</Typography><Typography sx={{ color: "rgba(255,255,255,.78)", lineHeight: 1.7, maxWidth: 520, mt: 1 }}>Use search, categories, filters, and product detail pages to move through the shared TWC catalog quickly.</Typography></Box><Button onClick={() => router.push("/twc-ecommerce/shop")} endIcon={<SearchRoundedIcon />} sx={{ alignSelf: { xs: "flex-start", md: "center" }, bgcolor: "#fff", color: "#2457c5", px: 3 }}>Search the catalog</Button></Stack></Box>
-    </Container>
-  </Box>;
+  const firstProducts = products.slice(0, 8);
+  const moreProducts = products.slice(8, 16);
+
+  return (
+    <Box sx={{ bgcolor: "background.default", color: "text.primary" }}>
+      <Container maxWidth="xl" sx={{ pb: { xs: 3, md: 6 }, pt: { xs: 2, md: 3 } }}>
+        <Box
+          component="section"
+          aria-labelledby="marketplace-heading"
+          sx={{
+            bgcolor: "primary.main",
+            color: "primary.contrastText",
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            minHeight: { md: 370 },
+            overflow: "hidden",
+          }}
+        >
+          <Stack spacing={2} sx={{ alignSelf: "center", p: { xs: 3, sm: 4, md: 6 } }}>
+            <Typography sx={{ color: "primary.contrastText", fontSize: 11, fontWeight: 800, letterSpacing: ".14em", opacity: 0.78 }}>
+              TWC MARKETPLACE
+            </Typography>
+            <Typography id="marketplace-heading" component="h1" sx={{ fontSize: { xs: 38, sm: 46, md: 58 }, fontWeight: 800, letterSpacing: "-.055em", lineHeight: 1.02, maxWidth: 520 }}>
+              Everyday finds, all in one place.
+            </Typography>
+            <Typography sx={{ color: "primary.contrastText", lineHeight: 1.7, maxWidth: 450, opacity: 0.86 }}>
+              Explore the current TWC collection across wellness, personal care, and useful essentials.
+            </Typography>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ pt: 0.5 }}>
+              <Button
+                onClick={() => onShop()}
+                endIcon={<ArrowForwardRoundedIcon />}
+                sx={{ bgcolor: "background.paper", color: "text.primary", minHeight: 44, px: 2.25, "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}
+                variant="contained"
+              >
+                Shop all products
+              </Button>
+              <Button
+                onClick={() => router.push("/twc-ecommerce/shop")}
+                startIcon={<SearchRoundedIcon />}
+                sx={{ borderColor: "primary.contrastText", color: "primary.contrastText", minHeight: 44, px: 2.25, "&:hover": { bgcolor: "rgba(255,255,255,.12)", borderColor: "primary.contrastText", color: "primary.contrastText" } }}
+                variant="outlined"
+              >
+                Search the catalog
+              </Button>
+            </Stack>
+          </Stack>
+          <ProductShowcase products={firstProducts.slice(0, 4)} />
+        </Box>
+
+        {categories.length > 0 && (
+          <Box component="section" aria-label="Shop by category" sx={{ borderBottom: 1, borderColor: "divider", mt: { xs: 2, md: 3 }, pb: 1.5, pt: 2 }}>
+            <Stack direction="row" sx={{ alignItems: "center", gap: 1, overflowX: "auto", pb: 0.5 }}>
+              <Typography sx={{ color: "text.secondary", flex: "0 0 auto", fontSize: 12, fontWeight: 800, mr: 0.5 }}>Shop by category</Typography>
+              {categories.slice(0, 8).map((category) => (
+                <Button
+                  key={category}
+                  onClick={() => onShop(category)}
+                  sx={{ border: 1, borderColor: "divider", color: "text.primary", flex: "0 0 auto", fontSize: 12, minHeight: 36, px: 1.5, "&:hover": { bgcolor: "action.hover", borderColor: "primary.main", color: "primary.main" } }}
+                  variant="outlined"
+                >
+                  {category}
+                </Button>
+              ))}
+            </Stack>
+          </Box>
+        )}
+
+        <ProductSection title="Browse the collection" products={firstProducts} onAdd={onAdd} onShop={onShop} />
+
+        <Box sx={{ alignItems: { md: "center" }, borderBottom: 1, borderColor: "divider", borderTop: 1, display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "1fr auto" }, my: { xs: 3, md: 5 }, py: { xs: 2.5, md: 3 } }}>
+          <Box>
+            <Typography component="h2" sx={{ fontSize: { xs: 22, md: 27 }, fontWeight: 750, letterSpacing: "-.03em" }}>Find what you came for</Typography>
+            <Typography color="text.secondary" sx={{ lineHeight: 1.65, mt: 0.5 }}>Search the shared catalog or narrow it down by category and price.</Typography>
+          </Box>
+          <Button onClick={() => router.push("/twc-ecommerce/shop")} endIcon={<ArrowForwardRoundedIcon />} sx={{ justifySelf: { md: "end" }, minHeight: 42 }} variant="outlined">
+            Browse all products
+          </Button>
+        </Box>
+
+        {moreProducts.length > 0 && <ProductSection title="More to explore" products={moreProducts} onAdd={onAdd} onShop={onShop} />}
+      </Container>
+    </Box>
+  );
 }
 
-function MarketplaceHero({ onShop }: { onShop: Props["onShop"] }) {
-  const slides = [
-    { eyebrow: "THE MARKETPLACE EDIT", title: "Find what moves your day forward.", copy: "Explore useful products, fresh categories, and everyday upgrades in one fast catalog.", image: "/images/twc/marketplace-hero-a.png" },
-    { eyebrow: "DISCOVER MORE", title: "A better way to browse the everyday.", copy: "Search, compare, and build your basket from a product-first storefront experience.", image: "/images/twc/marketplace-hero-b.png" },
-  ];
-  return <StorefrontCarousel interval={6500} label="Modern Marketplace promotional hero">{slides.map((slide) => <Box key={slide.title} sx={{ bgcolor: "#e6efff", minHeight: { xs: 530, md: 570 }, overflow: "hidden", position: "relative" }}><Container maxWidth="xl" sx={{ height: "100%" }}><Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, minHeight: { md: 570 } }}><Stack sx={{ justifyContent: "center", maxWidth: 600, p: { xs: 3, md: 7 }, position: "relative", zIndex: 1 }} spacing={2}><Chip label={slide.eyebrow} sx={{ alignSelf: "flex-start", bgcolor: "#dce8ff", color: "#2457c5", fontWeight: 900 }} /><Typography component="h1" sx={{ color: "#142c63", fontSize: { xs: 46, md: 72 }, fontWeight: 950, letterSpacing: "-.09em", lineHeight: .92 }}>{slide.title}</Typography><Typography sx={{ color: "#4c6390", fontSize: 16, lineHeight: 1.75, maxWidth: 500 }}>{slide.copy}</Typography><Stack direction="row" spacing={1.25}><Button onClick={() => onShop()} endIcon={<ArrowForwardRoundedIcon />} variant="contained">Shop now</Button><Button onClick={() => document.getElementById("marketplace-categories")?.scrollIntoView({ behavior: "smooth" })} sx={{ color: "#2457c5" }} variant="outlined">Explore categories</Button></Stack></Stack><Box sx={{ minHeight: { xs: 260, md: 570 }, p: { xs: 2, md: 5 }, position: "relative" }}><Box sx={{ bgcolor: "#fff", boxShadow: "0 22px 55px rgba(36,87,197,.2)", height: { xs: 260, md: 430 }, mt: { md: 6 }, overflow: "hidden", transform: { md: "rotate(3deg)" } }}><Box component="img" src={slide.image} alt="Featured marketplace product" sx={{ height: "100%", objectFit: "contain", p: { xs: 2, md: 4 }, width: "100%" }} /></Box><Box sx={{ bgcolor: "#e07a35", bottom: { xs: 18, md: 48 }, color: "#fff", p: 1.5, position: "absolute", right: { xs: 22, md: 56 }, transform: "rotate(-6deg)" }}><Typography sx={{ fontSize: 11, fontWeight: 950, letterSpacing: ".1em" }}>SHOP THE EDIT</Typography></Box></Box></Box></Container></Box>)}</StorefrontCarousel>;
+function ProductShowcase({ products }: { products: StoreProduct[] }) {
+  return (
+    <Box sx={{ bgcolor: "#e7edf5", display: "grid", gap: 1, gridTemplateColumns: "repeat(2, minmax(0, 1fr))", minHeight: { xs: 240, sm: 300, md: 370 }, p: { xs: 1.25, md: 2 } }}>
+      {products.map((product) => (
+        <Box key={product.slug} sx={{ alignItems: "center", bgcolor: "#fff", display: "flex", justifyContent: "center", minHeight: 0, overflow: "hidden", p: { xs: 1, md: 1.5 } }}>
+          <Box component="img" src={product.image} alt={product.name} loading="lazy" sx={{ height: "100%", maxHeight: 168, maxWidth: "100%", objectFit: "contain", width: "100%" }} />
+        </Box>
+      ))}
+      {products.length === 0 && <Box sx={{ gridColumn: "1 / -1" }} />}
+    </Box>
+  );
 }
 
-function MarketplaceCategoryRail({ categories, onSelect }: { categories: string[]; onSelect: Props["onShop"] }) {
-  return <Box id="marketplace-categories" sx={{ scrollMarginTop: 90 }}><Stack direction={{ xs: "column", sm: "row" }} sx={{ alignItems: { sm: "center" }, justifyContent: "space-between", gap: 1, mb: 1.5 }}><Typography component="h2" sx={{ color: "#142c63", fontSize: 21, fontWeight: 950 }}>Quick shop by category</Typography><Typography color="text.secondary" sx={{ fontSize: 12 }}>Fast paths into the catalog</Typography></Stack><Box sx={{ display: "flex", gap: 1, overflowX: "auto", pb: 1, "&::-webkit-scrollbar": { display: "none" } }}>{categories.map((category) => <Button key={category} onClick={() => onSelect(category)} startIcon={<CategoryRoundedIcon fontSize="small" />} sx={{ bgcolor: "#fff", border: 1, borderColor: "#d4def0", color: "#142c63", flex: "0 0 auto", fontSize: 12, fontWeight: 850, px: 1.75, textTransform: "none", whiteSpace: "nowrap", "&:hover": { bgcolor: "#e6efff", borderColor: "#2457c5" } }}>{category}</Button>)}</Box></Box>;
-}
-
-function MarketplaceTrust() {
-  return <Box sx={{ borderBottom: 1, borderColor: "#dce3ef", borderTop: 1, display: "grid", gap: 0, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, my: { xs: 4, md: 6 }, py: 1 }}>{[[<TrendingUpRoundedIcon key="trend" />, "Product-first discovery", "Search and filter the real catalog."], [<VerifiedOutlinedIcon key="verified" />, "Clear product detail", "Compare information before adding."], [<LocalShippingOutlinedIcon key="delivery" />, "Demo-ready checkout", "Shipping is calculated in the shared flow."]].map(([icon, title, copy]) => <Stack direction="row" key={String(title)} spacing={1.25} sx={{ alignItems: "center", borderRight: { sm: 1 }, borderColor: "#dce3ef", p: 1.5 }}>{icon}<Box><Typography sx={{ color: "#142c63", fontSize: 12, fontWeight: 900 }}>{title}</Typography><Typography color="text.secondary" sx={{ fontSize: 11, mt: .25 }}>{copy}</Typography></Box></Stack>)}</Box>;
-}
-
-function MarketplaceMerchandising({ onShop }: { onShop: Props["onShop"] }) {
-  return <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "1.4fr .6fr" }, mb: { xs: 6, md: 9 } }}><Paper sx={{ bgcolor: "#142c63", color: "#fff", overflow: "hidden", p: { xs: 2.5, md: 4 }, position: "relative" }}><Box sx={{ maxWidth: 520, position: "relative", zIndex: 1 }}><Typography sx={{ color: "#b9ccf5", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>FEATURED COLLECTION</Typography><Typography component="h2" sx={{ fontSize: { xs: 27, md: 38 }, fontWeight: 950, letterSpacing: "-.07em", lineHeight: 1, mt: .75 }}>Useful things, gathered in one place.</Typography><Typography sx={{ color: "rgba(255,255,255,.72)", lineHeight: 1.7, mt: 1 }}>A merchandising banner for the shared catalog—clear, direct, and ready for a collection link.</Typography><Button onClick={() => onShop()} sx={{ bgcolor: "#fff", color: "#142c63", mt: 2 }}>Browse products</Button></Box><Box sx={{ bgcolor: "rgba(224,122,53,.9)", borderRadius: "50%", height: 210, position: "absolute", right: -45, top: -55, width: 210 }} /></Paper><Paper sx={{ bgcolor: "#fff3e8", border: 1, borderColor: "#f3d4b7", p: { xs: 2.5, md: 3 } }}><Typography sx={{ color: "#b45720", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>JUST IN THE CATALOG</Typography><Typography component="h2" sx={{ color: "#703112", fontSize: 27, fontWeight: 950, letterSpacing: "-.06em", mt: 1 }}>New finds to explore.</Typography><Typography sx={{ color: "#8e5f49", fontSize: 13, lineHeight: 1.7, mt: 1 }}>Browse the latest available products without fabricated discounts or claims.</Typography><Button onClick={() => onShop()} sx={{ color: "#b45720", mt: 2, px: 0 }}>See what is new →</Button></Paper></Box>;
-}
-
-function MarketplaceProducts({ eyebrow, title, products: items, onAdd, onShop }: { eyebrow: string; title: string; products: StoreProduct[]; onAdd: Props["onAdd"]; onShop: Props["onShop"] }) {
-  return <Box sx={{ mb: { xs: 7, md: 10 } }}><Stack direction={{ xs: "column", sm: "row" }} sx={{ alignItems: { sm: "end" }, justifyContent: "space-between", gap: 2, mb: 2.5 }}><Box><Typography sx={{ color: "#2457c5", fontSize: 11, fontWeight: 950, letterSpacing: ".14em" }}>{eyebrow}</Typography><Typography component="h2" sx={{ color: "#142c63", fontSize: { xs: 28, md: 42 }, fontWeight: 950, letterSpacing: "-.08em", mt: .5 }}>{title}</Typography></Box><Button onClick={() => onShop()} endIcon={<ArrowForwardRoundedIcon />} sx={{ color: "#2457c5" }}>View all</Button></Stack><Box sx={{ display: "grid", gap: { xs: 1.5, md: 2 }, gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(3, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" }}}>{items.map((product) => <TwcProductCard key={product.slug} product={product} onAdd={() => onAdd(product)} />)}</Box></Box>;
-}
-
-function MarketplaceSplit() {
-  return <Box sx={{ bgcolor: "#fff", border: 1, borderColor: "#dce3ef", display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, mb: { xs: 7, md: 10 }, overflow: "hidden" }}><Box component="img" src="/images/twc/marketplace-everyday.png" alt="Useful everyday products arranged in a bright home setting" sx={{ height: { xs: 260, md: 350 }, objectFit: "cover", width: "100%" }} /><Stack sx={{ justifyContent: "center", p: { xs: 3, md: 5 } }} spacing={1.5}><Typography sx={{ color: "#2457c5", fontSize: 11, fontWeight: 950, letterSpacing: ".14em" }}>EDITOR'S PICK</Typography><Typography component="h2" sx={{ color: "#142c63", fontSize: { xs: 28, md: 40 }, fontWeight: 950, letterSpacing: "-.08em", lineHeight: 1 }}>Make the everyday more useful.</Typography><Typography color="text.secondary" sx={{ lineHeight: 1.7 }}>A visual break between product collections keeps the marketplace energetic without inventing a promotion.</Typography></Stack></Box>;
+function ProductSection({ title, products, onAdd, onShop }: { title: string; products: StoreProduct[]; onAdd: Props["onAdd"]; onShop: Props["onShop"] }) {
+  return (
+    <Box component="section" sx={{ pt: { xs: 3, md: 4 } }}>
+      <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1, mb: 2 }}>
+        <Typography component="h2" sx={{ fontSize: { xs: 23, md: 30 }, fontWeight: 750, letterSpacing: "-.04em" }}>{title}</Typography>
+        <Button onClick={() => onShop()} endIcon={<ArrowForwardRoundedIcon />} sx={{ flexShrink: 0 }}>View all</Button>
+      </Stack>
+      <Box sx={{ display: "grid", gap: { xs: 1, sm: 1.5 }, gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(3, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" } }}>
+        {products.map((product) => <TwcProductCard key={product.slug} product={product} onAdd={() => onAdd(product)} />)}
+      </Box>
+    </Box>
+  );
 }

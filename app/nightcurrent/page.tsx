@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { NightcurrentPage } from "./_components/NightcurrentPage";
 
 export const metadata: Metadata = {
-  title: "Nightcurrent | Archive recovery and original rebrand study",
+  title: "Nightcurrent | An Original Narrative Exploration",
   description:
-    "An original narrative-game web experience built from an archive recovery study, featuring layered parallax, responsive storytelling, and a documented modernization approach.",
+    "Discover Tideglass Island, its abandoned weather station, and the " +
+    "signal Mara Venn was sent to investigate.",
 };
 
 export default function NightcurrentRoute() {
