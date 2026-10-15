@@ -21,8 +21,36 @@ export default function AssessmentDialog({
   onClose: () => void;
 }) {
   const [submitted, setSubmitted] = useState(false);
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    setSubmitting(true);
+    setSubmitError("");
+
+    const formData = new FormData(event.currentTarget);
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.fromEntries(formData.entries())),
+    }).catch(() => null);
+
+    setSubmitting(false);
+
+    if (!response?.ok) {
+      const result = (await response?.json().catch(() => null)) as {
+        message?: unknown;
+      } | null;
+      setSubmitError(
+        typeof result?.message === "string"
+          ? result.message
+          : "We couldn’t send your request. Please email hello@cotabatosolar.ph.",
+      );
+      return;
+    }
+
     setSubmitted(true);
   };
   return (
@@ -39,6 +67,11 @@ export default function AssessmentDialog({
         </DialogTitle>
         <DialogContent>
           <Stack spacing={2.2} sx={{ pt: 1 }}>
+            {submitError && (
+              <Typography color="error" role="alert">
+                {submitError}
+              </Typography>
+            )}
             {submitted ? (
               <Typography color="primary" sx={{ py: 4 }}>
                 Thanks! We&apos;ll use these details to prepare your initial
@@ -46,16 +79,18 @@ export default function AssessmentDialog({
               </Typography>
             ) : (
               <>
-                <TextField required label="Your name" fullWidth />
+                <TextField required label="Your name" name="name" fullWidth />
                 <TextField
                   required
                   type="email"
                   label="Email address"
+                  name="email"
                   fullWidth
                 />
                 <TextField
                   select
                   label="Property type"
+                  name="propertyType"
                   defaultValue="home"
                   fullWidth
                 >
@@ -65,6 +100,7 @@ export default function AssessmentDialog({
                 </TextField>
                 <TextField
                   label="What would you like us to know?"
+                  name="message"
                   multiline
                   minRows={3}
                   fullWidth
@@ -81,8 +117,8 @@ export default function AssessmentDialog({
           ) : (
             <>
               <Button onClick={onClose}>Maybe later</Button>
-              <Button type="submit" variant="contained">
-                Request assessment
+              <Button disabled={submitting} type="submit" variant="contained">
+                {submitting ? "Sending request…" : "Request assessment"}
               </Button>
             </>
           )}

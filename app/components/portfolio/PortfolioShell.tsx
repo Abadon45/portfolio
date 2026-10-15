@@ -15,6 +15,7 @@ import { dottedBackgroundSx } from "./dottedBackground";
 import { usePortfolioMode } from "./usePortfolioMode";
 import ScrollToTopButton from "../ScrollToTopButton";
 import type { PortfolioUser } from "../../../lib/portfolioAuth";
+import { version as appVersion } from "../../../package.json";
 
 export function PortfolioShell({
   initialUser,
@@ -89,6 +90,9 @@ export function PortfolioShell({
         >
           <Box component="span" sx={{ color: "text.secondary", fontSize: 13 }}>
             Emmanuel Noy Pangan · Built with care.
+            <Box component="span" sx={{ ml: 1 }}>
+              v{appVersion}
+            </Box>
           </Box>
           <Link
             href="https://github.com/Abadon45"
@@ -96,6 +100,9 @@ export function PortfolioShell({
             sx={{ fontSize: 13 }}
           >
             GitHub
+          </Link>
+          <Link href="/privacy" color="text.secondary" sx={{ fontSize: 13 }}>
+            Privacy
           </Link>
         </Container>
       </Box>

@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description:
     "A fictional SaaS commerce and business operations platform demonstrating dashboards, fulfillment, suppliers, storefronts, and analytics.",
   alternates: { canonical: "/saas-platform" },
+  robots: { index: false, follow: false },
 };
 
 export default function SaaSPlatformRoute() {

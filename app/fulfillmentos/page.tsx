@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "FulfillmentOS | Order Operations Platform",
   description:
     "A multi-role order and fulfillment operations platform demo for the portfolio.",
+  robots: { index: false, follow: false },
 };
 
 export default function FulfillmentOsRoute() {

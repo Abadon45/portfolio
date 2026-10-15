@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "About Noy Pangan | Experience & Skills",
   description:
     "The development experience and business background behind Noy Pangan’s work.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

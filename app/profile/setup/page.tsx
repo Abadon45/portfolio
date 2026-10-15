@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentPortfolioUser } from "../../../lib/portfolioAuth";
 import ProfileSetupClient from "./ProfileSetupClient";
+
+export const metadata: Metadata = {
+  title: "Complete Your Profile | Noy Pangan",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

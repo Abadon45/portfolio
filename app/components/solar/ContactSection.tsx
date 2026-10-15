@@ -28,6 +28,8 @@ const serviceAreas = [
 
 export default function ContactSection() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [offset, setOffset] = useState(0);
   const sectionRef = useRef<HTMLElement | null>(null);
 
@@ -57,8 +59,32 @@ export default function ContactSection() {
     };
   }, []);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setSubmitting(true);
+    setSubmitError("");
+
+    const formData = new FormData(event.currentTarget);
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.fromEntries(formData.entries())),
+    }).catch(() => null);
+
+    setSubmitting(false);
+
+    if (!response?.ok) {
+      const result = (await response?.json().catch(() => null)) as {
+        message?: unknown;
+      } | null;
+      setSubmitError(
+        typeof result?.message === "string"
+          ? result.message
+          : "We couldn’t send your request. Please email hello@cotabatosolar.ph.",
+      );
+      return;
+    }
+
     setSubmitted(true);
   }
 
@@ -279,6 +305,11 @@ export default function ContactSection() {
                 </Stack>
               ) : (
                 <Stack spacing={2.5}>
+                  {submitError && (
+                    <Typography color="error" role="alert">
+                      {submitError}
+                    </Typography>
+                  )}
                   <Box>
                     <Typography
                       variant="h3"
@@ -348,11 +379,12 @@ export default function ContactSection() {
                   </Grid>
                   <Button
                     type="submit"
+                    disabled={submitting}
                     variant="contained"
                     size="large"
                     sx={{ alignSelf: "flex-start", borderRadius: 99, px: 3 }}
                   >
-                    Request a free assessment ↗
+                    {submitting ? "Sending request…" : "Request a free assessment ↗"}
                   </Button>
                   <Typography color="text.secondary" sx={{ fontSize: 11 }}>
                     No pressure, no obligation. This is an initial conversation,

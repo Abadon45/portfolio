@@ -6,6 +6,11 @@ import {
   StorefrontModeProvider,
   StorefrontThemeProvider,
 } from "./_components/twcEcommerceTheme";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 
