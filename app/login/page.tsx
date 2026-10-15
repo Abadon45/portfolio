@@ -6,6 +6,7 @@ import LoginClient from "./LoginClient";
 export const metadata: Metadata = {
   title: "Authentication demo",
   description: "A Neon-backed authentication demonstration from the portfolio.",
+  robots: { index: false, follow: false },
 };
 
 type LoginPageProps = {

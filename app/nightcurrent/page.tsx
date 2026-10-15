@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description:
     "Discover Tideglass Island, its abandoned weather station, and the " +
     "signal Mara Venn was sent to investigate.",
+  alternates: { canonical: "/nightcurrent" },
 };
 
 export default function NightcurrentRoute() {

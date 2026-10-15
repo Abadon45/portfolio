@@ -4,6 +4,7 @@ import AwsOperationsPage from "../components/aws/AwsOperationsPage";
 export const metadata: Metadata = {
   title: "Cloudline | AWS Operations Hub",
   description: "An AWS-focused product template for monitoring serverless infrastructure.",
+  robots: { index: false, follow: false },
 };
 
 export default function AwsRoute() {

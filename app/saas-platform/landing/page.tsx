@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     description:
       "A focused commerce operating system for teams that want connected workflows and clearer decisions.",
     type: "website",
+    images: [{ url: "/images/portfolio/commerce.webp", alt: "Northstar Commerce platform" }],
   },
 };
 
