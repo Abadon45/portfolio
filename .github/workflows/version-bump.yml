@@ -34,8 +34,8 @@ jobs:
         with:
           branch: chore/automatic-version-bump
           delete-branch: true
-          commit-message: chore(release): bump portfolio version [skip version bump]
-          title: chore(release): bump portfolio version
+          commit-message: "chore(release): bump portfolio version [skip version bump]"
+          title: "chore(release): bump portfolio version"
           body: >
             Automatically increments the portfolio patch version after changes are
             merged to main. The package version is also shown in the portfolio footer.
