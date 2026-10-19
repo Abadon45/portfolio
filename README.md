@@ -11,6 +11,10 @@ npm install
 npm run dev
 ```
 
+## Canonical site URL
+
+Canonical metadata, `robots.txt`, and the sitemap use `NEXT_PUBLIC_SITE_URL` when it is set. In Vercel, configure this variable for Production as `https://emmanuelpanganportfolio.vercel.app` if you want an explicit override. The application falls back to that stable production domain when the variable is absent, and uses `http://localhost:3000` in development. Do not use Vercel's deployment-specific `VERCEL_URL` as the canonical origin.
+
 ## Contents
 
 - Next.js App Router

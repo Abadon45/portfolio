@@ -6,16 +6,24 @@ import {
   Chip,
   Container,
   Divider,
-  Link as MuiLink,
+  Drawer,
+  IconButton,
+  List,
+  ListItemButton,
   ListItemIcon,
+  ListItemText,
+  Link as MuiLink,
   Menu,
   MenuItem,
   Skeleton,
   Stack,
   Toolbar,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import SpaceDashboardRoundedIcon from "@mui/icons-material/SpaceDashboardRounded";
 import NextLink from "next/link";
@@ -87,6 +95,10 @@ export function PortfolioAppBar({
   const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(
     null,
   );
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const prefersReducedMotion = useMediaQuery(
+    "(prefers-reduced-motion: reduce)",
+  );
 
   useEffect(() => {
     let active = true;
@@ -141,11 +153,12 @@ export function PortfolioAppBar({
         <Toolbar
           disableGutters
           sx={{
-            alignItems: { xs: "flex-start", sm: "center" },
-            flexDirection: { xs: "column", sm: "row" },
-            gap: { xs: 1.5, sm: 2 },
+            alignItems: "center",
+            flexDirection: "row",
+            gap: 2,
             justifyContent: "space-between",
-            py: { xs: 1.5, sm: 0 },
+            minHeight: { xs: 68, sm: 72 },
+            py: { xs: 1, sm: 0 },
           }}
         >
           <MuiLink
@@ -174,6 +187,8 @@ export function PortfolioAppBar({
                 color: "primary.contrastText",
                 fontSize: "0.78rem",
                 fontWeight: 850,
+                height: { xs: 36, sm: 40 },
+                width: { xs: 36, sm: 40 },
               }}
             >
               EP
@@ -188,7 +203,7 @@ export function PortfolioAppBar({
               <Typography
                 color="text.secondary"
                 component="small"
-                sx={{ display: "block", mt: 0.25 }}
+                sx={{ display: { xs: "none", sm: "block" }, mt: 0.25 }}
               >
                 Full Stack Web Developer
               </Typography>
@@ -202,18 +217,9 @@ export function PortfolioAppBar({
             spacing={{ xs: 0, sm: 0.5 }}
             sx={{
               alignItems: "center",
-              maxWidth: "100%",
+              display: { xs: "none", md: "flex" },
               minHeight: 40,
-              flexWrap: { xs: "wrap", sm: "nowrap" },
-              rowGap: 1,
-              overflowX: "visible",
-              overflowY: "hidden",
-              pb: { xs: 0.5, sm: 0 },
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-              "&::-webkit-scrollbar": {
-                display: "none",
-              },
+              flexWrap: "nowrap",
             }}
           >
             {!isHomepage && (
@@ -226,18 +232,6 @@ export function PortfolioAppBar({
                 Home
               </Button>
             )}
-            {isHomepage && (
-              <Button
-                component={NextLink}
-                href="/work"
-                scroll={false}
-                color="inherit"
-                size="small"
-                sx={{ color: "text.secondary", whiteSpace: "nowrap" }}
-              >
-                Case studies
-              </Button>
-            )}
             {navItems.map((item) => (
               <Button
                 color="inherit"
@@ -248,7 +242,9 @@ export function PortfolioAppBar({
                   item.href === "#work"
                     ? isHomepage
                       ? "#work"
-                      : "/work"
+                      : onScrollToSection
+                        ? "/#work"
+                        : "/work"
                     : item.href === "#about"
                       ? "/about"
                       : isHomepage
@@ -497,8 +493,201 @@ export function PortfolioAppBar({
               </Button>
             )}
           </Stack>
+
+          <Stack
+            direction="row"
+            spacing={0.5}
+            sx={{ alignItems: "center", display: { xs: "flex", md: "none" } }}
+          >
+            <ThemeToggle
+              compact
+              mode={isDark ? "dark" : "light"}
+              onToggle={onToggleMode}
+            />
+            <IconButton
+              aria-label={`${mobileMenuOpen ? "Close" : "Open"} navigation menu`}
+              aria-controls="portfolio-mobile-navigation"
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen(true)}
+              sx={{
+                color: "text.primary",
+                minHeight: 44,
+                minWidth: 44,
+              }}
+            >
+              <MenuRoundedIcon />
+            </IconButton>
+          </Stack>
         </Toolbar>
       </Container>
+      <Drawer
+        anchor="right"
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        transitionDuration={prefersReducedMotion ? 0 : undefined}
+        slotProps={{
+          paper: {
+            sx: {
+              bgcolor: "background.paper",
+              color: "text.primary",
+              maxWidth: "calc(100vw - 32px)",
+              width: 320,
+            },
+          },
+        }}
+      >
+        <Box
+          component="nav"
+          aria-label="Mobile navigation"
+          id="portfolio-mobile-navigation"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            p: 2,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{ alignItems: "center", justifyContent: "space-between" }}
+          >
+            <Typography component="h2" sx={{ fontSize: 18, fontWeight: 750 }}>
+              Menu
+            </Typography>
+            <IconButton
+              aria-label="Close navigation menu"
+              autoFocus
+              onClick={() => setMobileMenuOpen(false)}
+              sx={{ color: "text.primary" }}
+            >
+              <CloseRoundedIcon />
+            </IconButton>
+          </Stack>
+          <Divider sx={{ my: 1 }} />
+          <List disablePadding>
+            {!isHomepage && (
+              <ListItemButton
+                component={NextLink}
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <ListItemText primary="Home" />
+              </ListItemButton>
+            )}
+            {navItems.map((item) => {
+              const href =
+                item.href === "#work"
+                  ? isHomepage
+                    ? "#work"
+                    : onScrollToSection
+                      ? "/#work"
+                      : "/work"
+                  : item.href === "#about"
+                    ? "/about"
+                    : isHomepage
+                      ? item.href
+                      : `/${item.href}`;
+
+              return (
+                <ListItemButton
+                  component={NextLink}
+                  href={href}
+                  key={item.href}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (isHomepage) {
+                      onScrollToSection?.(item.href.slice(1));
+                    }
+                  }}
+                  sx={{
+                    minHeight: 48,
+                    "&.Mui-focusVisible": {
+                      outline: "2px solid",
+                      outlineColor: "primary.main",
+                      outlineOffset: -2,
+                    },
+                    "&:focus-visible": {
+                      outline: "2px solid",
+                      outlineColor: "primary.main",
+                      outlineOffset: -2,
+                    },
+                  }}
+                >
+                  <ListItemText
+                    primary={item.href === "#about" ? "Experience" : item.label}
+                  />
+                </ListItemButton>
+              );
+            })}
+          </List>
+          <Box sx={{ flexGrow: 1 }} />
+          <Divider sx={{ my: 1.5 }} />
+          {authState === "loading" ? (
+            <Typography color="text.secondary" sx={{ p: 2 }}>
+              Loading account…
+            </Typography>
+          ) : user ? (
+            <>
+              <ListItemButton
+                component={NextLink}
+                href="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <ListItemIcon>
+                  <PersonRoundedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText
+                  primary={visibleUserName(user)}
+                  secondary="Profile"
+                />
+              </ListItemButton>
+              <ListItemButton
+                component={NextLink}
+                href="/saas-platform"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <ListItemIcon>
+                  <SpaceDashboardRoundedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="SaaS workspace" />
+              </ListItemButton>
+              {user.role.toLowerCase() === "admin" && (
+                <ListItemButton
+                  component={NextLink}
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <ListItemIcon>
+                    <SpaceDashboardRoundedIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary="Admin dashboard" />
+                </ListItemButton>
+              )}
+              <ListItemButton
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  void handleLogout();
+                }}
+                sx={{ color: "error.main" }}
+              >
+                <ListItemIcon sx={{ color: "inherit" }}>
+                  <LogoutRoundedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Log out" />
+              </ListItemButton>
+            </>
+          ) : (
+            <Button
+              component={NextLink}
+              href="/login?callbackUrl=/"
+              onClick={() => setMobileMenuOpen(false)}
+              variant="outlined"
+            >
+              Account
+            </Button>
+          )}
+        </Box>
+      </Drawer>
     </AppBar>
   );
 }

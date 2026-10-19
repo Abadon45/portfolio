@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="833" viewBox="0 0 1200 833" fill="none">
+  <rect width="1200" height="833" fill="#F3F7F7"/>
+  <circle cx="998" cy="132" r="186" fill="#DCEDEA"/>
+  <circle cx="117" cy="744" r="206" fill="#E7EEEE"/>
+  <rect x="172" y="166" width="856" height="500" rx="24" fill="white" stroke="#D5E1E0" stroke-width="2"/>
+  <rect x="172" y="166" width="856" height="76" rx="24" fill="#17324D"/>
+  <path d="M172 218h856v24H172z" fill="#17324D"/>
+  <rect x="210" y="188" width="31" height="31" rx="9" fill="#69B3A8"/>
+  <path d="m218 203 6 6 11-13" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="256" y="211" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="700">LedgerCheck</text>
+  <text x="220" y="304" fill="#17324D" font-family="Arial, sans-serif" font-size="34" font-weight="700">Financial clarity for small organizations</text>
+  <text x="220" y="346" fill="#536171" font-family="Arial, sans-serif" font-size="18">Clear records. Reconciled balances. Explainable checks.</text>
+  <rect x="220" y="390" width="354" height="184" rx="15" fill="#F7FAFA" stroke="#D5E1E0" stroke-width="2"/>
+  <text x="246" y="429" fill="#536171" font-family="Arial, sans-serif" font-size="16">RECONCILIATION</text>
+  <text x="246" y="473" fill="#17324D" font-family="Arial, sans-serif" font-size="27" font-weight="700">Review the balance</text>
+  <rect x="246" y="499" width="216" height="10" rx="5" fill="#DCEDEA"/>
+  <rect x="246" y="499" width="162" height="10" rx="5" fill="#398C81"/>
+  <text x="246" y="548" fill="#536171" font-family="Arial, sans-serif" font-size="15">Deterministic and reviewable checks</text>
+  <rect x="600" y="390" width="390" height="184" rx="15" fill="#F7FAFA" stroke="#D5E1E0" stroke-width="2"/>
+  <circle cx="637" cy="431" r="13" fill="#398C81"/>
+  <path d="m631 431 4 4 8-9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="663" y="437" fill="#17324D" font-family="Arial, sans-serif" font-size="18" font-weight="700">Expense lines reconcile</text>
+  <circle cx="637" cy="480" r="13" fill="#398C81"/>
+  <path d="m631 480 4 4 8-9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="663" y="486" fill="#17324D" font-family="Arial, sans-serif" font-size="18" font-weight="700">Budget exceptions explained</text>
+  <circle cx="637" cy="529" r="13" fill="#398C81"/>
+  <path d="m631 529 4 4 8-9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="663" y="535" fill="#17324D" font-family="Arial, sans-serif" font-size="18" font-weight="700">Review snapshots preserved</text>
+  <text x="220" y="620" fill="#536171" font-family="Arial, sans-serif" font-size="16">Product project · Demo uses fictional organization data</text>
+</svg>

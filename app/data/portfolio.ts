@@ -12,6 +12,7 @@ export type Project = {
   summary: string;
   details: string[];
   href?: string;
+  external?: boolean;
 };
 
 export type LandingPage = {
@@ -55,9 +56,9 @@ export const profileSnapshot = [
 ] as const;
 
 export const proofMetrics: ProofMetric[] = [
-  { value: "60K+", label: "registered users served" },
+  { value: "60K+", label: "registered users on the platform" },
   { value: "38", label: "storefront builder blocks maintained" },
-  { value: "V4", label: "Next.js platform modernization" },
+  { value: "V4", label: "Next.js frontend delivered" },
 ];
 
 export const skills = {
@@ -107,12 +108,26 @@ export const projects: Project[] = [
   {
     eyebrow: "TWC Ako Platform",
     title: "Modern Next.js frontend integrated with a large Django API backend",
+    href: "/work/twc-platform",
     summary:
       "Architected the V4 frontend for a large SaaS and e-commerce platform, while maintaining and extending the Django REST/Django Ninja APIs needed by dashboards, storefronts, checkout, authentication, and supplier customization.",
     details: [
       "Built shared context providers, typed API utilities, and role-aware UI foundations.",
       "Created and maintained frontend-facing API endpoints for user identity, shipping addresses, cart and checkout, orders, storefronts, supplier tools, logistics, and dashboard data.",
       "Modernized legacy Django flows into a scalable API-driven Next.js architecture without claiming full ownership of the existing backend.",
+    ],
+  },
+  {
+    eyebrow: "LedgerCheck",
+    title: "Financial clarity for small organizations",
+    summary:
+      "A financial management and deterministic checking toolkit for small organizations to record income and expenses, reconcile balances, and review explainable exceptions.",
+    href: "https://ledgercheck-app.vercel.app",
+    external: true,
+    details: [
+      "Supports income and expense records, itemized expense sheets, reviewer workflows, and reconciliation checks.",
+      "Focuses on transparent, deterministic checks so reviewers can inspect why a record is flagged.",
+      "LedgerCheck is financial record management software, not professional accounting or legal auditing software.",
     ],
   },
   {
