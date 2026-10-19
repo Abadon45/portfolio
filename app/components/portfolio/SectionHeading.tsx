@@ -4,9 +4,14 @@ import { Eyebrow } from "./Eyebrow";
 type SectionHeadingProps = {
   eyebrow: string;
   title: string;
+  headingId?: string;
 };
 
-export function SectionHeading({ eyebrow, title }: SectionHeadingProps) {
+export function SectionHeading({
+  eyebrow,
+  title,
+  headingId,
+}: SectionHeadingProps) {
   return (
     <Box
       sx={{
@@ -18,7 +23,12 @@ export function SectionHeading({ eyebrow, title }: SectionHeadingProps) {
       }}
     >
       <Eyebrow>{eyebrow}</Eyebrow>
-      <Typography component="h2" variant="h2" sx={{ fontSize: { xs: "2rem", md: "2.7rem", lg: "3rem" } }}>
+      <Typography
+        component="h2"
+        id={headingId}
+        variant="h2"
+        sx={{ fontSize: { xs: "2rem", md: "2.7rem", lg: "3rem" } }}
+      >
         {title}
       </Typography>
     </Box>

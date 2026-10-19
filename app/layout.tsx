@@ -15,14 +15,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: "Emmanuel Noy Pangan | Full Stack Web Developer",
   description:
-    "Portfolio and resume for Emmanuel Noy Pangan, a Full Stack Web Developer specializing in Next.js, React, TypeScript, and Django.",
+    "Portfolio and resume for Emmanuel Noy Pangan, a Full Stack Web Developer focused on frontend architecture for large-scale SaaS and e-commerce platforms.",
   openGraph: {
     type: "website",
     locale: "en_PH",
     siteName: "Emmanuel Noy Pangan",
     title: "Emmanuel Noy Pangan | Full Stack Web Developer",
     description:
-      "Portfolio and resume for Emmanuel Noy Pangan, specializing in Next.js, React, TypeScript, and Django.",
+      "Frontend architecture and customer experiences for large-scale SaaS and e-commerce platforms, with Next.js, React, TypeScript, and Django.",
     images: [
       {
         url: "/images/portfolio/commerce.webp",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Emmanuel Noy Pangan | Full Stack Web Developer",
     description:
-      "Portfolio and resume for Emmanuel Noy Pangan, specializing in Next.js, React, TypeScript, and Django.",
+      "Frontend architecture and customer experiences for large-scale SaaS and e-commerce platforms, with Next.js, React, TypeScript, and Django.",
     images: ["/images/portfolio/commerce.webp"],
   },
   robots: { index: true, follow: true },

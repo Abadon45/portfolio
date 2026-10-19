@@ -6,7 +6,16 @@ export type Experience = {
   bullets: string[];
 };
 
+export type ProjectStatus =
+  | "Production work"
+  | "Product demo"
+  | "Case study"
+  | "Reconstruction"
+  | "Portfolio project"
+  | "Former work reference";
+
 export type Project = {
+  status: ProjectStatus;
   title: string;
   eyebrow: string;
   summary: string;
@@ -16,6 +25,7 @@ export type Project = {
 };
 
 export type LandingPage = {
+  status: ProjectStatus;
   title: string;
   summary: string;
   href: string;
@@ -106,6 +116,7 @@ export const skills = {
 
 export const projects: Project[] = [
   {
+    status: "Production work",
     eyebrow: "TWC Ako Platform",
     title: "Modern Next.js frontend integrated with a large Django API backend",
     href: "/work/twc-platform",
@@ -118,6 +129,7 @@ export const projects: Project[] = [
     ],
   },
   {
+    status: "Product demo",
     eyebrow: "LedgerCheck",
     title: "Financial clarity for small organizations",
     summary:
@@ -131,6 +143,7 @@ export const projects: Project[] = [
     ],
   },
   {
+    status: "Production work",
     eyebrow: "Legacy TWC E-Commerce",
     title:
       "Django e-commerce platform with checkout, referrals, and fulfillment tooling",
@@ -143,6 +156,7 @@ export const projects: Project[] = [
     ],
   },
   {
+    status: "Production work",
     eyebrow: "Auth & API Architecture",
     title: "Centralized API gateway and normalized user identity system",
     href: "/login",
@@ -155,6 +169,7 @@ export const projects: Project[] = [
     ],
   },
   {
+    status: "Production work",
     eyebrow: "Commerce Systems",
     title: "Checkout, cart, Xendit payments, and cross-device continuation",
     href: "/payments",
@@ -167,6 +182,7 @@ export const projects: Project[] = [
     ],
   },
   {
+    status: "Production work",
     eyebrow: "Storefront Builder",
     title: "Puck page builder and supplier-configurable theming",
     summary:
@@ -178,6 +194,7 @@ export const projects: Project[] = [
     ],
   },
   {
+    status: "Reconstruction",
     eyebrow: "Commerce OS",
     title: "Commerce OS — one platform for many business roles",
     summary:
@@ -190,6 +207,7 @@ export const projects: Project[] = [
     ],
   },
   {
+    status: "Reconstruction",
     eyebrow: "Archive Recovery + Rebrand",
     title: "Nightcurrent — an original narrative-game web experience",
     summary:
@@ -202,6 +220,7 @@ export const projects: Project[] = [
     ],
   },
   {
+    status: "Case study",
     eyebrow: "Healthcare Discovery · Medora",
     title: "Find care wherever you are",
     summary:
@@ -217,14 +236,16 @@ export const projects: Project[] = [
 
 export const landingPages: LandingPage[] = [
   {
+    status: "Case study",
     title: "Medora",
     summary:
       "A doctor-discovery directory for the Philippines, with specialty and city browsing, doctor profiles, and clinic listings.",
     href: "/work/medora",
-    eyebrow: "Healthcare discovery · Product audit",
+    eyebrow: "Healthcare discovery",
     actionLabel: "Read project audit",
   },
   {
+    status: "Reconstruction",
     title: "Commerce OS",
     summary:
       "A persona-aware commerce operating system for storefronts, supplier operations, analytics, subscriptions, affiliate tools, and business growth.",
@@ -233,6 +254,7 @@ export const landingPages: LandingPage[] = [
     actionLabel: "Explore product landing",
   },
   {
+    status: "Reconstruction",
     title: "Nightcurrent",
     summary:
       "An original narrative-game web experience rebuilt from an archive recovery study, with layered Tideglass Island artwork, parallax depth, and a documented modernization report.",
@@ -241,35 +263,39 @@ export const landingPages: LandingPage[] = [
     actionLabel: "Open Nightcurrent study",
   },
   {
+    status: "Portfolio project",
     title: "Cotabato Solar",
     summary:
       "A responsive solar services landing page with an interactive savings estimator and inquiry flow.",
     href: "/solar",
-    eyebrow: "Recent landing page project",
+    eyebrow: "Solar services website",
     actionLabel: "Open landing page",
   },
   {
+    status: "Reconstruction",
     title: "TWC Ecommerce",
     summary:
       "A reusable offline storefront reconstruction with theme switching, product discovery, cart, shipping simulation, checkout, and order confirmation flows.",
     href: "/twc-ecommerce",
-    eyebrow: "Portfolio reconstruction",
+    eyebrow: "Commerce workflows",
     actionLabel: "Open ecommerce demo",
   },
   {
+    status: "Product demo",
     title: "Payments Lab",
     summary:
       "An interactive comparison of Xendit invoice payments and Stripe Checkout, focused on server-side verification and idempotent fulfillment.",
     href: "/payments",
-    eyebrow: "Payment integration study",
+    eyebrow: "Payment integrations",
     actionLabel: "Open payments lab",
   },
   {
+    status: "Former work reference",
     title: "Techno Wealth Creators",
     summary:
       "A reference to past work delivered for TWC IT Solutions. The current company website is linked for historical context; this portfolio does not represent an ongoing association.",
     href: "https://www.technowealthcreators.com",
-    eyebrow: "Former work reference",
+    eyebrow: "TWC IT Solutions",
     actionLabel: "View company website",
     external: true,
   },
