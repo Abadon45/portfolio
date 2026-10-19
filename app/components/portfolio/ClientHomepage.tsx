@@ -10,11 +10,13 @@ import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import { Box, Button, Divider, Link, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { Eyebrow } from "./Eyebrow";
+import { ProjectStatusLabel } from "./ProjectStatusLabel";
 import { proofMetrics } from "../../data/portfolio";
 
 const selectedWork = [
   {
     name: "LedgerCheck",
+    status: "Product demo" as const,
     category: "Financial management",
     description:
       "A financial record and deterministic checking toolkit for small organizations.",
@@ -26,6 +28,7 @@ const selectedWork = [
   },
   {
     name: "Medora",
+    status: "Case study" as const,
     category: "Healthcare discovery",
     description:
       "A doctor-discovery directory for the Philippines, organized around specialties, cities, and clinics.",
@@ -36,7 +39,8 @@ const selectedWork = [
   },
   {
     name: "Commerce OS",
-    category: "Portfolio reconstruction",
+    status: "Reconstruction" as const,
+    category: "SaaS operations",
     description:
       "An interactive, fictional commerce workspace for products, inventory, " +
       "and business operations.",
@@ -49,7 +53,8 @@ const selectedWork = [
   },
   {
     name: "TWC Ecommerce",
-    category: "Portfolio reconstruction",
+    status: "Reconstruction" as const,
+    category: "Commerce workflows",
     description:
       "An offline storefront reconstruction with product discovery, cart, " +
       "shipping, and checkout flows.",
@@ -62,7 +67,8 @@ const selectedWork = [
   },
   {
     name: "Cotabato Solar",
-    category: "Portfolio project",
+    status: "Portfolio project" as const,
+    category: "Solar services",
     description:
       "A welcoming service website that helps visitors explore solar and request an assessment.",
     image: "/images/portfolio/solar.webp",
@@ -104,6 +110,54 @@ const bodyCopy = {
   lineHeight: 1.8,
 };
 
+function ProofMetrics({ placement }: { placement: "inline" | "below-portrait" }) {
+  const belowPortrait = placement === "below-portrait";
+
+  return (
+    <Stack
+      direction="row"
+      spacing={{ xs: 2, sm: 3.5 }}
+      useFlexGap
+      sx={{
+        borderColor: "divider",
+        borderTop: 1,
+        display: belowPortrait
+          ? { xs: "flex", sm: "none" }
+          : { xs: "none", sm: "flex" },
+        flexWrap: "wrap",
+        gridColumn: belowPortrait ? { md: "1" } : undefined,
+        maxWidth: 620,
+        mt: belowPortrait ? 0 : { xs: 3.5, md: 4.5 },
+        order: belowPortrait ? 3 : undefined,
+        pt: 2.5,
+        width: "100%",
+      }}
+    >
+      {proofMetrics.map((metric) => (
+        <Box key={metric.label} sx={{ minWidth: 90, flex: "1 1 110px" }}>
+          <Typography
+            component="strong"
+            sx={{
+              display: "block",
+              fontSize: { xs: 19, sm: 23 },
+              fontWeight: 800,
+              lineHeight: 1.2,
+            }}
+          >
+            {metric.value}
+          </Typography>
+          <Typography
+            color="text.secondary"
+            sx={{ fontSize: 12, lineHeight: 1.4, mt: 0.5 }}
+          >
+            {metric.label}
+          </Typography>
+        </Box>
+      ))}
+    </Stack>
+  );
+}
+
 export function ClientHomepage() {
   return (
     <>
@@ -117,22 +171,25 @@ export function ClientHomepage() {
             md: "minmax(0, 1.1fr) minmax(280px, .9fr)",
           },
           alignItems: "center",
-          gap: { xs: 4, md: 8 },
+          columnGap: { xs: 4, md: 8 },
+          rowGap: { xs: 4, md: 3 },
           pt: { xs: 4, md: 8 },
           pb: { xs: 6, md: 9 },
         }}
       >
-        <Box sx={{ order: { xs: 2, md: 1 } }}>
-          <Eyebrow>Full-stack engineer · Davao City, Philippines · Remote-ready</Eyebrow>
+        <Box sx={{ order: { xs: 1, sm: 2, md: 1 } }}>
+          <Eyebrow>
+            Full Stack Web Developer · Davao City, Philippines · Remote-ready
+          </Eyebrow>
           <Typography
             component="h1"
             sx={{
-              fontSize: { xs: "2.7rem", sm: "4rem", md: "5rem" },
+              fontSize: { xs: "2.5rem", sm: "4rem", md: "5rem" },
               fontWeight: 800,
               letterSpacing: "-0.055em",
               lineHeight: 1.06,
-              maxWidth: "13ch",
-              mt: 2,
+              maxWidth: { xs: "15ch", md: "13ch" },
+              mt: 1.5,
               textWrap: "balance",
             }}
           >
@@ -142,23 +199,28 @@ export function ClientHomepage() {
             color="text.secondary"
             sx={{
               fontSize: { xs: 16, md: 19 },
-              lineHeight: { xs: 1.7, md: 1.8 },
+              lineHeight: { xs: 1.65, md: 1.8 },
               maxWidth: "52ch",
-              mt: 2.5,
+              mt: 2,
             }}
           >
-            I’m Noy Pangan, a full-stack developer focused on SaaS and
-            e-commerce. I build customer experiences alongside the APIs and
+            I build frontend architecture and customer experiences for
+            large-scale SaaS and e-commerce platforms, alongside the APIs and
             operational tools behind them.
           </Typography>
           <Stack
             direction={{ xs: "column", sm: "row" }}
-            spacing={1.25}
+            spacing={1}
             useFlexGap
             sx={{
               alignItems: { sm: "center" },
               flexWrap: "wrap",
-              mt: { xs: 2.5, sm: 3.5 },
+              mt: { xs: 2, sm: 3.5 },
+              "& > .MuiButton-root": {
+                justifyContent: { xs: "space-between", sm: "center" },
+                minHeight: 48,
+                width: { xs: "100%", sm: "auto" },
+              },
             }}
           >
             <Button
@@ -177,98 +239,104 @@ export function ClientHomepage() {
             >
               Get in touch
             </Button>
-            <Button
-              component="a"
-              href="/files/emmanuel-noy-pangan-resume-ph.pdf"
-              download
-              variant="text"
-              size="large"
-              endIcon={<PictureAsPdfOutlinedIcon />}
-            >
-              Download résumé · Philippines
-            </Button>
-            <Link
-              component="a"
-              href="/files/emmanuel-noy-pangan-resume-international.pdf"
-              download
-              color="text.secondary"
-              underline="hover"
-              sx={{ fontSize: 13, px: 1, py: 1 }}
-            >
-              International version · no photo
-            </Link>
           </Stack>
+          <Box
+            component="section"
+            aria-labelledby="resume-downloads-title"
+            sx={{ mt: 1.5 }}
+          >
+            <Typography
+              component="h2"
+              id="resume-downloads-title"
+              color="text.secondary"
+              sx={{ fontSize: 12, fontWeight: 700, mb: 0.25 }}
+            >
+              Résumé versions
+            </Typography>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={{ xs: 0, sm: 2 }}
+              useFlexGap
+              sx={{ alignItems: { sm: "center" }, flexWrap: "wrap" }}
+            >
+              <Link
+                component="a"
+                href="/files/emmanuel-noy-pangan-resume-ph.pdf"
+                download
+                underline="hover"
+                sx={{
+                  alignItems: "center",
+                  display: "inline-flex",
+                  fontSize: 14,
+                  fontWeight: 650,
+                  gap: 0.75,
+                  minHeight: 44,
+                  width: "fit-content",
+                  "&:focus-visible": {
+                    outline: "2px solid",
+                    outlineColor: "primary.main",
+                    outlineOffset: 3,
+                  },
+                }}
+              >
+                <PictureAsPdfOutlinedIcon fontSize="small" />
+                Philippines · with photo
+              </Link>
+              <Link
+                component="a"
+                href="/files/emmanuel-noy-pangan-resume-international.pdf"
+                download
+                color="text.secondary"
+                underline="hover"
+                sx={{
+                  alignItems: "center",
+                  display: "inline-flex",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  minHeight: 44,
+                  width: "fit-content",
+                  "&:focus-visible": {
+                    outline: "2px solid",
+                    outlineColor: "primary.main",
+                    outlineOffset: 3,
+                  },
+                }}
+              >
+                International · no photo
+              </Link>
+            </Stack>
+          </Box>
           <Typography color="text.secondary" sx={{ fontSize: 12, mt: 1.25 }}>
             Open to full-time remote roles and select project work
           </Typography>
-          <Stack
-            direction="row"
-            spacing={{ xs: 2, sm: 3.5 }}
-            useFlexGap
-            sx={{
-              flexWrap: "wrap",
-              mt: { xs: 3.5, md: 4.5 },
-              pt: 2.5,
-              borderTop: 1,
-              borderColor: "divider",
-              maxWidth: 620,
-            }}
-          >
-            {proofMetrics.map((metric) => (
-              <Box key={metric.label} sx={{ minWidth: 90, flex: "1 1 110px" }}>
-                <Typography
-                  component="strong"
-                  sx={{
-                    display: "block",
-                    fontSize: { xs: 19, sm: 23 },
-                    fontWeight: 800,
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {metric.value}
-                </Typography>
-                <Typography
-                  color="text.secondary"
-                  sx={{ fontSize: 12, lineHeight: 1.4, mt: 0.5 }}
-                >
-                  {metric.label}
-                </Typography>
-              </Box>
-            ))}
-          </Stack>
+          <ProofMetrics placement="inline" />
         </Box>
         <Box
           sx={{
-            order: { xs: 1, md: 2 },
+            order: { xs: 2, sm: 1, md: 2 },
             maxWidth: { xs: 520, md: 430 },
             width: "100%",
-            justifySelf: { xs: "stretch", md: "end" },
+            justifySelf: { xs: "center", md: "end" },
             position: "relative",
           }}
         >
           <Box
-            sx={{
-              position: "absolute",
-              inset: { xs: "10% -3% -3% 12%", md: "8% -6% -5% 14%" },
-              border: 1,
-              borderColor: "divider",
-              borderRadius: 2,
-            }}
-          />
-          <Box
             component="img"
             src="/display-image/noy-dp.jpg"
-            alt="Noy Pangan, full-stack developer"
+            alt="Noy Pangan, Full Stack Web Developer"
             width={860}
             height={960}
             fetchPriority="high"
             sx={{
               position: "relative",
+              zIndex: 1,
               width: "100%",
-              height: { xs: 290, sm: 390, md: 500 },
+              height: { xs: 240, sm: 390, md: 500 },
               objectFit: "cover",
               objectPosition: "center 22%",
               display: "block",
+              border: 1,
+              borderColor: "divider",
               borderRadius: 2,
             }}
           />
@@ -288,29 +356,30 @@ export function ClientHomepage() {
                 Davao City, Philippines
               </Typography>
             </Box>
+            <Box
+              component="span"
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.75,
+                color: "text.secondary",
+                fontSize: 12,
+              }}
+            >
               <Box
-                component="span"
+                aria-hidden="true"
                 sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 0.75,
-                  color: "text.secondary",
-                  fontSize: 12,
+                  height: 8,
+                  width: 8,
+                  borderRadius: "50%",
+                  bgcolor: "success.main",
                 }}
-              >
-                <Box
-                  aria-hidden="true"
-                  sx={{
-                    height: 8,
-                    width: 8,
-                    borderRadius: "50%",
-                    bgcolor: "success.main",
-                  }}
-                />
-                Open to opportunities
-              </Box>
+              />
+              Open to opportunities
+            </Box>
           </Stack>
         </Box>
+        <ProofMetrics placement="below-portrait" />
       </Box>
 
       <Divider />
@@ -332,7 +401,7 @@ export function ClientHomepage() {
                 ...sectionHeading,
               }}
             >
-            Production systems, then products you can explore.
+              Production systems, then products you can explore.
             </Typography>
           </Box>
           <Button
@@ -361,7 +430,8 @@ export function ClientHomepage() {
           }}
         >
           <Box>
-            <Eyebrow>Production experience · TWC IT Solutions</Eyebrow>
+            <ProjectStatusLabel status="Production work" />
+            <Eyebrow color="text.secondary">TWC IT Solutions</Eyebrow>
             <Typography
               component="h3"
               sx={{
@@ -472,10 +542,13 @@ export function ClientHomepage() {
                   }}
                 />
               </Link>
+              <Box sx={{ mt: 2.5 }}>
+                <ProjectStatusLabel status={project.status} />
+              </Box>
               <Typography
                 color="text.secondary"
                 sx={{
-                  mt: 2.5,
+                  mt: 0,
                   mb: 0.75,
                   fontSize: 11,
                   fontWeight: 600,

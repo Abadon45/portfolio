@@ -9,8 +9,9 @@ import {
   Typography,
 } from "@mui/material";
 import ArrowOutwardRoundedIcon from "@mui/icons-material/ArrowOutwardRounded";
-import { projects } from "../../data/portfolio";
+import { projects, type Project } from "../../data/portfolio";
 import { Eyebrow } from "./Eyebrow";
+import { ProjectStatusLabel } from "./ProjectStatusLabel";
 import { SectionHeading } from "./SectionHeading";
 import { SectionMotion } from "./SectionMotion";
 import {
@@ -25,8 +26,83 @@ const MotionCard = motion.create(Card);
 const MotionUl = motion.ul;
 const MotionLi = motion.li;
 
+function ProjectCard({ project }: { project: Project }) {
+  return (
+    <MotionCard
+      key={project.title}
+      variants={cardVariant}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.2 }}
+      sx={{ ...cardSx, minHeight: { md: 330 } }}
+    >
+      <CardContent sx={{ p: 2.5 }}>
+        <ProjectStatusLabel status={project.status} />
+        <Eyebrow>{project.eyebrow}</Eyebrow>
+        <Typography
+          component="h3"
+          variant="h3"
+          sx={{ fontSize: "1.3rem", mb: 1 }}
+        >
+          {project.title}
+        </Typography>
+        <Typography color="text.secondary" sx={{ lineHeight: 1.65 }}>
+          {project.summary}
+        </Typography>
+        {project.href && (
+          <Button
+            component="a"
+            href={project.href}
+            target={project.external ? "_blank" : undefined}
+            rel={project.external ? "noreferrer" : undefined}
+            endIcon={<ArrowOutwardRoundedIcon />}
+            sx={{ mt: 2, width: "fit-content" }}
+          >
+            {project.external
+              ? `Visit ${project.eyebrow}`
+              : `View ${project.eyebrow} details`}
+          </Button>
+        )}
+        <MotionUl
+          variants={staggerContainer}
+          style={{
+            display: "grid",
+            gap: 8,
+            listStyle: "none",
+            margin: "16px 0 0",
+            paddingLeft: 0,
+          }}
+        >
+          {project.details.map((detail) => (
+            <MotionLi
+              key={detail}
+              variants={listItemVariant}
+              style={{
+                alignItems: "flex-start",
+                display: "flex",
+                gap: 8,
+              }}
+            >
+              <CheckCircleIcon
+                color="secondary"
+                sx={{ fontSize: 18, marginTop: 2 }}
+              />
+              <Typography sx={{ lineHeight: 1.5 }}>{detail}</Typography>
+            </MotionLi>
+          ))}
+        </MotionUl>
+      </CardContent>
+    </MotionCard>
+  );
+}
+
 export function ProjectsSection() {
-  const [featuredProject, ...supportingProjects] = projects;
+  const productionProjects = projects.filter(
+    (project) => project.status === "Production work",
+  );
+  const [featuredProject, ...supportingProjects] = productionProjects;
+  const portfolioProjects = projects.filter(
+    (project) => project.status !== "Production work",
+  );
 
   return (
     <SectionMotion>
@@ -66,6 +142,7 @@ export function ProjectsSection() {
                 }}
               >
                 <Box>
+                  <ProjectStatusLabel status={featuredProject.status} />
                   <Eyebrow>{featuredProject.eyebrow}</Eyebrow>
                   <Typography
                     color="text.secondary"
@@ -145,75 +222,14 @@ export function ProjectsSection() {
             }}
           >
             {supportingProjects.map((project) => (
-              <MotionCard
-                key={project.title}
-                variants={cardVariant}
-                whileHover={{ y: -6 }}
-                transition={{ duration: 0.2 }}
-                sx={{ ...cardSx, minHeight: { md: 330 } }}
-              >
-                <CardContent sx={{ p: 2.5 }}>
-                  <Eyebrow>{project.eyebrow}</Eyebrow>
-                  <Typography
-                    component="h3"
-                    variant="h3"
-                    sx={{ fontSize: "1.3rem", mb: 1 }}
-                  >
-                    {project.title}
-                  </Typography>
-                  <Typography color="text.secondary" sx={{ lineHeight: 1.65 }}>
-                    {project.summary}
-                  </Typography>
-                  {project.href && (
-                    <Button
-                      component="a"
-                      href={project.href}
-                      target={project.external ? "_blank" : undefined}
-                      rel={project.external ? "noreferrer" : undefined}
-                      endIcon={<ArrowOutwardRoundedIcon />}
-                      sx={{ mt: 2, width: "fit-content" }}
-                    >
-                      {project.external
-                        ? `Visit ${project.eyebrow}`
-                        : `View ${project.eyebrow} details`}
-                    </Button>
-                  )}
-                  <MotionUl
-                    variants={staggerContainer}
-                    style={{
-                      display: "grid",
-                      gap: 8,
-                      listStyle: "none",
-                      margin: "16px 0 0",
-                      paddingLeft: 0,
-                    }}
-                  >
-                    {project.details.map((detail) => (
-                      <MotionLi
-                        key={detail}
-                        variants={listItemVariant}
-                        style={{
-                          alignItems: "flex-start",
-                          display: "flex",
-                          gap: 8,
-                        }}
-                      >
-                        <CheckCircleIcon
-                          color="secondary"
-                          sx={{ fontSize: 18, marginTop: 2 }}
-                        />
-                        <Typography sx={{ lineHeight: 1.5 }}>
-                          {detail}
-                        </Typography>
-                      </MotionLi>
-                    ))}
-                  </MotionUl>
-                </CardContent>
-              </MotionCard>
+              <ProjectCard key={project.title} project={project} />
             ))}
           </MotionBox>
 
           <Box
+            component="section"
+            id="portfolio-projects"
+            aria-labelledby="portfolio-projects-heading"
             sx={{
               borderTop: 1,
               borderColor: "divider",
@@ -222,14 +238,35 @@ export function ProjectsSection() {
             }}
           >
             <SectionHeading
-              eyebrow="Portfolio reconstructions and product studies"
-              title="Interactive work you can explore."
+              headingId="portfolio-projects-heading"
+              eyebrow="Demos, case studies & reconstructions"
+              title="Portfolio work you can explore."
             />
-            <Typography color="text.secondary" sx={{ maxWidth: 680, lineHeight: 1.7 }}>
-              These local demos show how I approach product UI and workflows.
-              They use fictional or sanitized data and are separate from my
-              production work at TWC IT Solutions.
+            <Typography
+              color="text.secondary"
+              sx={{ maxWidth: 680, lineHeight: 1.7 }}
+            >
+              Each entry is labeled as a product demo, case study, or
+              reconstruction. Demos use fictional or sanitized data where
+              applicable and are separate from my production work at TWC IT
+              Solutions.
             </Typography>
+            <MotionBox
+              variants={staggerContainer}
+              sx={{
+                display: "grid",
+                gap: 2,
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "repeat(2, minmax(0, 1fr))",
+                },
+                mt: 3,
+              }}
+            >
+              {portfolioProjects.map((project) => (
+                <ProjectCard key={project.title} project={project} />
+              ))}
+            </MotionBox>
           </Box>
         </MotionBox>
       </Box>
