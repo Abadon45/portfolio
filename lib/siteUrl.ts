@@ -1,10 +1,23 @@
+const productionOrigin = "https://emmanuelpanganportfolio.vercel.app";
+
 export function getSiteUrl() {
   const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
   if (configuredUrl) {
-    return configuredUrl.replace(/\/$/, "");
+    try {
+      const parsedUrl = new URL(configuredUrl);
+      if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+        throw new Error("Unsupported URL protocol.");
+      }
+      return parsedUrl.origin;
+    } catch {
+      throw new Error("NEXT_PUBLIC_SITE_URL must be an absolute HTTP(S) URL.");
+    }
   }
 
-  const vercelHost = process.env.VERCEL_URL;
-  return vercelHost ? `https://${vercelHost}` : "http://localhost:3000";
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:3000";
+  }
+
+  return productionOrigin;
 }

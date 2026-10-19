@@ -1,16 +1,6 @@
 import type { MetadataRoute } from "next";
+import { publicRoutes } from "../lib/publicRoutes";
 import { getSiteUrl } from "../lib/siteUrl";
-
-const publicRoutes = [
-  "",
-  "/about",
-  "/privacy",
-  "/work",
-  "/solar",
-  "/nightcurrent",
-  "/saas-platform/landing",
-  "/twc-ecommerce",
-];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();

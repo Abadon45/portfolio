@@ -90,10 +90,12 @@ export function ProjectsSection() {
                     <Button
                       component="a"
                       href={featuredProject.href}
+                      target={featuredProject.external ? "_blank" : undefined}
+                      rel={featuredProject.external ? "noreferrer" : undefined}
                       endIcon={<ArrowOutwardRoundedIcon />}
                       sx={{ mt: 2, width: "fit-content" }}
                     >
-                      Open case study
+                      Read {featuredProject.eyebrow} case study
                     </Button>
                   )}
                 </Box>
@@ -166,10 +168,14 @@ export function ProjectsSection() {
                     <Button
                       component="a"
                       href={project.href}
+                      target={project.external ? "_blank" : undefined}
+                      rel={project.external ? "noreferrer" : undefined}
                       endIcon={<ArrowOutwardRoundedIcon />}
                       sx={{ mt: 2, width: "fit-content" }}
                     >
-                      Open case study
+                      {project.external
+                        ? `Visit ${project.eyebrow}`
+                        : `View ${project.eyebrow} details`}
                     </Button>
                   )}
                   <MotionUl

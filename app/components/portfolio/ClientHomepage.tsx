@@ -6,12 +6,24 @@ import DashboardCustomizeOutlinedIcon from "@mui/icons-material/DashboardCustomi
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
+import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import { Box, Button, Divider, Link, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { Eyebrow } from "./Eyebrow";
 import { proofMetrics } from "../../data/portfolio";
 
 const selectedWork = [
+  {
+    name: "LedgerCheck",
+    category: "Financial management",
+    description:
+      "A financial record and deterministic checking toolkit for small organizations.",
+    image: "/images/portfolio/ledgercheck.svg",
+    href: "https://ledgercheck-app.vercel.app",
+    alt: "LedgerCheck financial management workspace",
+    actionLabel: "Visit LedgerCheck",
+    external: true,
+  },
   {
     name: "Medora",
     category: "Healthcare discovery",
@@ -24,27 +36,33 @@ const selectedWork = [
   },
   {
     name: "Commerce OS",
-    category: "Custom web application",
+    category: "Portfolio reconstruction",
     description:
-      "A workspace that brings products, inventory, and business operations together.",
+      "An interactive, fictional commerce workspace for products, inventory, " +
+      "and business operations.",
     image: "/images/portfolio/commerce.webp",
     href: "/saas-platform",
-    alt: "Commerce OS dashboard with business navigation and operational panels",
+    alt:
+      "Portfolio reconstruction of a Commerce OS dashboard with business " +
+      "navigation and operational panels",
     actionLabel: "Explore reconstruction",
   },
   {
     name: "TWC Ecommerce",
-    category: "Online store",
+    category: "Portfolio reconstruction",
     description:
-      "From finding the right product to checking out. A complete shopping demo.",
+      "An offline storefront reconstruction with product discovery, cart, " +
+      "shipping, and checkout flows.",
     image: "/images/portfolio/store.webp",
     href: "/twc-ecommerce",
-    alt: "TWC Ecommerce storefront with a product collection and shopping navigation",
+    alt:
+      "Portfolio reconstruction of a TWC Ecommerce storefront with product " +
+      "collection and shopping navigation",
     actionLabel: "Try the storefront",
   },
   {
     name: "Cotabato Solar",
-    category: "Business website",
+    category: "Portfolio project",
     description:
       "A welcoming service website that helps visitors explore solar and request an assessment.",
     image: "/images/portfolio/solar.webp",
@@ -130,14 +148,16 @@ export function ClientHomepage() {
             }}
           >
             I’m Noy Pangan, a full-stack developer focused on SaaS and
-            e-commerce. I build customer-facing experiences and the APIs,
-            identity, and operational tools that keep them working.
+            e-commerce. I build customer experiences alongside the APIs and
+            operational tools behind them.
           </Typography>
           <Stack
             direction={{ xs: "column", sm: "row" }}
             spacing={1.25}
+            useFlexGap
             sx={{
               alignItems: { sm: "center" },
+              flexWrap: "wrap",
               mt: { xs: 2.5, sm: 3.5 },
             }}
           >
@@ -157,6 +177,26 @@ export function ClientHomepage() {
             >
               Get in touch
             </Button>
+            <Button
+              component="a"
+              href="/files/emmanuel-noy-pangan-resume-ph.pdf"
+              download
+              variant="text"
+              size="large"
+              endIcon={<PictureAsPdfOutlinedIcon />}
+            >
+              Download résumé · Philippines
+            </Button>
+            <Link
+              component="a"
+              href="/files/emmanuel-noy-pangan-resume-international.pdf"
+              download
+              color="text.secondary"
+              underline="hover"
+              sx={{ fontSize: 13, px: 1, py: 1 }}
+            >
+              International version · no photo
+            </Link>
           </Stack>
           <Typography color="text.secondary" sx={{ fontSize: 12, mt: 1.25 }}>
             Open to full-time remote roles and select project work
@@ -248,27 +288,27 @@ export function ClientHomepage() {
                 Davao City, Philippines
               </Typography>
             </Box>
-            <Box
-              component="span"
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 0.75,
-                color: "text.secondary",
-                fontSize: 12,
-              }}
-            >
               <Box
-                aria-hidden="true"
+                component="span"
                 sx={{
-                  height: 8,
-                  width: 8,
-                  borderRadius: "50%",
-                  bgcolor: "success.main",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.75,
+                  color: "text.secondary",
+                  fontSize: 12,
                 }}
-              />
-              Open to opportunities
-            </Box>
+              >
+                <Box
+                  aria-hidden="true"
+                  sx={{
+                    height: 8,
+                    width: 8,
+                    borderRadius: "50%",
+                    bgcolor: "success.main",
+                  }}
+                />
+                Open to opportunities
+              </Box>
           </Stack>
         </Box>
       </Box>
@@ -292,7 +332,7 @@ export function ClientHomepage() {
                 ...sectionHeading,
               }}
             >
-              Selected work across products and industries.
+            Production systems, then products you can explore.
             </Typography>
           </Box>
           <Button
@@ -306,6 +346,78 @@ export function ClientHomepage() {
           </Button>
         </Stack>
         <Box
+          component="article"
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1.2fr) auto" },
+            alignItems: "center",
+            gap: { xs: 2.5, md: 5 },
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 2,
+            bgcolor: "background.paper",
+            p: { xs: 2.5, md: 4 },
+            mb: 4,
+          }}
+        >
+          <Box>
+            <Eyebrow>Production experience · TWC IT Solutions</Eyebrow>
+            <Typography
+              component="h3"
+              sx={{
+                fontWeight: 750,
+                fontSize: { xs: 23, md: 30 },
+                letterSpacing: "-.035em",
+                lineHeight: 1.25,
+                mt: 1,
+              }}
+            >
+              Modernizing a commerce platform across frontend, APIs, and
+              storefront tools.
+            </Typography>
+            <Typography color="text.secondary" sx={{ ...bodyCopy, mt: 1.5 }}>
+              My work on the Next.js V4 frontend and Django APIs supported a
+              platform with 60,000+ registered users, checkout workflows, and
+              supplier storefront customization.
+            </Typography>
+            <Stack
+              direction="row"
+              useFlexGap
+              spacing={1}
+              sx={{ flexWrap: "wrap", mt: 2 }}
+            >
+              {["Next.js", "TypeScript", "Django APIs", "Puck builder"].map(
+                (item) => (
+                  <Typography
+                    key={item}
+                    component="span"
+                    sx={{
+                      border: 1,
+                      borderColor: "divider",
+                      borderRadius: 1,
+                      color: "text.secondary",
+                      fontSize: 12,
+                      px: 1,
+                      py: 0.5,
+                    }}
+                  >
+                    {item}
+                  </Typography>
+                ),
+              )}
+            </Stack>
+          </Box>
+          <Button
+            component={NextLink}
+            href="/work/twc-platform"
+            variant="contained"
+            endIcon={<ArrowOutwardRoundedIcon />}
+            sx={{ minHeight: 48, whiteSpace: "nowrap" }}
+          >
+            Read the case study
+          </Button>
+        </Box>
+        <Box
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
@@ -316,8 +428,10 @@ export function ClientHomepage() {
           {selectedWork.map((project) => (
             <Box component="article" key={project.name} sx={{ minWidth: 0 }}>
               <Link
-                component={NextLink}
+                component={project.external ? "a" : NextLink}
                 href={project.href}
+                target={project.external ? "_blank" : undefined}
+                rel={project.external ? "noreferrer" : undefined}
                 aria-label={`Open ${project.name} project`}
                 sx={{
                   display: "block",
@@ -327,6 +441,7 @@ export function ClientHomepage() {
                   overflow: "hidden",
                   bgcolor: "background.paper",
                   transition: "border-color 180ms ease-out",
+                  "&:active": { transform: "scale(0.99)" },
                   "& img": {
                     transition: "transform 220ms cubic-bezier(0.23, 1, 0.32, 1)",
                   },
@@ -334,7 +449,6 @@ export function ClientHomepage() {
                     "&:hover": { borderColor: "primary.main" },
                     "&:hover img": { transform: "scale(1.025)" },
                   },
-                  "&:active": { transform: "scale(0.99)" },
                   "&:focus-visible": {
                     outline: "2px solid",
                     outlineColor: "primary.main",
@@ -386,8 +500,10 @@ export function ClientHomepage() {
                 {project.description}
               </Typography>
               <Button
-                component={NextLink}
+                component={project.external ? "a" : NextLink}
                 href={project.href}
+                target={project.external ? "_blank" : undefined}
+                rel={project.external ? "noreferrer" : undefined}
                 endIcon={<ArrowOutwardRoundedIcon />}
                 sx={{ mt: 1.5, px: 0 }}
               >
