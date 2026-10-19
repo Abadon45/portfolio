@@ -5,12 +5,23 @@ import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import DashboardCustomizeOutlinedIcon from "@mui/icons-material/DashboardCustomizeOutlined";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
 import { Box, Button, Divider, Link, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { Eyebrow } from "./Eyebrow";
 import { proofMetrics } from "../../data/portfolio";
 
 const selectedWork = [
+  {
+    name: "Medora",
+    category: "Healthcare discovery",
+    description:
+      "A doctor-discovery directory for the Philippines, organized around specialties, cities, and clinics.",
+    image: "/images/portfolio/medora-care.webp",
+    href: "/work/medora",
+    alt: "Medora homepage introducing doctor discovery by specialty and city",
+    actionLabel: "Read project audit",
+  },
   {
     name: "Commerce OS",
     category: "Custom web application",
@@ -19,6 +30,7 @@ const selectedWork = [
     image: "/images/portfolio/commerce.webp",
     href: "/saas-platform",
     alt: "Commerce OS dashboard with business navigation and operational panels",
+    actionLabel: "Explore reconstruction",
   },
   {
     name: "TWC Ecommerce",
@@ -28,6 +40,7 @@ const selectedWork = [
     image: "/images/portfolio/store.webp",
     href: "/twc-ecommerce",
     alt: "TWC Ecommerce storefront with a product collection and shopping navigation",
+    actionLabel: "Try the storefront",
   },
   {
     name: "Cotabato Solar",
@@ -37,6 +50,7 @@ const selectedWork = [
     image: "/images/portfolio/solar.webp",
     href: "/solar",
     alt: "Cotabato Solar website introducing its solar installation services",
+    actionLabel: "View project",
   },
 ];
 
@@ -80,66 +94,93 @@ export function ClientHomepage() {
         id="top"
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "1.4fr 0.6fr" },
+          gridTemplateColumns: {
+            xs: "1fr",
+            md: "minmax(0, 1.1fr) minmax(280px, .9fr)",
+          },
           alignItems: "center",
           gap: { xs: 4, md: 8 },
-          pt: { xs: 5, md: 8 },
-          pb: { xs: 6, md: 8 },
+          pt: { xs: 4, md: 8 },
+          pb: { xs: 6, md: 9 },
         }}
       >
-        <Box>
+        <Box sx={{ order: { xs: 2, md: 1 } }}>
           <Eyebrow>Full-stack engineer · Davao City, Philippines · Remote-ready</Eyebrow>
           <Typography
             component="h1"
             sx={{
-              fontSize: { xs: "2.8rem", sm: "3.9rem", md: "4.8rem" },
+              fontSize: { xs: "2.7rem", sm: "4rem", md: "5rem" },
               fontWeight: 800,
               letterSpacing: "-0.055em",
               lineHeight: 1.06,
-              maxWidth: "14ch",
+              maxWidth: "13ch",
               mt: 2,
               textWrap: "balance",
             }}
           >
-            I build the systems
-            <br />
-            <Box component="span" sx={{ color: "primary.main" }}>
-              behind the storefront.
-            </Box>
+            I build the systems behind the storefront.
           </Typography>
           <Typography
             color="text.secondary"
             sx={{
-              fontSize: { xs: 17, md: 20 },
-              fontWeight: 500,
-              lineHeight: 1.75,
-              maxWidth: "48ch",
-              mt: 3,
+              fontSize: { xs: 16, md: 19 },
+              lineHeight: { xs: 1.7, md: 1.8 },
+              maxWidth: "52ch",
+              mt: 2.5,
             }}
           >
             I’m Noy Pangan, a full-stack developer focused on SaaS and
             e-commerce. I build customer-facing experiences and the APIs,
             identity, and operational tools that keep them working.
           </Typography>
-          <Box
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1.25}
             sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
-              gap: 1.5,
-              mt: 3.5,
+              alignItems: { sm: "center" },
+              mt: { xs: 2.5, sm: 3.5 },
+            }}
+          >
+            <Button
+              href="#work"
+              variant="contained"
+              size="large"
+              endIcon={<ArrowDownwardRoundedIcon />}
+            >
+              Explore selected work
+            </Button>
+            <Button
+              href="mailto:noypangan5@gmail.com"
+              variant="outlined"
+              size="large"
+              endIcon={<ArrowForwardRoundedIcon />}
+            >
+              Get in touch
+            </Button>
+          </Stack>
+          <Typography color="text.secondary" sx={{ fontSize: 12, mt: 1.25 }}>
+            Open to full-time remote roles and select project work
+          </Typography>
+          <Stack
+            direction="row"
+            spacing={{ xs: 2, sm: 3.5 }}
+            useFlexGap
+            sx={{
+              flexWrap: "wrap",
+              mt: { xs: 3.5, md: 4.5 },
+              pt: 2.5,
+              borderTop: 1,
+              borderColor: "divider",
               maxWidth: 620,
             }}
           >
             {proofMetrics.map((metric) => (
-              <Box
-                key={metric.label}
-                sx={{ borderLeft: 2, borderColor: "primary.main", pl: 1.5 }}
-              >
+              <Box key={metric.label} sx={{ minWidth: 90, flex: "1 1 110px" }}>
                 <Typography
                   component="strong"
                   sx={{
                     display: "block",
-                    fontSize: 22,
+                    fontSize: { xs: 19, sm: 23 },
                     fontWeight: 800,
                     lineHeight: 1.2,
                   }}
@@ -154,73 +195,37 @@ export function ClientHomepage() {
                 </Typography>
               </Box>
             ))}
-          </Box>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(3, minmax(0, 1fr))",
-              },
-              gap: 1.5,
-              mt: 3.5,
-              "& .MuiButton-root": {
-                minHeight: 52,
-                px: 2,
-                fontSize: 14,
-                fontWeight: 700,
-                whiteSpace: "nowrap",
-              },
-            }}
-          >
-            <Button
-              href="#work"
-              variant="contained"
-              size="large"
-              endIcon={<ArrowForwardRoundedIcon />}
-            >
-              View my work
-            </Button>
-            <Button
-              component={NextLink}
-              href="/about"
-              scroll={false}
-              variant="outlined"
-              size="large"
-              endIcon={<ArrowForwardRoundedIcon />}
-            >
-              My experience
-            </Button>
-            <Button
-              href="mailto:noypangan5@gmail.com"
-              size="large"
-              variant="outlined"
-              endIcon={<ArrowForwardRoundedIcon />}
-            >
-              Let’s talk
-            </Button>
-          </Box>
-          <Typography color="text.secondary" sx={{ fontSize: 12, mt: 2 }}>
-            Open to full-time remote roles and select project work
-          </Typography>
+          </Stack>
         </Box>
         <Box
           sx={{
-            maxWidth: { xs: 300, md: 330 },
+            order: { xs: 1, md: 2 },
+            maxWidth: { xs: 520, md: 430 },
             width: "100%",
-            justifySelf: { xs: "start", md: "end" },
+            justifySelf: { xs: "stretch", md: "end" },
+            position: "relative",
           }}
         >
+          <Box
+            sx={{
+              position: "absolute",
+              inset: { xs: "10% -3% -3% 12%", md: "8% -6% -5% 14%" },
+              border: 1,
+              borderColor: "divider",
+              borderRadius: 2,
+            }}
+          />
           <Box
             component="img"
             src="/display-image/noy-dp.jpg"
             alt="Noy Pangan, full-stack developer"
-            width={660}
-            height={740}
+            width={860}
+            height={960}
             fetchPriority="high"
             sx={{
+              position: "relative",
               width: "100%",
-              height: { xs: 240, md: 340 },
+              height: { xs: 290, sm: 390, md: 500 },
               objectFit: "cover",
               objectPosition: "center 22%",
               display: "block",
@@ -240,18 +245,30 @@ export function ClientHomepage() {
                 Noy Pangan
               </Typography>
               <Typography color="text.secondary" sx={{ fontSize: 12 }}>
-                Full-stack engineer · Open to remote roles
+                Davao City, Philippines
               </Typography>
             </Box>
             <Box
-              aria-hidden="true"
+              component="span"
               sx={{
-                height: 8,
-                width: 8,
-                borderRadius: "50%",
-                bgcolor: "success.main",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.75,
+                color: "text.secondary",
+                fontSize: 12,
               }}
-            />
+            >
+              <Box
+                aria-hidden="true"
+                sx={{
+                  height: 8,
+                  width: 8,
+                  borderRadius: "50%",
+                  bgcolor: "success.main",
+                }}
+              />
+              Open to opportunities
+            </Box>
           </Stack>
         </Box>
       </Box>
@@ -275,7 +292,7 @@ export function ClientHomepage() {
                 ...sectionHeading,
               }}
             >
-              Production platforms and hands-on demos.
+              Selected work across products and industries.
             </Typography>
           </Box>
           <Button
@@ -291,8 +308,9 @@ export function ClientHomepage() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
-            gap: 3,
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
+            columnGap: { xs: 2.5, md: 4 },
+            rowGap: { xs: 4, md: 5 },
           }}
         >
           {selectedWork.map((project) => (
@@ -300,7 +318,7 @@ export function ClientHomepage() {
               <Link
                 component={NextLink}
                 href={project.href}
-                aria-label={`Explore ${project.name} demo`}
+                aria-label={`Open ${project.name} project`}
                 sx={{
                   display: "block",
                   border: 1,
@@ -308,7 +326,15 @@ export function ClientHomepage() {
                   borderRadius: 2,
                   overflow: "hidden",
                   bgcolor: "background.paper",
-                  "&:hover": { borderColor: "primary.main" },
+                  transition: "border-color 180ms ease-out",
+                  "& img": {
+                    transition: "transform 220ms cubic-bezier(0.23, 1, 0.32, 1)",
+                  },
+                  "@media (hover: hover) and (pointer: fine)": {
+                    "&:hover": { borderColor: "primary.main" },
+                    "&:hover img": { transform: "scale(1.025)" },
+                  },
+                  "&:active": { transform: "scale(0.99)" },
                   "&:focus-visible": {
                     outline: "2px solid",
                     outlineColor: "primary.main",
@@ -343,7 +369,7 @@ export function ClientHomepage() {
                   letterSpacing: ".1em",
                 }}
               >
-                {project.category} · Portfolio demo
+                {project.category}
               </Typography>
               <Typography
                 component="h3"
@@ -365,7 +391,7 @@ export function ClientHomepage() {
                 endIcon={<ArrowOutwardRoundedIcon />}
                 sx={{ mt: 1.5, px: 0 }}
               >
-                Explore demo
+                {project.actionLabel}
               </Button>
             </Box>
           ))}

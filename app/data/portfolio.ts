@@ -186,9 +186,29 @@ export const projects: Project[] = [
       "Documented recovered, approximated, unavailable, and newly created parts of the study.",
     ],
   },
+  {
+    eyebrow: "Healthcare Discovery · Medora",
+    title: "Find care wherever you are",
+    summary:
+      "A Philippine doctor-discovery experience that helps people explore providers by specialty and city, review profiles, and find clinics. The public demo clearly identifies fictional profiles and schedules.",
+    href: "/work/medora",
+    details: [
+      "Browse doctors across specialties including cardiology, dermatology, family medicine, internal medicine, OB-GYN, and pediatrics.",
+      "Explore individual doctor profiles and clinic listings through a responsive, editorial-style directory.",
+      "Frame healthcare discovery responsibly with a visible demo notice about fictional profile and schedule information.",
+    ],
+  },
 ];
 
 export const landingPages: LandingPage[] = [
+  {
+    title: "Medora",
+    summary:
+      "A doctor-discovery directory for the Philippines, with specialty and city browsing, doctor profiles, and clinic listings.",
+    href: "/work/medora",
+    eyebrow: "Healthcare discovery · Product audit",
+    actionLabel: "Read project audit",
+  },
   {
     title: "Commerce OS",
     summary:

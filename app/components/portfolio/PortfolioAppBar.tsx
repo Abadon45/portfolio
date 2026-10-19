@@ -265,10 +265,17 @@ export function PortfolioAppBar({
                   color: "text.secondary",
                   flexShrink: 0,
                   whiteSpace: "nowrap",
-                  transition: "color 150ms ease, transform 150ms ease",
+                  transition: "color 150ms ease, text-decoration-color 150ms ease",
                   "&:hover": {
                     color: "text.primary",
-                    transform: "translateY(-1px)",
+                    textDecorationLine: "underline",
+                    textDecorationColor: "primary.main",
+                    textUnderlineOffset: 6,
+                  },
+                  "&:focus-visible": {
+                    outline: "2px solid",
+                    outlineColor: "primary.main",
+                    outlineOffset: 2,
                   },
                 }}
               >
