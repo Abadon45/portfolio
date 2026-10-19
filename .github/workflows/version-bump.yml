@@ -1,0 +1,42 @@
+name: Prepare version bump
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - package.json
+      - package-lock.json
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  version-bump:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Increment patch version
+        run: npm version patch --no-git-tag-version
+
+      - name: Open or update version bump pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/automatic-version-bump
+          delete-branch: true
+          commit-message: chore(release): bump portfolio version [skip version bump]
+          title: chore(release): bump portfolio version
+          body: >
+            Automatically increments the portfolio patch version after changes are
+            merged to main. The package version is also shown in the portfolio footer.
