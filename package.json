@@ -1,6 +1,6 @@
 {
   "name": "noy-pangan-portfolio",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "allowScripts": {
     "sharp@0.34.5": true
